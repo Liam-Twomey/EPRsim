@@ -12,7 +12,7 @@ import numpy as np
 from . import Interpolation_lib
 from . import Direct_conversion_to_Field
 
-spline_interpolation_angle_grid = Interpolation_lib.spline_interpolation_angle_grid 
+spline_interpolation_angle_grid = Interpolation_lib.spline_interpolation_angle_grid
 field_interpol = Interpolation_lib.field_interpol
 create_Lorentzian = Direct_conversion_to_Field.create_Lorentzian
 create_Gaussian = Direct_conversion_to_Field.create_Gaussian

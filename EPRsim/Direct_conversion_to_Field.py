@@ -28,7 +28,6 @@ voigt_convolution_Gauss = Convolutions.voigt_convolution_Gauss
 voigt_convolution_Lorentz = Convolutions.voigt_convolution_Lorentz
 
 
-
 try:
     from numba import float64, jit
 

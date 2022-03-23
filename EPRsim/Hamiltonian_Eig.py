@@ -15,7 +15,7 @@ from . import Pauli_generators
 
 create_Pauli_matrices = Pauli_generators.create_Pauli_matrices
 create_Pauli_matrices_Nuc = Pauli_generators.create_Pauli_matrices_Nuc
-create_seperate_Pauli_matrices_Nuc = Pauli_generators.create_seperate_Pauli_matrices_Nuc 
+create_seperate_Pauli_matrices_Nuc = Pauli_generators.create_seperate_Pauli_matrices_Nuc
 
 try:
     from numba import complex64, int32, jit

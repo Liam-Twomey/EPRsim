@@ -20,11 +20,12 @@ from . import Presettings
 from . import resfield_full
 from . import spectral_processing
 
-convert_user_input_and_Set_up_defaults = Presettings.convert_user_input_and_Set_up_defaults 
+convert_user_input_and_Set_up_defaults = (
+    Presettings.convert_user_input_and_Set_up_defaults
+)
 stick_spectrum_calculation = resfield_full.stick_spectrum_calculation
 create_conv_spectrum = spectral_processing.create_conv_spectrum
 pseudo_modulation = Convolutions.pseudo_modulation
-
 
 
 def solid_state_kernel(Par1, SimPar1):
