@@ -1,0 +1,6 @@
+Maintainers (alphabetical by last name)
+  Darien Morrow <darienmorrow@gmail.com> (@darienmorrow)
+
+Contributors (alphabetical by last name)
+  (original) Stephan Rein stephan.rein@physchem.uni-freiburg.de, University of Freiburg
+
