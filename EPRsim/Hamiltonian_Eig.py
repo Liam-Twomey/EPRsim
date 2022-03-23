@@ -9,13 +9,13 @@ Created on Sat Oct 21 14:35:34 2017
 import numpy as np
 import math as math
 from scipy import linalg as LAS
-from EPRsim.Pauli_generators import (
-    create_Pauli_matrices,
-    create_Pauli_matrices_Nuc,
-    create_seperate_Pauli_matrices_Nuc,
-)
-import EPRsim.Tools as tool
-import EPRsim.Nucdic as Nucdic
+from . import Tools as tool
+from . import Nucdic as Nucdic
+from . import Pauli_generators
+
+create_Pauli_matrices = Pauli_generators.create_Pauli_matrices
+create_Pauli_matrices_Nuc = Pauli_generators.create_Pauli_matrices_Nuc
+create_seperate_Pauli_matrices_Nuc = Pauli_generators.create_seperate_Pauli_matrices_Nuc 
 
 try:
     from numba import complex64, int32, jit

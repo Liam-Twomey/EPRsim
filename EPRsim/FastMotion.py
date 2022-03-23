@@ -8,8 +8,8 @@ Created on Mon Mar 11 11:03:37 2019
 # Load all external libraries
 import numpy as np
 from scipy import interpolate
-import EPRsim.Validate_input_parameter as Val
-import EPRsim.Tools as tool
+from . import Validate_input_parameter as Val
+from . import Tools as tool
 
 global Numba
 try:

@@ -7,7 +7,7 @@ Created on Mon Mar 11 10:14:47 2019
 """
 
 import numpy as np
-import EPRsim.Tools as tool
+from . import Tools as tool
 
 
 con = tool.physical_constants()

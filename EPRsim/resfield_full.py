@@ -8,8 +8,10 @@ Created on Thu Oct 26 14:41:32 2017
 
 import numpy as np
 from scipy import interpolate
-from EPRsim.Hamiltonian_Eig import define_nKnots_pattern
+from . import Hamiltonian_Eig
 import scipy.sparse as sparse
+
+define_nKnots_pattern = Hamiltonian_Eig.define_nKnots_pattern
 
 try:
     from numba import int64, float64, int32, jit, types

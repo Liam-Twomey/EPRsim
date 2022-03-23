@@ -9,8 +9,13 @@ interpolated number of orientations.
 """
 
 import numpy as np
-from EPRsim.Interpolation_lib import spline_interpolation_angle_grid, field_interpol
-from EPRsim.Direct_conversion_to_Field import create_Lorentzian, create_Gaussian
+from . import Interpolation_lib
+from . import Direct_conversion_to_Field
+
+spline_interpolation_angle_grid = Interpolation_lib.spline_interpolation_angle_grid 
+field_interpol = Interpolation_lib.field_interpol
+create_Lorentzian = Direct_conversion_to_Field.create_Lorentzian
+create_Gaussian = Direct_conversion_to_Field.create_Gaussian
 
 
 def create_conv_spectrum(Par, intensity, resonance):

@@ -16,7 +16,7 @@ Nuc_zeemandict()
 
 @author: Stephan Rein, University of Freiburg, 2017
 """
-import EPRsim.Tools as tool
+from . import Tools as tool
 
 
 def isotopes_catalogue(element):

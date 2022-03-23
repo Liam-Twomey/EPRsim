@@ -5,9 +5,11 @@ Created on Thu Sep  7 12:59:48 2017
 @author: stephan
 """
 import numpy as np
-import EPRsim.Nucdic as nucdic
-from EPRsim.Hamiltonian_Point_Group import Symmetry_Group
-import EPRsim.Tools as tool
+from . import Nucdic as Nucdic
+from . import Hamiltonian_Point_Group
+from . import Tools as tool
+
+Symmetry_Group = Hamiltonian_Point_Group.Symmetry_Group
 
 # *****************************************************************************
 # Physical constants and unit conversion factors + global default settings

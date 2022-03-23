@@ -13,13 +13,18 @@ Copyright (c) 2017, Stephan Rein, M.Sc., University of Freiburg
 
 from copy import deepcopy
 import numpy as np
-from EPRsim.Presettings import convert_user_input_and_Set_up_defaults
-from EPRsim.resfield_full import stick_spectrum_calculation
-from EPRsim.Hamiltonian_Eig import ZFS_Hamiltonian, HF_Eig
-from EPRsim.spectral_processing import create_conv_spectrum
-from EPRsim.Convolutions import pseudo_modulation
-import EPRsim.Tools as tool
 import time as time
+from . import Tools as tool
+from . import Convolutions
+from . import Presettings
+from . import resfield_full
+from . import spectral_processing
+
+convert_user_input_and_Set_up_defaults = Presettings.convert_user_input_and_Set_up_defaults 
+stick_spectrum_calculation = resfield_full.stick_spectrum_calculation
+create_conv_spectrum = spectral_processing.create_conv_spectrum
+pseudo_modulation = Convolutions.pseudo_modulation
+
 
 
 def solid_state_kernel(Par1, SimPar1):

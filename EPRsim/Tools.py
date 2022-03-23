@@ -7,13 +7,9 @@ Copyright, Stephan Rein, 2019
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy import fftpack, special
 from scipy import signal
-
-try:
-    import matplotlib.pyplot as plt
-except ImportError:
-    pass
 
 
 class physical_constants:

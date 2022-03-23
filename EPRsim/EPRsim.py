@@ -12,11 +12,11 @@ Copyright, Stephan Rein, 2019
 import numpy as np
 import time as time
 from copy import copy
-import EPRsim.Validate_input_parameter as Val
-import EPRsim.Nucdic as Nucdic
-import EPRsim.Tools as tool
-import EPRsim.FastMotion as FM
-import EPRsim.SolidState as SO
+from . import Validate_input_parameter as Val
+from . import Nucdic as Nucdic
+from . import Tools as tool
+from . import FastMotion as FM
+from . import SolidState as SO
 
 # Load physical constans
 con = tool.physical_constants()

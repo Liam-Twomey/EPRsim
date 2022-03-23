@@ -1,6 +1,8 @@
 # EPRsim
 
-A package for simulating EPR experiments. 
+A package for simulating EPR experiments.
+
+Forked from https://pypi.org/project/EPRsim/
 
 # Install
 

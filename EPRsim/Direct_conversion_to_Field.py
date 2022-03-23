@@ -22,7 +22,12 @@ voigt_convolution_Lorentz()
 
 import numpy as np
 import math as math
-from EPRsim.Convolutions import voigt_convolution_Gauss, voigt_convolution_Lorentz
+from . import Convolutions
+
+voigt_convolution_Gauss = Convolutions.voigt_convolution_Gauss
+voigt_convolution_Lorentz = Convolutions.voigt_convolution_Lorentz
+
+
 
 try:
     from numba import float64, jit
