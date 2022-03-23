@@ -151,7 +151,7 @@ def get_full_nuclear_dimension(Par):
                 nucstring = Par.Nucs[i]  # each nuclei seperately
             else:
                 nucstring = Par.Nucs
-            Par.dim_nuc[i] = nucdic.nuclear_properties(nucstring)[1]
+            Par.dim_nuc[i] = Nucdic.nuclear_properties(nucstring)[1]
         Par.dim_nuc_tot = int(np.prod(Par.dim_nuc))  # full nuclear dimension
     return
 

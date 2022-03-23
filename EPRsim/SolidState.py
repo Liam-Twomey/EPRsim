@@ -19,6 +19,7 @@ from . import Convolutions
 from . import Presettings
 from . import resfield_full
 from . import spectral_processing
+from . import Hamiltonian_Eig
 
 convert_user_input_and_Set_up_defaults = (
     Presettings.convert_user_input_and_Set_up_defaults
@@ -39,8 +40,8 @@ def solid_state_kernel(Par1, SimPar1):
             np.zeros(int(Par.Points)),
             Par.warning,
         )
-    ZFS_Hamiltonian(Par)
-    HF_Eig(Par)
+    Hamiltonian_Eig.ZFS_Hamiltonian(Par)
+    Hamiltonian_Eig.HF_Eig(Par)
     # print(time.time()-st)
     # st= time.time()
     intensity, resonance, Par = stick_spectrum_calculation(Par)
