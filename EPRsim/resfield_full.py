@@ -10,8 +10,10 @@ import numpy as np
 from scipy import interpolate
 from EPRsim.Hamiltonian_Eig import define_nKnots_pattern
 import scipy.sparse as sparse
+
 try:
     from numba import int64, float64, int32, jit, types
+
     Numba = 1
 except ImportError:
     Numba = 0
@@ -67,15 +69,21 @@ def stick_spectrum_calculation(Par):
     # Check if its spin-polarized. Transfer it to local bool to spare time
     popu, ispopu, rho_0 = check_spin_polarization(Par)
     # Thow all fully off Par.field range transitions
-    arg = (Par.nKnots, Par.mwFreq, Par.trans_dim, Par.Hilbert_dim, Par.phinKnots,
-           Par.eigval, Par.n_explicit)
+    arg = (
+        Par.nKnots,
+        Par.mwFreq,
+        Par.trans_dim,
+        Par.Hilbert_dim,
+        Par.phinKnots,
+        Par.eigval,
+        Par.n_explicit,
+    )
     Delta_t, signum = preselect_off_res(*arg)
     Par.trans_dim = len(Delta_t)
     if Par.trans_dim > 30 and Par.Point_Group != "Dhinfty":
         args = (Par, Delta_t, signum, S_sp_x_y, Knots_theta_vec)
         Delta_t, signum, Par.trans_dim = preselect_to_probability(*args)
-    arg = (Par, S_sp_x_y, Knots_theta_vec, Delta_t, ispopu, signum,
-           rho_0, popu)
+    arg = (Par, S_sp_x_y, Knots_theta_vec, Delta_t, ispopu, signum, rho_0, popu)
     res, intensity, Warning_counter = resonance_loop(*arg)
     args = (Par, intensity, Warning_counter, res, Knots_theta_vec)
     postprocess_resonances(*args)
@@ -92,7 +100,7 @@ def preparations(Par):
     is present
     """
     # Initialization of dimension
-    Par.trans_dim = int((len(Par.eigvec)-1)*len(Par.eigvec)//2)
+    Par.trans_dim = int((len(Par.eigvec) - 1) * len(Par.eigvec) // 2)
     Par.all_trans_dim = Par.trans_dim
     Par.Hilbert_dim = len(Par.Pauli[0, 0, :])
     # Ceate sparse matrices for transition probablities
@@ -102,7 +110,7 @@ def preparations(Par):
     else:
         S_spx = Par.S_tot[0]
         S_spy = Par.S_tot[1]
-    S_sp_x_y = S_spx+S_spy
+    S_sp_x_y = S_spx + S_spy
     return S_sp_x_y
 
 
@@ -116,10 +124,13 @@ def dec_preselect_off_res():
     the Python program is invoked.
     """
     if Numba == 1:
-        return (jit(types.Tuple((float64[:, :, :, :], int32[:, :]))
-                (int64, float64, int64, int64, int64,
-                 float64[:, :, :, :], int64),
-                nopython=True, cache=True))
+        return jit(
+            types.Tuple((float64[:, :, :, :], int32[:, :]))(
+                int64, float64, int64, int64, int64, float64[:, :, :, :], int64
+            ),
+            nopython=True,
+            cache=True,
+        )
     else:
         return dec_identity
 
@@ -134,8 +145,11 @@ def dec_find_resonances():
     the Python program is invoked.
     """
     if Numba == 1:
-        return (jit(types.Tuple((float64, float64, float64))(float64[:],
-                float64[:], int32), nopython=True, cache=True))
+        return jit(
+            types.Tuple((float64, float64, float64))(float64[:], float64[:], int32),
+            nopython=True,
+            cache=True,
+        )
     else:
         return dec_identity
 
@@ -150,9 +164,11 @@ def dec_thermal_popdiff():
     the Python program is invoked.
     """
     if Numba == 1:
-        return (jit(float64(float64[:], float64[:],
-                int32, int32, float64, float64),
-                nopython=True, cache=True))
+        return jit(
+            float64(float64[:], float64[:], int32, int32, float64, float64),
+            nopython=True,
+            cache=True,
+        )
     else:
         return dec_identity
 
@@ -176,22 +192,23 @@ def population_trans(rho_0, eig, popu):
 
 
 def transition_probability(eigvec1, eigvec2, S_x_y):
-    TransProb = abs(np.vdot(eigvec1, S_x_y.dot(eigvec2)))**2
+    TransProb = abs(np.vdot(eigvec1, S_x_y.dot(eigvec2))) ** 2
     return TransProb
 
 
 @dec_preselect_off_res()
-def preselect_off_res(nKnots, mwFreq, trans_dim, Hilbert_dim, phinKnots,
-                      eigval_hf, n_explicit):
+def preselect_off_res(
+    nKnots, mwFreq, trans_dim, Hilbert_dim, phinKnots, eigval_hf, n_explicit
+):
     signum = np.zeros((trans_dim, 2), dtype=np.int32)
     Delta_t = np.zeros((trans_dim, nKnots, phinKnots, n_explicit))
     p = 0
     for s in range(0, Hilbert_dim):
         for t in range(0, s):
-            k = (eigval_hf[s, :, :, :]-eigval_hf[t, :, :, :])
+            k = eigval_hf[s, :, :, :] - eigval_hf[t, :, :, :]
             if not (np.all((k > mwFreq) | (k == 0))):
                 if not (np.all((k < mwFreq) | (k == 0))):
-                    Delta_t[p] = k-mwFreq
+                    Delta_t[p] = k - mwFreq
                     signum[p] = [t, s]
                     p += 1
     Delta_t = np.real(Delta_t[0:p])
@@ -206,12 +223,12 @@ def preselect_to_probability(Par, Delta_t, signum, S_sp_x_y, Knots_theta_vec):
     """
     index = np.zeros(Par.trans_dim, dtype=np.int32)
     prob_tmp = np.zeros((Par.trans_dim, Par.nKnots, Par.phinKnots))
-    Par.field_length = len(Delta_t[0, 0, 0, :])-1
-    ind = np.round(np.linspace(0, 1, 3)*Par.nKnots)
-    ind[2] = ind[2]-1
+    Par.field_length = len(Delta_t[0, 0, 0, :]) - 1
+    ind = np.round(np.linspace(0, 1, 3) * Par.nKnots)
+    ind[2] = ind[2] - 1
     ind = ind.astype(int)
-    ind2 = np.round(np.linspace(0, 1, 4)*Par.nKnots)
-    ind2[3] = ind2[3]-1
+    ind2 = np.round(np.linspace(0, 1, 4) * Par.nKnots)
+    ind2[3] = ind2[3] - 1
     ind2_st = ind2.astype(int)
     for k in range(0, 3):
         if k == 0:
@@ -227,8 +244,8 @@ def preselect_to_probability(Par, Delta_t, signum, S_sp_x_y, Knots_theta_vec):
                 prob = transition_probability(eigv1, eigv2, S_sp_x_y)
                 prob_tmp[g, 0, 0] = prob
         else:
-            for q in range(0, k+2):
-                if k+1 == 2:
+            for q in range(0, k + 2):
+                if k + 1 == 2:
                     ind2 = ind
                 else:
                     ind2 = ind2_st
@@ -243,9 +260,10 @@ def preselect_to_probability(Par, Delta_t, signum, S_sp_x_y, Knots_theta_vec):
                     eigv2 = Par.eigvec[t2][ind2[q], ind[k], index]
                     prob = transition_probability(eigv1, eigv2, S_sp_x_y)
                     prob_tmp[i, ind2[q], ind[k]] = prob
-    maxtransprob = Par.LevelSelect*(np.max(np.sum(np.sum(np.absolute(prob_tmp),
-                                                         axis=2), axis=1)))
-    for s in range(Par.trans_dim-1, -1, -1):
+    maxtransprob = Par.LevelSelect * (
+        np.max(np.sum(np.sum(np.absolute(prob_tmp), axis=2), axis=1))
+    )
+    for s in range(Par.trans_dim - 1, -1, -1):
         if np.sum(np.absolute(prob_tmp[s, :, :])) < maxtransprob:
             Delta_t = np.delete(Delta_t, s, 0)
             signum = np.delete(signum, s, 0)
@@ -253,8 +271,9 @@ def preselect_to_probability(Par, Delta_t, signum, S_sp_x_y, Knots_theta_vec):
     return Delta_t, signum, Par.trans_dim
 
 
-def resonance_loop(Par, S_sp_x_y, Knots_theta_vec, Delta_t, ispopu, signum,
-                   rho_0, popu):
+def resonance_loop(
+    Par, S_sp_x_y, Knots_theta_vec, Delta_t, ispopu, signum, rho_0, popu
+):
     """
     Function with the loop for finding resonance fiels and intensities to find
     the required information (resonance fields, intensities) for generating
@@ -263,15 +282,17 @@ def resonance_loop(Par, S_sp_x_y, Knots_theta_vec, Delta_t, ispopu, signum,
     resonance is partially (for some orientations) out of the defined
     magentic field range.
     """
-    thermal_energy = (Par.T*con.kb)/con.h
+    thermal_energy = (Par.T * con.kb) / con.h
     # Allocation of all vectors which should be filled
-    intensity = np.zeros((Par.trans_dim, Par.nKnots, Par.phinKnots), order='C')
-    res = np.zeros((Par.trans_dim, Par.nKnots, Par.phinKnots), order='C')
+    intensity = np.zeros((Par.trans_dim, Par.nKnots, Par.phinKnots), order="C")
+    res = np.zeros((Par.trans_dim, Par.nKnots, Par.phinKnots), order="C")
     Warning_counter = np.zeros((Par.trans_dim, 2))
     # Extrapolative Par.field if necessary
-    stepsize = (Par.field[len(Par.field)-1]-Par.field[0])/(len(Par.field)-1)
-    Par.field_extra = np.append(np.append(Par.field[0]-10*stepsize, Par.field),
-                                Par.field[len(Par.field)-1]+10*stepsize)
+    stepsize = (Par.field[len(Par.field) - 1] - Par.field[0]) / (len(Par.field) - 1)
+    Par.field_extra = np.append(
+        np.append(Par.field[0] - 10 * stepsize, Par.field),
+        Par.field[len(Par.field) - 1] + 10 * stepsize,
+    )
     t1 = []
     t2 = []
     for i in range(0, Par.trans_dim):
@@ -287,26 +308,33 @@ def resonance_loop(Par, S_sp_x_y, Knots_theta_vec, Delta_t, ispopu, signum,
                 index = np.argmax(Delta_t[i, k, q, :] > 0)
                 Delta = Delta_t[i, k, q, :]
                 if index > 0:
-                    res[i][k, q], steep, ediff = find_resonance(Par.field,
-                                                                Delta, index)
-                    fac = ((con.beta*(Par.field[index]-Par.field[index-1])) /
-                           (con.h*ediff*1e3))
-                    prob1 = transition_probability(Par.eigvec[t1[i]][k, q, index-1],
-                                                   Par.eigvec[t2[i]][k, q, index-1],
-                                                   S_sp_x_y)
-                    prob2 = transition_probability(Par.eigvec[t1[i]][k, q, index],
-                                                   Par.eigvec[t2[i]][k, q, index], S_sp_x_y)
+                    res[i][k, q], steep, ediff = find_resonance(Par.field, Delta, index)
+                    fac = (con.beta * (Par.field[index] - Par.field[index - 1])) / (
+                        con.h * ediff * 1e3
+                    )
+                    prob1 = transition_probability(
+                        Par.eigvec[t1[i]][k, q, index - 1],
+                        Par.eigvec[t2[i]][k, q, index - 1],
+                        S_sp_x_y,
+                    )
+                    prob2 = transition_probability(
+                        Par.eigvec[t1[i]][k, q, index],
+                        Par.eigvec[t2[i]][k, q, index],
+                        S_sp_x_y,
+                    )
 
-                    prob = (1-steep)*prob1+(steep)*prob2
+                    prob = (1 - steep) * prob1 + (steep) * prob2
                     Warning_counter[i][0] = 1
                     if ispopu:
-                        eigv_1 = (Par.eigvec[t1[i]][k, q, index-1]*(1-steep)+
-                                  Par.eigvec[t1[i]][k, q, index]*(steep))
-                        eigv_2 = (Par.eigvec[t2[i]][k, q, index-1]*(1-steep)+
-                                  Par.eigvec[t2[i]][k, q, index]*(steep))
+                        eigv_1 = Par.eigvec[t1[i]][k, q, index - 1] * (
+                            1 - steep
+                        ) + Par.eigvec[t1[i]][k, q, index] * (steep)
+                        eigv_2 = Par.eigvec[t2[i]][k, q, index - 1] * (
+                            1 - steep
+                        ) + Par.eigvec[t2[i]][k, q, index] * (steep)
                 else:
                     if min(Delta) > 0:
-                        ind = len(Par.field)-1
+                        ind = len(Par.field) - 1
                         steep = 1
                     else:
                         ind = 0
@@ -330,20 +358,24 @@ def resonance_loop(Par, S_sp_x_y, Knots_theta_vec, Delta_t, ispopu, signum,
                         eigv_2 = eigv2
                 # Spare some calculations for very small transition prob.
                 if prob < 1e-6:
-                        Warning_counter[i][1] = 0
+                    Warning_counter[i][1] = 0
                 else:
                     if ispopu:
-                        eigv_1 = eigv_1/np.linalg.norm(eigv_1)
-                        eigv_2 = eigv_2/np.linalg.norm(eigv_2)
+                        eigv_1 = eigv_1 / np.linalg.norm(eigv_1)
+                        eigv_2 = eigv_2 / np.linalg.norm(eigv_2)
                         pop1 = population_trans(rho_0[0, k, q], eigv_1, popu)
                         pop2 = population_trans(rho_0[0, k, q], eigv_2, popu)
-                        popdiff = np.asscalar(np.real(pop2-pop1))
+                        popdiff = np.asscalar(np.real(pop2 - pop1))
                     else:
-                        popdiff = thermal_popdiff(Par.eigval[:, k, q, index-1],
-                                                  Par.eigval[:, k, q, index],
-                                                  t1[i], t2[i], thermal_energy,
-                                                  steep)
-                    intensity[i, k, q] = fac*prob*popdiff
+                        popdiff = thermal_popdiff(
+                            Par.eigval[:, k, q, index - 1],
+                            Par.eigval[:, k, q, index],
+                            t1[i],
+                            t2[i],
+                            thermal_energy,
+                            steep,
+                        )
+                    intensity[i, k, q] = fac * prob * popdiff
     return res, intensity, Warning_counter
 
 
@@ -354,10 +386,10 @@ def find_resonance(field, Delta, index):
     Linear interpolation between eigenvalue points is used to find the
     resonance fields.
     """
-    fielddiff = field[index]-field[index-1]
-    ediff = (Delta[index]-Delta[index-1])
-    steep = -Delta[index-1]/(ediff)
-    res = field[index-1]+steep*fielddiff
+    fielddiff = field[index] - field[index - 1]
+    ediff = Delta[index] - Delta[index - 1]
+    steep = -Delta[index - 1] / (ediff)
+    res = field[index - 1] + steep * fielddiff
     return res, steep, ediff
 
 
@@ -370,19 +402,18 @@ def thermal_popdiff(eigval, eigval2, t1, t2, thermal_energy, steep):
     the thermal enery, the high-temperature approximation is used.
     Otherwise the fully Boltzman factor is calculated.
     """
-    levels = (1-steep)*eigval+(steep)*eigval2
-    ekbt = (levels[t2]-levels[t1])/thermal_energy
+    levels = (1 - steep) * eigval + (steep) * eigval2
+    ekbt = (levels[t2] - levels[t1]) / thermal_energy
     if ekbt < 0.1:
-        poppges = np.sum(1-levels/thermal_energy)
-        popdiff = (1-ekbt)/poppges
+        poppges = np.sum(1 - levels / thermal_energy)
+        popdiff = (1 - ekbt) / poppges
     else:
-        poppges = np.sum(np.exp(levels/thermal_energy))
-        popdiff = np.exp(ekbt)/poppges
+        poppges = np.sum(np.exp(levels / thermal_energy))
+        popdiff = np.exp(ekbt) / poppges
     return popdiff
 
 
-def postprocess_resonances(Par, intensity, Warning_counter, res,
-                           Knots_theta_vec):
+def postprocess_resonances(Par, intensity, Warning_counter, res, Knots_theta_vec):
     """
     input: Par,intensity,Warning_counter,res,Knots_theta_vec
 
@@ -419,8 +450,8 @@ def post_selection(Par, intensity, res, Warning_counter):
     Par.Transdim = len(intensity[:, 0, 0])
     # Kick out all transitions with an average intensity smaller than
     maxv = np.max((np.sum(np.sum(np.absolute(intensity), axis=2), axis=1)))
-    maxtransprob = Par.LevelSelect*maxv
-    for s in range(Par.Transdim-1, -1, -1):
+    maxtransprob = Par.LevelSelect * maxv
+    for s in range(Par.Transdim - 1, -1, -1):
         if np.amax(np.sum(np.absolute(intensity[s, :, :]))) < maxtransprob:
             intensity = np.delete(intensity, s, 0)
             res = np.delete(res, s, 0)
@@ -440,22 +471,21 @@ def equiv_grid(Par, res, intensity, Knots_theta_vec):
     Par.intensity = np.zeros((Par.Transdim, Par.nKnots, Par.phinKnots))
     Par.res = np.zeros((Par.Transdim, Par.nKnots, Par.phinKnots))
     # Fill the first orientation vectorized
-    Par.intensity[:, 0, :] = np.reshape(np.repeat(Par.intensity[:, 0, 0],
-                                        Par.phinKnots, axis=0),
-                                        Par.intensity[:, 0, :].shape)
-    Par.res[:, 0, :] = np.reshape(np.repeat(res[:, 0, 0],
-                                  Par.phinKnots, axis=0),
-                                  Par.res[:, 0, :].shape)
-    k2 = np.linspace(0, Par.nOctants*np.pi/2, Par.phinKnots, endpoint=True)
+    Par.intensity[:, 0, :] = np.reshape(
+        np.repeat(Par.intensity[:, 0, 0], Par.phinKnots, axis=0),
+        Par.intensity[:, 0, :].shape,
+    )
+    Par.res[:, 0, :] = np.reshape(
+        np.repeat(res[:, 0, 0], Par.phinKnots, axis=0), Par.res[:, 0, :].shape
+    )
+    k2 = np.linspace(0, Par.nOctants * np.pi / 2, Par.phinKnots, endpoint=True)
     # Cubic spline interpolation to bring it to the square grid over angles
     for k in range(1, Par.nKnots):
-        k1 = np.linspace(0, Par.nOctants*np.pi/2, Knots_theta_vec[k],
-                         endpoint=True)
+        k1 = np.linspace(0, Par.nOctants * np.pi / 2, Knots_theta_vec[k], endpoint=True)
         for i in range(0, Par.Transdim):
-            spl = interpolate.splrep(k1, intensity[i, k, 0:Knots_theta_vec[k]],
-                                     k=3)
+            spl = interpolate.splrep(k1, intensity[i, k, 0 : Knots_theta_vec[k]], k=3)
             Par.intensity[i, k, :] = interpolate.splev(k2, spl)
-            spl2 = interpolate.splrep(k1, res[i, k, 0:Knots_theta_vec[k]], k=3)
+            spl2 = interpolate.splrep(k1, res[i, k, 0 : Knots_theta_vec[k]], k=3)
             Par.res[i, k, :] = interpolate.splev(k2, spl2)
     return
 
@@ -465,7 +495,7 @@ def check_spin_polarization(Par):
     The function checks if a spin-polarized system should be calculated
     and sets some default parameters.
     """
-    if hasattr(Par, 'Population'):
+    if hasattr(Par, "Population"):
         popu = Par.Population
         ispopu = True
         rho_0 = Par.rho_0

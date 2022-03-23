@@ -9,10 +9,8 @@ interpolated number of orientations.
 """
 
 import numpy as np
-from EPRsim.Interpolation_lib import (spline_interpolation_angle_grid,
-                                      field_interpol)
-from EPRsim.Direct_conversion_to_Field import (create_Lorentzian,
-                                               create_Gaussian)
+from EPRsim.Interpolation_lib import spline_interpolation_angle_grid, field_interpol
+from EPRsim.Direct_conversion_to_Field import create_Lorentzian, create_Gaussian
 
 
 def create_conv_spectrum(Par, intensity, resonance):
@@ -21,8 +19,7 @@ def create_conv_spectrum(Par, intensity, resonance):
     Par._ntheta = None
     determine_which_broadening(Par)
     interpolation_number(Par, intensity, resonance, True)
-    inten, res, theta, phi = spline_interpolation_angle_grid(Par, intensity,
-                                                             resonance)
+    inten, res, theta, phi = spline_interpolation_angle_grid(Par, intensity, resonance)
     if Par.Gaussian:
         field, signal = create_Gaussian(Par, res, inten)
     else:
@@ -32,7 +29,7 @@ def create_conv_spectrum(Par, intensity, resonance):
 
 
 def determine_which_broadening(Par):
-    if Par.lw[1] > 2*Par.lw[0]:
+    if Par.lw[1] > 2 * Par.lw[0]:
         Par.Gaussian = False
     return
 
@@ -46,24 +43,24 @@ def interpolation_number(Par, intensity, resonance, Intref=False):
     lenthetha = len(resonance[0, :, 0])
     nTransitions = len(resonance[:, 0, 0])
     for i in range(0, nTransitions):
-        phimax = np.max(np.abs(np.gradient(resonance[i, lenthetha-1, :])))
+        phimax = np.max(np.abs(np.gradient(resonance[i, lenthetha - 1, :])))
         thetamax = np.max(np.abs(np.gradient(resonance[i, :, 0])))
         if thetamax_ges < thetamax:
             thetamax_ges = thetamax
-        thetamax = np.max(np.abs(np.gradient(resonance[i, :, lenthetha-1])))
+        thetamax = np.max(np.abs(np.gradient(resonance[i, :, lenthetha - 1])))
         if thetamax_ges < thetamax:
             thetamax_ges = thetamax
         if phimax_ges < phimax:
             phimax_ges = phimax
-    thetamax_ges = 2*Par.nKnots*thetamax_ges
-    phimax_ges = 2*Par.nKnots*phimax_ges
-    Range = np.amax(resonance)-np.amin(resonance)
+    thetamax_ges = 2 * Par.nKnots * thetamax_ges
+    phimax_ges = 2 * Par.nKnots * phimax_ges
+    Range = np.amax(resonance) - np.amin(resonance)
     maxlw = np.sqrt(np.max(Par.lw))
-    numges = np.sqrt(thetamax_ges**2+phimax_ges**2)
-    num_theta = 2*(thetamax_ges*numges)/maxlw
-    num_phi = 2*(numges*phimax_ges)/maxlw
-    num_phi = int(round(num_phi/Range))
-    num_theta = int(round(num_theta/Range))
+    numges = np.sqrt(thetamax_ges ** 2 + phimax_ges ** 2)
+    num_theta = 2 * (thetamax_ges * numges) / maxlw
+    num_phi = 2 * (numges * phimax_ges) / maxlw
+    num_phi = int(round(num_phi / Range))
+    num_theta = int(round(num_theta / Range))
     # Minimal number of points
     if Par.Point_Group == "O3":
         num_phi = 4
@@ -87,10 +84,10 @@ def interpolation_number(Par, intensity, resonance, Intref=False):
         if num_theta > maxnangle:
             num_theta = maxnangle
     # scale the number of phi due to the number of octants
-    num_phi = num_phi*Par.nOctants
-    if hasattr(Par, 'Interpolative_Refinement') and Intref:
-        num_theta = int(round(Par.Interpolative_Refinement*num_theta))
-        num_phi = int(round(Par.Interpolative_Refinement*num_phi))
+    num_phi = num_phi * Par.nOctants
+    if hasattr(Par, "Interpolative_Refinement") and Intref:
+        num_theta = int(round(Par.Interpolative_Refinement * num_theta))
+        num_phi = int(round(Par.Interpolative_Refinement * num_phi))
     if num_phi < 4:
         num_phi = 4
     if num_theta < 4:

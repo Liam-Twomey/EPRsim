@@ -10,9 +10,11 @@ import numpy as np
 from scipy import interpolate
 import EPRsim.Validate_input_parameter as Val
 import EPRsim.Tools as tool
+
 global Numba
 try:
     from numba import jit, float64, int64
+
     Numba = 1
 except ImportError:
     Numba = 0
@@ -25,8 +27,8 @@ except ImportError:
 # Load physical constans
 con = tool.physical_constants()
 # Define specific default values for the fast motion program
-Breit_Rabi_thresh = 1e-7         # Threshold for the fixpoint iteration in T
-defPoints = 1024                 # Default number of points
+Breit_Rabi_thresh = 1e-7  # Threshold for the fixpoint iteration in T
+defPoints = 1024  # Default number of points
 
 
 # *****************************************************************************
@@ -44,10 +46,23 @@ def dec_fm_lw_kernel():
     you invoke a Python program.
     """
     if Numba == 1:
-        return (jit(float64[:](float64[:, :, :], float64[:, :, :], float64,
-                    float64, float64, float64, float64, float64,
-                    float64[:, :], float64[:], int64), nopython=True,
-                    cache=True))
+        return jit(
+            float64[:](
+                float64[:, :, :],
+                float64[:, :, :],
+                float64,
+                float64,
+                float64,
+                float64,
+                float64,
+                float64,
+                float64[:, :],
+                float64[:],
+                int64,
+            ),
+            nopython=True,
+            cache=True,
+        )
     else:
         return dec_identity
 
@@ -62,8 +77,9 @@ def dec_Lorentzian():
     you invoke a Python program.
     """
     if Numba == 1:
-        return (jit(float64[:](float64[:], float64, float64, int64),
-                    nopython=True, cache=True))
+        return jit(
+            float64[:](float64[:], float64, float64, int64), nopython=True, cache=True
+        )
     else:
         return dec_identity
 
@@ -77,7 +93,7 @@ def dec_identity(ob):
 
 
 def fast_motion_kernel(Param, SimPar):
-    """ fast_motion_kernel(Sys,Exp)
+    """fast_motion_kernel(Sys,Exp)
 
     in:  Sys           (one class with definitions of spin system parameters)
          Exp           (one class with definitions of experimental parameters)
@@ -102,29 +118,46 @@ def fast_motion_kernel(Param, SimPar):
         6. Normalize the signal to the integral of the absorptive signal
         7. Return the spectrum
     """
-    res, indices, DeltaA, Deltag, giso = calculate_resfields(SimPar.A,
-                                                             SimPar.g,
-                                                             SimPar._Nucsvec,
-                                                             SimPar._equiv,
-                                                             SimPar.mwFreq,
-                                                             SimPar._Iequiv,
-                                                             SimPar._g_n)
-    if not hasattr(SimPar, 'Bfield'):
-        SimPar.Bfield = do_default_range(res, SimPar.lw[0], SimPar.lw[1],
-                                         SimPar._tcorriso)
+    res, indices, DeltaA, Deltag, giso = calculate_resfields(
+        SimPar.A,
+        SimPar.g,
+        SimPar._Nucsvec,
+        SimPar._equiv,
+        SimPar.mwFreq,
+        SimPar._Iequiv,
+        SimPar._g_n,
+    )
+    if not hasattr(SimPar, "Bfield"):
+        SimPar.Bfield = do_default_range(
+            res, SimPar.lw[0], SimPar.lw[1], SimPar._tcorriso
+        )
     resonances = res
     if SimPar.iso:
-        Int = create_isotropic_spectrum(SimPar.Bfield, resonances, indices,
-                                        SimPar._equiv,
-                                        SimPar._I, Param.Harmonic,
-                                        SimPar.lw[0],
-                                        SimPar.lw[1])
+        Int = create_isotropic_spectrum(
+            SimPar.Bfield,
+            resonances,
+            indices,
+            SimPar._equiv,
+            SimPar._I,
+            Param.Harmonic,
+            SimPar.lw[0],
+            SimPar.lw[1],
+        )
     else:
-        Int = create_fastmotion_spectrum(SimPar.Bfield, resonances, indices,
-                                         SimPar._I,
-                                         Deltag, DeltaA, SimPar._tcorriso,
-                                         SimPar.lw[0], SimPar.lw[1],
-                                         giso, SimPar.mwFreq, Param.Harmonic)
+        Int = create_fastmotion_spectrum(
+            SimPar.Bfield,
+            resonances,
+            indices,
+            SimPar._I,
+            Deltag,
+            DeltaA,
+            SimPar._tcorriso,
+            SimPar.lw[0],
+            SimPar.lw[1],
+            giso,
+            SimPar.mwFreq,
+            Param.Harmonic,
+        )
     Int = tool.normalize2area(Int, Param.Harmonic)
 
     if Param.verbosity:
@@ -140,8 +173,20 @@ def fast_motion_kernel(Param, SimPar):
 # *****************************************************************************
 
 
-def create_fastmotion_spectrum(Bfield, resonances, indices, I, Deltag, DeltaA,
-                               tcorr, lw, lwG, giso, mfreq, Harmonic=1):
+def create_fastmotion_spectrum(
+    Bfield,
+    resonances,
+    indices,
+    I,
+    Deltag,
+    DeltaA,
+    tcorr,
+    lw,
+    lwG,
+    giso,
+    mfreq,
+    Harmonic=1,
+):
     """create_fastmotion_spectrum(Bfield,resonance,resfield,indices,equiv,I,
                                Deltag,DeltaA,tcorr,lw,lwG,giso,mfreq,Harmonic)
 
@@ -166,10 +211,11 @@ def create_fastmotion_spectrum(Bfield, resonances, indices, I, Deltag, DeltaA,
     If ForBoost is enabled, compiled fortran files are used to carry out
     the critical fast_motion_lw() function.
     """
-    Biso = mfreq*(con.h/(con.beta*giso))
+    Biso = mfreq * (con.h / (con.beta * giso))
     Int = np.zeros(len(Bfield))
-    lw_s = fast_motion_lw(Deltag, DeltaA, I, indices, Biso, giso,
-                          tcorr, len(resonances))
+    lw_s = fast_motion_lw(
+        Deltag, DeltaA, I, indices, Biso, giso, tcorr, len(resonances)
+    )
     lw_s += lw
     resonances = np.digitize(resonances, Bfield)
     for i in range(0, len(resonances)):
@@ -184,8 +230,7 @@ def create_fastmotion_spectrum(Bfield, resonances, indices, I, Deltag, DeltaA,
     return Int
 
 
-def create_isotropic_spectrum(Bfield, resonances, indices, equiv, I, Harmonic,
-                              lw, lwG):
+def create_isotropic_spectrum(Bfield, resonances, indices, equiv, I, Harmonic, lw, lwG):
     """create_isotropic_spectrum(Bfield,resonance,indices,equiv,I,Harmonic,lw,
                                  lwG)
 
@@ -216,7 +261,7 @@ def create_isotropic_spectrum(Bfield, resonances, indices, equiv, I, Harmonic,
     for i in range(0, len(resonances)):
         g1 = resonances[i]
         try:
-            L = fac[i]*create_Lorentzian(Bfield, Bfield[g1], lw, Harmonic)
+            L = fac[i] * create_Lorentzian(Bfield, Bfield[g1], lw, Harmonic)
         except:
             L = 0
         Int += L
@@ -263,8 +308,9 @@ def calculate_resfields(A, g, Nucs, equiv, mfreq, Iequiv, g_n):
         else:
             giso, aiso, DeltaA, Deltag = tensor_readout(A[k], g)
         # Fix-point iteration (analytical formula for the resfield calculation)
-        resfields, indices = Breit_Rabi_iteration(aiso, giso, Iequiv[k],
-                                                  g_n[k], mfreq, k)
+        resfields, indices = Breit_Rabi_iteration(
+            aiso, giso, Iequiv[k], g_n[k], mfreq, k
+        )
         resfield_list.append(resfields)
         indices_list.append(indices)
         DeltaA_list.append(DeltaA)
@@ -298,36 +344,46 @@ def Breit_Rabi_iteration(aiso, giso, I, g_n, mfreq, k=0):
     indices = []
     resfields = []
     B_iso = Biso(giso, mfreq)
-    mI = np.zeros(int(2*I)+1)
+    mI = np.zeros(int(2 * I) + 1)
     for i in range(0, len(mI)):
-        mI[i] = -I+i
-    aiso = aiso+1e-5
+        mI[i] = -I + i
+    aiso = aiso + 1e-5
     if aiso < 0:
         fac = -1.0
     else:
         fac = 1.0
-    epsilon = (aiso/2.0)/mfreq
-    gamma = giso*con.beta+g_n*con.beta_n
+    epsilon = (aiso / 2.0) / mfreq
+    gamma = giso * con.beta + g_n * con.beta_n
     # Fixpoint iteration
     for trans in range(0, len(mI)):
         B0_0 = 0
         for i in range(0, 20):
-            B0_k = ((con.h*aiso)/(gamma*(1-epsilon**2))*(-1.0*mI[trans] +
-                    fac*np.sqrt(mI[trans]**2+(1-epsilon**2) *
-                    (np.power(2*epsilon, -2.0)-(I+1.0/2)**2))))
-            if abs(B0_k-B0_0) < Breit_Rabi_thresh:
+            B0_k = (
+                (con.h * aiso)
+                / (gamma * (1 - epsilon ** 2))
+                * (
+                    -1.0 * mI[trans]
+                    + fac
+                    * np.sqrt(
+                        mI[trans] ** 2
+                        + (1 - epsilon ** 2)
+                        * (np.power(2 * epsilon, -2.0) - (I + 1.0 / 2) ** 2)
+                    )
+                )
+            )
+            if abs(B0_k - B0_0) < Breit_Rabi_thresh:
                 break
             else:
-                epsilon = (aiso/2.0)/(mfreq+con.beta_n*g_n*B0_k/con.h)
+                epsilon = (aiso / 2.0) / (mfreq + con.beta_n * g_n * B0_k / con.h)
                 B0_0 = B0_k
         if k > 0:
             B0_k -= B_iso
-        resfields = np.append(resfields, B0_k*con.T2mT)
+        resfields = np.append(resfields, B0_k * con.T2mT)
         indices = np.append(indices, mI[trans])
     return resfields, indices
 
 
-def Biso(giso, mfreq, unit='mT'):
+def Biso(giso, mfreq, unit="mT"):
     """Biso(giso,mfreq,unit='mT')
 
     in:  giso              (isotropic g-value)
@@ -340,12 +396,12 @@ def Biso(giso, mfreq, unit='mT'):
     isotropic g-value. The default unit is mT. Alternatively it can be returned
     in T (unit='T') or Gauss (unit='G')
     """
-    B_iso = (con.h*mfreq)/(giso*con.beta)
-    if unit == 'mT':
+    B_iso = (con.h * mfreq) / (giso * con.beta)
+    if unit == "mT":
         pass
-    elif unit == 'T':
+    elif unit == "T":
         B_iso *= 1e-3
-    elif unit == 'G':
+    elif unit == "G":
         B_iso *= 10
     return B_iso
 
@@ -369,18 +425,16 @@ def do_hf_splitting(indices_list, resfield_list):
     dim = []
     n = len(indices_list)
     for i in range(0, n):
-            dim.append(len(indices_list[i]))
+        dim.append(len(indices_list[i]))
     for i in range(0, n):
         for k in range(0, n):
             if k != i:
                 if i <= k:
                     indices_list[i] = np.kron(indices_list[i], np.ones(dim[k]))
-                    resfield_list[i] = np.kron(resfield_list[i],
-                                               np.ones(dim[k]))
+                    resfield_list[i] = np.kron(resfield_list[i], np.ones(dim[k]))
                 else:
                     indices_list[i] = np.kron(np.ones(dim[k]), indices_list[i])
-                    resfield_list[i] = np.kron(np.ones(dim[k]),
-                                               resfield_list[i])
+                    resfield_list[i] = np.kron(np.ones(dim[k]), resfield_list[i])
         resfields += resfield_list[i]
     return resfields, indices_list
 
@@ -401,14 +455,14 @@ def tensor_readout(A, g):
     A-Aiso*1 and g-giso*1.
     """
     g_ten = np.diag(g)
-    giso = 1.0/3*np.trace(g_ten)
-    giso_ten = np.eye(3)*giso
-    Deltag = g_ten-giso_ten
+    giso = 1.0 / 3 * np.trace(g_ten)
+    giso_ten = np.eye(3) * giso
+    Deltag = g_ten - giso_ten
     try:
         A_ten = np.diag(A)
-        aiso = 1.0/3*np.trace(A_ten)
-        Aiso_ten = np.eye(3)*aiso
-        DeltaA = A_ten-Aiso_ten
+        aiso = 1.0 / 3 * np.trace(A_ten)
+        Aiso_ten = np.eye(3) * aiso
+        DeltaA = A_ten - Aiso_ten
     except:
         aiso = 1e-9
         DeltaA = np.zeros((3, 3))
@@ -442,31 +496,32 @@ def fast_motion_lw(Deltag, DeltaA, I, mI, Biso, giso, tcorr, Nresonances):
 
     mI = np.asarray(mI)
     lw_s = np.zeros(Nresonances)
-    omega_0 = giso*Biso*con.beta/con.h
-    MHz2mT = (1e9*con.h)/(giso*con.beta)
+    omega_0 = giso * Biso * con.beta / con.h
+    MHz2mT = (1e9 * con.h) / (giso * con.beta)
     # Do all possible precalculation which are index independent
-    j0 = tcorr*2*np.pi
-    j1 = j0/(1+(omega_0**2)*(j0**2))
-    field_dep = (con.beta*Biso/con.h)
+    j0 = tcorr * 2 * np.pi
+    j1 = j0 / (1 + (omega_0 ** 2) * (j0 ** 2))
+    field_dep = con.beta * Biso / con.h
     # Formulas according to N.M.Atherton (p.331-332)
-    a11 = (2.0/15)*j0+(j1*1.0)/10
-    a22 = (1.0/20)*j0+(j1*7.0)/60
-    b11 = (4.0/15)*j0+(1.0/5)*j1
-    c11 = (1.0/12)*j0-(1.0/60)*j1
-    d11 = (4.0/15)*j0+(1.0/10)*j1
+    a11 = (2.0 / 15) * j0 + (j1 * 1.0) / 10
+    a22 = (1.0 / 20) * j0 + (j1 * 7.0) / 60
+    b11 = (4.0 / 15) * j0 + (1.0 / 5) * j1
+    c11 = (1.0 / 12) * j0 - (1.0 / 60) * j1
+    d11 = (4.0 / 15) * j0 + (1.0 / 10) * j1
     DeltaA = np.asarray(DeltaA)
     Deltag = np.asarray(Deltag)
     I = np.asarray(I)
-    lw_s = fast_motion_lw_kernel(DeltaA, Deltag, a11, a22, b11, c11, d11,
-                                 field_dep, mI, I, Nresonances)
-    lw_s *= 1e-6*MHz2mT
+    lw_s = fast_motion_lw_kernel(
+        DeltaA, Deltag, a11, a22, b11, c11, d11, field_dep, mI, I, Nresonances
+    )
+    lw_s *= 1e-6 * MHz2mT
     return lw_s
 
 
 @dec_fm_lw_kernel()
-def fast_motion_lw_kernel_expired(DeltaA, Deltag, a11, a22,
-                                  b11, c11, d11, field_dep,
-                                  mI, I, Nresonances):
+def fast_motion_lw_kernel_expired(
+    DeltaA, Deltag, a11, a22, b11, c11, d11, field_dep, mI, I, Nresonances
+):
     """fast_motion_lw_kernel(DeltaA,Deltag,a11,a22,b11,c11,d11,field_dep
                             ,indices,mI,I,Nresonances)
 
@@ -492,29 +547,30 @@ def fast_motion_lw_kernel_expired(DeltaA, Deltag, a11, a22,
     """
     lw_s = np.zeros(Nresonances)
     for j in range(0, len(mI)):
-        DeltaAA = np.sum(DeltaA[j]*DeltaA[j])
-        II1 = I[j]*(I[j]+1)
+        DeltaAA = np.sum(DeltaA[j] * DeltaA[j])
+        II1 = I[j] * (I[j] + 1)
         if j == 0:
-            A = ((field_dep**2)*(np.sum(Deltag[j]*Deltag[j])) *
-                 a11+II1*DeltaAA*a22)
+            A = (field_dep ** 2) * (
+                np.sum(Deltag[j] * Deltag[j])
+            ) * a11 + II1 * DeltaAA * a22
         else:
-            A = II1*(DeltaAA)*a22
-        B = field_dep*(np.sum(Deltag[j]*DeltaA[j]))*b11
-        C = DeltaAA*c11
+            A = II1 * (DeltaAA) * a22
+        B = field_dep * (np.sum(Deltag[j] * DeltaA[j])) * b11
+        C = DeltaAA * c11
         for i in range(0, Nresonances):
             D = 0
             if len(mI) > 1:
-                for k in range(j+1, len(mI)):
-                    DT = np.sum(DeltaA[j]*DeltaA[k])*d11
-                    D += DT*mI[k, i]*mI[j, i]
+                for k in range(j + 1, len(mI)):
+                    DT = np.sum(DeltaA[j] * DeltaA[k]) * d11
+                    D += DT * mI[k, i] * mI[j, i]
             # Set up quadratic formula for anistropic linewidth
-            lw_s[i] += (A+B*mI[j, i]+C*(mI[j, i]**2)+D)*2
+            lw_s[i] += (A + B * mI[j, i] + C * (mI[j, i] ** 2) + D) * 2
     return lw_s
 
 
-
-def fast_motion_lw_kernel(DeltaA, Deltag, a11, a22, b11, c11, d11, field_dep,
-                          mI, I, Nresonances):
+def fast_motion_lw_kernel(
+    DeltaA, Deltag, a11, a22, b11, c11, d11, field_dep, mI, I, Nresonances
+):
     """fast_motion_lw_kernel(DeltaA,Deltag,a11,a22,b11,c11,d11,field_dep
                             ,indices,mI,I,Nresonances)
 
@@ -542,25 +598,25 @@ def fast_motion_lw_kernel(DeltaA, Deltag, a11, a22, b11, c11, d11, field_dep,
     Dij = np.zeros((Nresonances, n), dtype=np.float64)
     DeltaAA = np.zeros(n)
     DeltaAg = np.zeros(n)
-    dgg1 = np.sum(Deltag[0]*Deltag[0])
+    dgg1 = np.sum(Deltag[0] * Deltag[0])
     for j in range(n):
-        DeltaAA[j] = np.sum(DeltaA[j]*DeltaA[j])
-        DeltaAg[j] = np.sum(DeltaA[j]*Deltag[j])
+        DeltaAA[j] = np.sum(DeltaA[j] * DeltaA[j])
+        DeltaAg[j] = np.sum(DeltaA[j] * Deltag[j])
     if n > 1:
         for j in range(0, n):
-            for k in range(j+1, n):
-                DAA2 = np.sum(DeltaA[j]*DeltaA[k])*d11
-                Dij[:, j] += DAA2*mI[k, :]*mI[j, :]
+            for k in range(j + 1, n):
+                DAA2 = np.sum(DeltaA[j] * DeltaA[k]) * d11
+                Dij[:, j] += DAA2 * mI[k, :] * mI[j, :]
     lw_s = np.zeros(Nresonances)
     for j in range(0, len(mI)):
-        II1 = I[j]*(I[j]+1)
+        II1 = I[j] * (I[j] + 1)
         if j == 0:
-            A = field_dep**2*dgg1*a11+II1*DeltaAA[0]*a22
+            A = field_dep ** 2 * dgg1 * a11 + II1 * DeltaAA[0] * a22
         else:
-            A = II1*DeltaAA[j]*a22
-        B = field_dep*DeltaAg[j]*b11
-        C = DeltaAA[j]*c11
-        lw_s += (A+B*mI[j, :]+C*(mI[j, :]**2)+Dij[:, j])*2
+            A = II1 * DeltaAA[j] * a22
+        B = field_dep * DeltaAg[j] * b11
+        C = DeltaAA[j] * c11
+        lw_s += (A + B * mI[j, :] + C * (mI[j, :] ** 2) + Dij[:, j]) * 2
     return lw_s
 
 
@@ -575,11 +631,11 @@ def create_Lorentzian(x, x0, lw, Harmonic=1):
 
     out: L                          (spectrum with Lorentzian lineshape)
     """
-    res = x-x0
+    res = x - x0
     if Harmonic == 0:
-        L = ((0.5*lw)/np.pi)/(res**2+(0.5*lw)**2)
+        L = ((0.5 * lw) / np.pi) / (res ** 2 + (0.5 * lw) ** 2)
     else:
-        L = -16.0*((res*lw)/np.pi)/(4.0*(res)**2+lw**2)**2
+        L = -16.0 * ((res * lw) / np.pi) / (4.0 * (res) ** 2 + lw ** 2) ** 2
     return L
 
 
@@ -624,14 +680,14 @@ def do_default_range(resfield, lw, lwG, tcorr=None):
         maxres = np.max(resfield)
     if tcorr is not None:
         factor = 6
-        lwtcorr = 5e9*tcorr*((1e-3*maxres)**2)
+        lwtcorr = 5e9 * tcorr * ((1e-3 * maxres) ** 2)
     else:
         factor = 10
         lwtcorr = 0
-    minres -= 5*(lw+lwG)+lwtcorr
-    maxres += 5*(lw+lwG)+lwtcorr
-    diff = (maxres-minres)/factor
-    Bfield = np.linspace(minres-diff, maxres+diff, defPoints)
+    minres -= 5 * (lw + lwG) + lwtcorr
+    maxres += 5 * (lw + lwG) + lwtcorr
+    diff = (maxres - minres) / factor
+    Bfield = np.linspace(minres - diff, maxres + diff, defPoints)
     return Bfield
 
 
@@ -643,7 +699,7 @@ def print_Info(SimPar):
         print("Isotropic calculation")
     else:
         print("Redfield calculation")
-        print("Rotational correlation time: " +str(SimPar._tcorriso)+" ns")
-    print("Nuclear spins : "+str(SimPar._Nucsvec))
+        print("Rotational correlation time: " + str(SimPar._tcorriso) + " ns")
+    print("Nuclear spins : " + str(SimPar._Nucsvec))
     print("Number of equivalent nuclei: " + str(SimPar._equiv))
     return

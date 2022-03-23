@@ -76,9 +76,9 @@ def convert_user_input_and_Set_up_defaults(Par, SimPar):
     """
     Par.warning = 0
     # Convert the microwave frequency to Hz
-    Par.mwFreq = Par.mwFreq*con.GHz2Hz
+    Par.mwFreq = Par.mwFreq * con.GHz2Hz
     # Spectrum exceeds field range boolean
-    Par.S = Par.S*1.0
+    Par.S = Par.S * 1.0
     # Some simulation thresholds
     threshold_settings(Par)
     # D-Tensor
@@ -88,7 +88,7 @@ def convert_user_input_and_Set_up_defaults(Par, SimPar):
     # Define dimension of hyperfines and Hyperfine Tensors
     define_hyperfines(Par, SimPar)
     if Par.warning == 1:
-        return  Par, SimPar
+        return Par, SimPar
     # g-Tensor
     Par.g_tensor = create_g_or_hyperfine_tensors(Par.g, Par.coupled_e_dim)
     zero_field_populations(Par)
@@ -100,8 +100,8 @@ def convert_user_input_and_Set_up_defaults(Par, SimPar):
 
 
 def allowed_trans(Par):
-    Par.allowed_NMR_trans = Par.e_dimension*(Par.dim_nuc_tot-1)
-    Par.allowed_EPR_trans = (Par.e_dimension-1)*Par.dim_nuc_tot
+    Par.allowed_NMR_trans = Par.e_dimension * (Par.dim_nuc_tot - 1)
+    Par.allowed_EPR_trans = (Par.e_dimension - 1) * Par.dim_nuc_tot
     return
 
 
@@ -121,19 +121,18 @@ def get_number_of_nuclei(Par):
 def get_number_of_coupled_electrons(Par):
     if isinstance(Par.S, float):
         Par.coupled_e_dim = 1
-        Par.e_dimension = int(2*Par.S+1)
+        Par.e_dimension = int(2 * Par.S + 1)
     else:
         Par.coupled_e_dim = len(Par.S)
         Par.e_dimension = 1
         for i in range(0, Par.coupled_e_dim):
-            Par.e_dimension *= int(2*Par.S[i]+1)
+            Par.e_dimension *= int(2 * Par.S[i] + 1)
     return
 
 
 def get_full_nuclear_dimension(Par):
-    if hasattr(Par, 'ENucCoupling') and Par.SepHilbertspace:
-        Par.dim_nuc = np.ones((Par.coupled_e_dim, Par.number_of_nuclei),
-                              dtype=np.int)
+    if hasattr(Par, "ENucCoupling") and Par.SepHilbertspace:
+        Par.dim_nuc = np.ones((Par.coupled_e_dim, Par.number_of_nuclei), dtype=np.int)
         Par.dim_nuc_tot = 0
         for s in range(0, Par.coupled_e_dim):
             for i in range(0, Par.number_of_nuclei):
@@ -182,16 +181,16 @@ def create_g_or_hyperfine_tensors(input_array, dim):
 def threshold_settings(Par):
     if Par.nKnots < 8:
         Par.nKnots = 8
-    if not hasattr(Par, 'LevelSelect'):
+    if not hasattr(Par, "LevelSelect"):
         Par.LevelSelect = 5e-5
-    if not hasattr(Par, 'SepHilbertspace'):
+    if not hasattr(Par, "SepHilbertspace"):
         Par.SepHilbertspace = False
-    if hasattr(Par, 'Population'):
+    if hasattr(Par, "Population"):
         Par.ispopu = True
     else:
         Par.ispopu = False
 
-    if hasattr(Par, 'Temperature'):
+    if hasattr(Par, "Temperature"):
         Par.T = Par.Temperature
     else:
         Par.T = 300
@@ -204,16 +203,15 @@ def define_hyperfines(Par, SimPar):
         get_equivalent_nucs(Par)
         get_number_of_nuclei(Par)
         if Par.number_of_nuclei > 1:
-            Par.Nucs = Par.Nucs.split(',')
+            Par.Nucs = Par.Nucs.split(",")
         else:
             Par.Nucs = Par.Nucs
         get_full_nuclear_dimension(Par)
-        if Par.dim_nuc_tot*Par.e_dimension > 512:
+        if Par.dim_nuc_tot * Par.e_dimension > 512:
             Par.warning = 1
             return
-        Par.A_tensor = create_g_or_hyperfine_tensors(Par.A,
-                                                     Par.number_of_nuclei)
-        Par.A_tensor = Par.A_tensor*con.MHz2Hz
+        Par.A_tensor = create_g_or_hyperfine_tensors(Par.A, Par.number_of_nuclei)
+        Par.A_tensor = Par.A_tensor * con.MHz2Hz
     else:
         Par.dim_nuc_tot = 1
         Par.number_of_nuclei = 0
@@ -234,18 +232,18 @@ def get_equivalent_nucs(Par):
             ntenss = 1
             Par.n = [Par.n]
             Par.A = [Par.A]
-            if hasattr(Par, 'AFrame'):
+            if hasattr(Par, "AFrame"):
                 Par.AFrame = [Par.AFrame]
-        if hasattr(Par, 'AFrame'):
+        if hasattr(Par, "AFrame"):
             AFrame_tmp = []
         Par.A_tmp = []
         for i in range(0, ntenss):
             for k in range(Par.n[i]):
                 Par.A_tmp.append(Par.A[i])
-                if hasattr(Par, 'AFrame'):
+                if hasattr(Par, "AFrame"):
                     AFrame_tmp.append(Par.AFrame[i])
         Par.A = Par.A_tmp
-        if hasattr(Par, 'AFrame'):
+        if hasattr(Par, "AFrame"):
             Par.AFrame = AFrame_tmp
     return
 
@@ -254,24 +252,29 @@ def define_D_tensors(Par):
     def arrange_D(D):
         if float(abs(D[0])) < 0.01:
             D[0] = 0.01
-        DT = np.array([[-1/3*D[0]+D[1], 0, 0], [0, -1/3*D[0]-D[1], 0],
-                      [0, 0, 2/3*D[0]]])
-        DT = DT*con.MHz2Hz
+        DT = np.array(
+            [
+                [-1 / 3 * D[0] + D[1], 0, 0],
+                [0, -1 / 3 * D[0] - D[1], 0],
+                [0, 0, 2 / 3 * D[0]],
+            ]
+        )
+        DT = DT * con.MHz2Hz
         return DT
 
     if Par.D is not None:
-        Par.D = np.asarray(Par.D)*1.0
+        Par.D = np.asarray(Par.D) * 1.0
         Par.D_tensor = arrange_D(Par.D)
     # D-Tensor _pair
     if Par.DPair is not None:
-        Par.DPair = Par.DPair*1.0
+        Par.DPair = Par.DPair * 1.0
         Par.DPair_tensor = arrange_D(Par.DPair)
     return
 
 
 def define_J(Par):
     if Par.J is not None:
-        Par.J_tensor = Par.J*1e6*np.eye(3)
+        Par.J_tensor = Par.J * 1e6 * np.eye(3)
     return
 
 
@@ -279,31 +282,29 @@ def symmetry(Par):
     Symmetry_Group(Par)
     if Par.Point_Group == "O3":
         Par.nKnots = 4
-    Par.phinKnots = Par.nOctants*Par.nKnots
+    Par.phinKnots = Par.nOctants * Par.nKnots
     return
 
 
 def rotate_coordsystems(Par):
-    if hasattr(Par, 'gFrame'):
-        eulermatrix = tool.Eulermatrix(Par.gFrame[2], Par.gFrame[1],
-                                       Par.gFrame[0])
+    if hasattr(Par, "gFrame"):
+        eulermatrix = tool.Eulermatrix(Par.gFrame[2], Par.gFrame[1], Par.gFrame[0])
         Par.g_tensor = tool.tensor_rotation(Par.g_tensor, eulermatrix)
-    if hasattr(Par, 'AFrame'):
+    if hasattr(Par, "AFrame"):
         if Par.number_of_nuclei == 1:
-                eulermatrix = tool.Eulermatrix(Par.AFrame[2], Par.AFrame[1],
-                                               Par.AFrame[0])
-                Par.A_tensor = tool.tensor_rotation(Par.A_tensor, eulermatrix)
+            eulermatrix = tool.Eulermatrix(Par.AFrame[2], Par.AFrame[1], Par.AFrame[0])
+            Par.A_tensor = tool.tensor_rotation(Par.A_tensor, eulermatrix)
         else:
             Par.AFrame = np.asarray(Par.AFrame)
             for i in range(Par.number_of_nuclei):
-                eulermatrix = tool.Eulermatrix(Par.AFrame[i, 2],
-                                               Par.AFrame[i, 1],
-                                               Par.AFrame[i, 0])
-                Par.A_tensor[i, :] = tool.tensor_rotation(Par.A_tensor[i, :],
-                                                          eulermatrix)
-    if hasattr(Par, 'DFrame'):
-        eulermatrix = tool.Eulermatrix(Par.DFrame[2], Par.DFrame[1],
-                                       Par.DFrame[0])
+                eulermatrix = tool.Eulermatrix(
+                    Par.AFrame[i, 2], Par.AFrame[i, 1], Par.AFrame[i, 0]
+                )
+                Par.A_tensor[i, :] = tool.tensor_rotation(
+                    Par.A_tensor[i, :], eulermatrix
+                )
+    if hasattr(Par, "DFrame"):
+        eulermatrix = tool.Eulermatrix(Par.DFrame[2], Par.DFrame[1], Par.DFrame[0])
         Par.D_tensor = tool.tensor_rotation(Par.D_tensor, eulermatrix)
     return
 
@@ -311,9 +312,9 @@ def rotate_coordsystems(Par):
 def zero_field_populations(Par):
     # Set up spinpolarization for electron sublevels
     def renormalize(Pop):
-        Pop = Pop/sum(Pop)
-        Pop = 1.0-Pop
-        Pop = Pop/sum(Pop)
+        Pop = Pop / sum(Pop)
+        Pop = 1.0 - Pop
+        Pop = Pop / sum(Pop)
         return Pop
 
     def triplet(Par):
@@ -323,13 +324,13 @@ def zero_field_populations(Par):
         Par.Population_t = renormalize(Par.Population_t)
         return
 
-    if hasattr(Par, 'Population'):
+    if hasattr(Par, "Population"):
         if isinstance(Par.Population, str):
             if Par.Population == "S" or Par.Population == "s":
                 Par.Singlet = True
             elif Par.Population == "T" or Par.Population == "t":
-                    Par.Population = ["T", 1/3.0, 1/3.0, 1/3.0]
-                    triplet(Par)
+                Par.Population = ["T", 1 / 3.0, 1 / 3.0, 1 / 3.0]
+                triplet(Par)
         elif isinstance(Par.Population, list):
             if isinstance(Par.Population[0], str):
                 if Par.Population[0] == "T" or Par.Population[0] == "t":

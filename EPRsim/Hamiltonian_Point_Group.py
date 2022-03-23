@@ -22,71 +22,71 @@ def check_tensor(tensor, ani, inft, iso):
 
 
 def mul_and_add_tensors(mul, add, tensor):
-    mul = mul@tensor
+    mul = mul @ tensor
     add += tensor
     return mul, add
 
 
 def Symmetry_Group(Par):
     """
-   Determin the symmetry group of a (pre-processed) Hamiltonian
+    Determin the symmetry group of a (pre-processed) Hamiltonian
 
-    Parameters
-    ----------
-    Par :     :class:`object`
-              Object with all user-defined parameters.
-
-
-    See Also
-    --------
-    Parameters : Class of Parameters (with a full list of parameters)
+     Parameters
+     ----------
+     Par :     :class:`object`
+               Object with all user-defined parameters.
 
 
-    Notes
-    -----
-    Works fully on call on reference on the Par object. The function
-    categrorized the Hamiltonian in different point groups. The symmetry
-    group determines how many octants of a hemisphere are calculated
-    and how many points, at maxmimum, of theta and phi are caluclated.
-
-    ========  ================  ============   ====================
-    sym_grou    Point group        Octants        max nphi/ntheta
-    ========  ================  ============   ====================
-     -1             O3                1               4/4
-      0           Dhinfty             1          400/4  or  4/400
-      1             D2h               1              400/400
-      2             C2h               2              800/400
-      4             Ci                4             1600/400
-    ========  ================  ===========    ====================
+     See Also
+     --------
+     Parameters : Class of Parameters (with a full list of parameters)
 
 
+     Notes
+     -----
+     Works fully on call on reference on the Par object. The function
+     categrorized the Hamiltonian in different point groups. The symmetry
+     group determines how many octants of a hemisphere are calculated
+     and how many points, at maxmimum, of theta and phi are caluclated.
 
-    Examples
-    --------
+     ========  ================  ============   ====================
+     sym_grou    Point group        Octants        max nphi/ntheta
+     ========  ================  ============   ====================
+      -1             O3                1               4/4
+       0           Dhinfty             1          400/4  or  4/400
+       1             D2h               1              400/400
+       2             C2h               2              800/400
+       4             Ci                4             1600/400
+     ========  ================  ===========    ====================
 
-    Example for getting back the hyperfine tensors, out of the input
-    information as well as the point group of the Hamiltonian
 
-    >>> import numpy as np
-    >>> import EPRsim.Presettings as pre
-    >>> import EPRsim.Hamiltonian_Point_Group as gr
-    >>> P = sim.Parameters()
-    >>> P.Range = [335 ,350]
-    >>> P.mwFreq = 9.6
-    >>> P.g = 2.002
-    >>> P.A = [12, 20, 120]
-    >>> P.Nucs = '14N'
-    >>> Val = sim.Validate_Parameters(P)
-    >>> P.A_tensor = [np.diag(np.array([12, 20, 120]))]
-    >>> P.g_tensor = [np.diag(np.array([2.002, 2.002, 2.002]))]
-    >>> P.number_of_nuclei = 1
-    >>> P.coupled_e_dim = 1
-    >>> gr.Symmetry_Group(P)
-    D2h
+
+     Examples
+     --------
+
+     Example for getting back the hyperfine tensors, out of the input
+     information as well as the point group of the Hamiltonian
+
+     >>> import numpy as np
+     >>> import EPRsim.Presettings as pre
+     >>> import EPRsim.Hamiltonian_Point_Group as gr
+     >>> P = sim.Parameters()
+     >>> P.Range = [335 ,350]
+     >>> P.mwFreq = 9.6
+     >>> P.g = 2.002
+     >>> P.A = [12, 20, 120]
+     >>> P.Nucs = '14N'
+     >>> Val = sim.Validate_Parameters(P)
+     >>> P.A_tensor = [np.diag(np.array([12, 20, 120]))]
+     >>> P.g_tensor = [np.diag(np.array([2.002, 2.002, 2.002]))]
+     >>> P.number_of_nuclei = 1
+     >>> P.coupled_e_dim = 1
+     >>> gr.Symmetry_Group(P)
+     D2h
     """
 
     # Important Symmetry Point Groups
-    sym_grou = {4: "Ci", 2: "C2h",  1: "D2h", 0: "Dhinfty", -1: "O3"}
+    sym_grou = {4: "Ci", 2: "C2h", 1: "D2h", 0: "Dhinfty", -1: "O3"}
     sym_num = {"Ci": 4, "C2h": 2, "D2h": 1, "Dhinfty": 1, "O3": 1}
     n = 0
     # Assume the best symmetry Group (O3) at the beginning.
@@ -153,7 +153,7 @@ def Symmetry_Group(Par):
 def check_off_diag(tensor):
     iszero = True
     for i in range(0, 2):
-        for j in range(i+1, 3):
+        for j in range(i + 1, 3):
             if abs(tensor[i, j]) > 1e-8:
                 iszero = False
     return iszero
@@ -162,13 +162,17 @@ def check_off_diag(tensor):
 def check_diag(tensor):
     issame = False
     allsame = False
-    if (abs(tensor[0, 0]-tensor[1, 1]) < 1e-8 or
-       abs(tensor[0, 0]-tensor[2, 2]) < 1e-8 or
-       abs(tensor[2, 2]-tensor[1, 1]) < 1e-8):
+    if (
+        abs(tensor[0, 0] - tensor[1, 1]) < 1e-8
+        or abs(tensor[0, 0] - tensor[2, 2]) < 1e-8
+        or abs(tensor[2, 2] - tensor[1, 1]) < 1e-8
+    ):
         issame = True
-    if (abs(tensor[0, 0]-tensor[1, 1]) < 1e-8 and
-       abs(tensor[0, 0]-tensor[2, 2]) < 1e-8 and
-       abs(tensor[2, 2]-tensor[1, 1]) < 1e-8):
+    if (
+        abs(tensor[0, 0] - tensor[1, 1]) < 1e-8
+        and abs(tensor[0, 0] - tensor[2, 2]) < 1e-8
+        and abs(tensor[2, 2] - tensor[1, 1]) < 1e-8
+    ):
         allsame = True
     return issame, allsame
 
@@ -188,19 +192,19 @@ def permutate_tensor_elements(Par, add):
         transformat[1, 0] = 1
         transformat[2, 1] = 1
     if Par.coupled_e_dim == 1:
-        Par.g_tensor = Par.g_tensor@transformat
+        Par.g_tensor = Par.g_tensor @ transformat
     else:
         for t in range(0, Par.coupled_e_dim):
-            Par.g_tensor[t] = Par.g_tensor[t]@transformat
+            Par.g_tensor[t] = Par.g_tensor[t] @ transformat
     if Par.D is not None:
-        Par.D_tensor = Par.D_tensor@transformat
+        Par.D_tensor = Par.D_tensor @ transformat
     if Par.DPair is not None:
-        Par.DPair_tensor = Par.DPair_tensor@transformat
+        Par.DPair_tensor = Par.DPair_tensor @ transformat
     # Hyperfine tensors
     if Par.A is not None:
         if Par.number_of_nuclei == 1:
-            Par.A_tensor[0] = Par.A_tensor[0]@transformat
+            Par.A_tensor[0] = Par.A_tensor[0] @ transformat
         else:
             for t in range(0, Par.number_of_nuclei):
-                Par.A_tensor[t] = Par.A_tensor[t]@transformat
+                Par.A_tensor[t] = Par.A_tensor[t] @ transformat
     return

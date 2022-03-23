@@ -44,10 +44,7 @@ setup(
     license="GPLv3",
     url="https://github.com/darienmorrow/EPRsim",
     keywords="photophysics spectroscopy science paramagnetic resonance",
-    entry_points={
-        "console_scripts": [
-        ]
-    },
+    entry_points={"console_scripts": []},
     classifiers=[
         "Development Status :: 1 - Planning",
         "Intended Audience :: Science/Research",
@@ -57,8 +54,8 @@ setup(
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
-	"Programming Language :: Python :: 3.6",
-	"Programming Language :: Python :: 3.7",
-	"Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
 )

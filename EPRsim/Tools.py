@@ -9,15 +9,18 @@ Copyright, Stephan Rein, 2019
 import numpy as np
 from scipy import fftpack, special
 from scipy import signal
+
 try:
     import matplotlib.pyplot as plt
 except ImportError:
     pass
 
+
 class physical_constants:
     """
     Collection of constants used in EPR simulations
     """
+
     def __init__(self):
         self.kb = 1.38064852e-23
         self.kb_info = "Boltzman constant in J/K"
@@ -29,17 +32,17 @@ class physical_constants:
         self.J2Hz_info = "Joule to Hz"
         self.beta = 9.27401007e-24
         self.beta_info = "Bohr magenton in J/T"
-        self.beta_n = 5.050783699*1e-27
+        self.beta_n = 5.050783699 * 1e-27
         self.beta_n_info = "Nuclear Bohr magneton in J/T"
         self.g_free = 2.0023193
         self.g_free_info = "g-factor of the free electron"
         self.m0 = 9.10938356e-31
         self.m0_info = "Rest mass of the electron in kg"
-        self.MHz2mT = (1e9*self.h)/(self.g_free*self.beta)
+        self.MHz2mT = (1e9 * self.h) / (self.g_free * self.beta)
         self.MHz2mT_info = "Conversion MHz to mT"
-        self.mT2MHz = 1/self.MHz2mT
+        self.mT2MHz = 1 / self.MHz2mT
         self.mt2MHz_info = "Conversion mT to MHz"
-        self.hbar = self.h/(2*np.pi)
+        self.hbar = self.h / (2 * np.pi)
         self.hbar_info = "Planks constant in angular frequencies"
         self.g_n = 5.5856946803
         self.g_n_info = "Nuclear g-factor for a proton"
@@ -119,11 +122,13 @@ class physical_constants:
         print("mT2T:    Constant mT to T")
         print("GHz2Hz:  Constant GHz to Hz")
         print("Hz2GHz:  Constant Hz to GHz")
-        print("\nInformation about a specific variable can be obtained  " +
-              " by asking for a member variable with an appended _info " +
-              "(e.g. kb_info). This variable " +
-              "is then a string, containing the information " +
-              "about the constant.")
+        print(
+            "\nInformation about a specific variable can be obtained  "
+            + " by asking for a member variable with an appended _info "
+            + "(e.g. kb_info). This variable "
+            + "is then a string, containing the information "
+            + "about the constant."
+        )
         return
 
 
@@ -189,20 +194,20 @@ def pseudo_field_modulation(modamp, field, spectrum):
     """
     modamp = max(0.001, modamp)
     # Set up x-axis in inverse field domain
-    fieldstep = (field[1]-field[0])
+    fieldstep = field[1] - field[0]
     fourier_x = fftpack.fftfreq(len(spectrum), fieldstep)
     # Modulation amplitude in conjugated Fourier space
-    level = modamp*np.pi
+    level = modamp * np.pi
     datafft = fftpack.fft(spectrum)
-    bessel_fft = special.jv(1, fourier_x*level)
-    pseudomod = 1j*bessel_fft*datafft
+    bessel_fft = special.jv(1, fourier_x * level)
+    pseudomod = 1j * bessel_fft * datafft
     # Inverse Fourier transform of the convoluted signal
     spcm = np.real(fftpack.ifft(pseudomod))
     return spcm
 
 
 def degree_in_rad(angle):
-    angle = (np.pi*angle)/180
+    angle = (np.pi * angle) / 180
     return angle
 
 
@@ -261,7 +266,7 @@ def GHz2mT(freq, giso=None):
         giso = cons.g_free
     if not isinstance(freq, float) or not isinstance(freq, int):
         freq = np.asarray(freq)
-    field = (cons.h*freq*1e12)/(giso*cons.beta)
+    field = (cons.h * freq * 1e12) / (giso * cons.beta)
     return field
 
 
@@ -325,7 +330,7 @@ def mT2GHz(field, giso=None):
         giso = cons.g_free
     if not isinstance(field, float) or not isinstance(field, int):
         field = np.asarray(field)
-    mwFreq = ((giso*field*1e-12*cons.beta)/cons.h)
+    mwFreq = (giso * field * 1e-12 * cons.beta) / cons.h
     return mwFreq
 
 
@@ -430,9 +435,9 @@ def phase_offset(gamma, spc, unit="rad"):
     >>> spcp = tool.pseudo_field_modulation(gamma, spc, 'degree')
     """
     if unit == "degree":
-        gamma = (np.pi*gamma)/180
+        gamma = (np.pi * gamma) / 180
     spc_im = signal.hilbert(spc)
-    spc_im = np.exp(-1j*gamma)*spc_im
+    spc_im = np.exp(-1j * gamma) * spc_im
     return np.real(spc_im)
 
 
@@ -474,12 +479,12 @@ def convolution_L(width, field, spectrum):
     """
 
     npoints = len(spectrum)
-    mid = npoints//2
+    mid = npoints // 2
     Bcenter = field[mid]
     std = width
-    res = field-Bcenter
-    L = ((0.5*std)/np.pi)/(res**2+(0.5*std)**2)
-    spectrum_conv = np.convolve(spectrum, L, mode='same')
+    res = field - Bcenter
+    L = ((0.5 * std) / np.pi) / (res ** 2 + (0.5 * std) ** 2)
+    spectrum_conv = np.convolve(spectrum, L, mode="same")
     spectrum = spectrum_conv
     return spectrum_conv
 
@@ -522,10 +527,10 @@ def convolution_G(width, field, spectrum):
     >>> spcc = tool.convolution_G(FWHM, field, spc)
     """
     npoints = len(spectrum)
-    mid = npoints//2
-    std = (width/(2*np.sqrt(2*np.log(2))))
-    G = np.exp(-0.5*(field-field[mid])**2/(std**2))
-    spectrum_conv = np.convolve(spectrum, G, mode='same')
+    mid = npoints // 2
+    std = width / (2 * np.sqrt(2 * np.log(2)))
+    G = np.exp(-0.5 * (field - field[mid]) ** 2 / (std ** 2))
+    spectrum_conv = np.convolve(spectrum, G, mode="same")
     spectrum = spectrum_conv
     return spectrum_conv
 
@@ -567,9 +572,9 @@ def normalize2area(spectrum, Harmonic=1):
 
     if Harmonic == 1:
         pass
-        spectrum = spectrum/np.sum(np.absolute(np.cumsum(spectrum)))
+        spectrum = spectrum / np.sum(np.absolute(np.cumsum(spectrum)))
     else:
-        spectrum = spectrum/np.sum(np.absolute(spectrum))
+        spectrum = spectrum / np.sum(np.absolute(spectrum))
     return spectrum
 
 
@@ -639,22 +644,22 @@ def generalized_Pascal(n, I):
     if n == 0:
         return [1.0]
 
-    s0 = int(2*I*n+1)
+    s0 = int(2 * I * n + 1)
     A = np.zeros((n, s0))
-    A[0, 0:int(2*I+1)] = 1
-    I2 = 2*I
+    A[0, 0 : int(2 * I + 1)] = 1
+    I2 = 2 * I
     for i in range(1, n):
         for j in range(0, s0):
-            if j+I2 >= s0:
-                ub = int(s0-1)
+            if j + I2 >= s0:
+                ub = int(s0 - 1)
             else:
-                ub = int(j+I2)
-            if j-I2 < 0:
+                ub = int(j + I2)
+            if j - I2 < 0:
                 lb = 0
             else:
-                lb = int(j-I2)
-            A[i, j] = np.sum(A[i-1, lb:ub-int(2*I)+1])
-    return A[n-1, :]
+                lb = int(j - I2)
+            A[i, j] = np.sum(A[i - 1, lb : ub - int(2 * I) + 1])
+    return A[n - 1, :]
 
 
 def gyro2gn(gyro):
@@ -698,7 +703,7 @@ def gyro2gn(gyro):
     5.585694680337019
     """
     con = physical_constants()
-    gn = (1e6*gyro*con.h)/con.beta_n
+    gn = (1e6 * gyro * con.h) / con.beta_n
     return gn
 
 
@@ -788,7 +793,7 @@ def add_noise(spc, SNR):
     """
     maxSNR = np.max(np.abs(spc))
     lenghtspc = len(spc)
-    noisvec = np.random.normal(0, maxSNR/SNR, lenghtspc)
+    noisvec = np.random.normal(0, maxSNR / SNR, lenghtspc)
     spc += noisvec
     return spc
 
@@ -813,14 +818,14 @@ def Eulermatrix(phi, theta, psi=0):
     sinpsi = np.sin(psi)
     eulermatrix = np.zeros((3, 3))
     # Set up the full 3-dimensional Euler matrix
-    eulermatrix[0][0] = cosphi*costhet*cospsi - sinphi*sinpsi
-    eulermatrix[0][1] = -cosphi*costhet*sinpsi - sinphi*cospsi
-    eulermatrix[0][2] = cosphi*sinthet
-    eulermatrix[1][0] = sinphi*costhet*cospsi + cosphi*sinpsi
-    eulermatrix[1][1] = - sinphi*costhet*sinpsi + cosphi*cospsi
-    eulermatrix[1][2] = sinphi*sinthet
-    eulermatrix[2][0] = -sinthet*cospsi
-    eulermatrix[2][1] = sinthet*sinpsi
+    eulermatrix[0][0] = cosphi * costhet * cospsi - sinphi * sinpsi
+    eulermatrix[0][1] = -cosphi * costhet * sinpsi - sinphi * cospsi
+    eulermatrix[0][2] = cosphi * sinthet
+    eulermatrix[1][0] = sinphi * costhet * cospsi + cosphi * sinpsi
+    eulermatrix[1][1] = -sinphi * costhet * sinpsi + cosphi * cospsi
+    eulermatrix[1][2] = sinphi * sinthet
+    eulermatrix[2][0] = -sinthet * cospsi
+    eulermatrix[2][1] = sinthet * sinpsi
     eulermatrix[2][2] = costhet
     return eulermatrix
 
@@ -840,14 +845,15 @@ def tensor_rotation(tensor, eulermatrix):
     """
     # Final two sided matrix multiplication (similarity transformation)
     eulermatrix_transpose = eulermatrix.T
-    rotatedTensor = eulermatrix_transpose@(tensor@eulermatrix)
+    rotatedTensor = eulermatrix_transpose @ (tensor @ eulermatrix)
 
     return rotatedTensor
 
 
-#************************************************************************
+# ************************************************************************
 # Plot Results
-#************************************************************************
+# ************************************************************************
+
 
 def plot(field, spectrum, font=11):
     """
@@ -905,12 +911,12 @@ def plot(field, spectrum, font=11):
     """
 
     try:
-        spectrum = spectrum/max(abs(spectrum))
+        spectrum = spectrum / max(abs(spectrum))
         fig = plt.figure()
         ax = fig.add_subplot(111)
         ax.margins(x=0, y=0.08)
-        ax.set_xlabel(r'$magnetic\ field\, / \,  \rm{mT}$', fontsize=font)
-        ax.set_ylabel(r'$Normalised\ Intensity$', fontsize=font)
+        ax.set_xlabel(r"$magnetic\ field\, / \,  \rm{mT}$", fontsize=font)
+        ax.set_ylabel(r"$Normalised\ Intensity$", fontsize=font)
         ax.plot(field, spectrum)
         plt.show()
     except:

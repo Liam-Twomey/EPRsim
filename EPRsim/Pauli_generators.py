@@ -55,32 +55,43 @@ def Pauli_matrices(dim):
     [ 0.+0.j  0.+0.j  0.+0.j]
     [ 0.+0.j  0.+0.j -1.+0.j]]
     """
-    d = np.zeros(int(dim-1))
+    d = np.zeros(int(dim - 1))
     j_x = np.zeros((dim, dim))
-    for i in range(0, dim-1):
-        d[i] = np.sqrt((i+1)*(dim-1-(i)))
-    j_x = np.zeros((dim, dim), dtype=np.complex, order='C')
-    j_y = np.zeros((dim, dim), dtype=np.complex, order='C')
-    j_z = np.zeros((dim, dim), dtype=np.complex, order='C')
+    for i in range(0, dim - 1):
+        d[i] = np.sqrt((i + 1) * (dim - 1 - (i)))
+    j_x = np.zeros((dim, dim), dtype=np.complex, order="C")
+    j_y = np.zeros((dim, dim), dtype=np.complex, order="C")
+    j_z = np.zeros((dim, dim), dtype=np.complex, order="C")
     for i in range(0, dim):
-        j_z[i, i] = dim/2.0-i-0.5
-        if i+1 <= dim-1:
-            j_x[i, i+1] = 0.5*d[i]
-            j_y[i, i+1] = 0.5*1j*d[i]
-    j_x = j_x+np.transpose(np.conjugate(j_x))
-    j_y = j_y+np.transpose(np.conjugate(j_y))
+        j_z[i, i] = dim / 2.0 - i - 0.5
+        if i + 1 <= dim - 1:
+            j_x[i, i + 1] = 0.5 * d[i]
+            j_y[i, i + 1] = 0.5 * 1j * d[i]
+    j_x = j_x + np.transpose(np.conjugate(j_x))
+    j_y = j_y + np.transpose(np.conjugate(j_y))
     return j_x, j_y, j_z
 
 
 def create_Pauli_matrices(Par, ZE=False):
-    S_p = np.zeros((Par.coupled_e_dim, 3, Par.e_dimension*Par.dim_nuc_tot,
-                   Par.e_dimension*Par.dim_nuc_tot), dtype=np.complex64,
-                   order='C')
-    Par.S_tot = np.zeros((3, Par.e_dimension, Par.e_dimension),
-                         dtype=np.complex64, order='C')
+    S_p = np.zeros(
+        (
+            Par.coupled_e_dim,
+            3,
+            Par.e_dimension * Par.dim_nuc_tot,
+            Par.e_dimension * Par.dim_nuc_tot,
+        ),
+        dtype=np.complex64,
+        order="C",
+    )
+    Par.S_tot = np.zeros(
+        (3, Par.e_dimension, Par.e_dimension), dtype=np.complex64, order="C"
+    )
     Par.S_tot_without_nuc = 0
-    Par.S_pure_ele = np.zeros((Par.coupled_e_dim, 3, Par.e_dimension,
-                               Par.e_dimension), dtype=np.complex64, order='C')
+    Par.S_pure_ele = np.zeros(
+        (Par.coupled_e_dim, 3, Par.e_dimension, Par.e_dimension),
+        dtype=np.complex64,
+        order="C",
+    )
     for i in range(0, Par.coupled_e_dim):
         if Par.coupled_e_dim == 1:
             i_x_tmp, i_y_tmp, i_z_tmp = Pauli_matrices(Par.e_dimension)
@@ -93,10 +104,10 @@ def create_Pauli_matrices(Par, ZE=False):
             Par.S_pure_ele[0, 2] = i_z_tmp
             Par.S_tot = S_p[0, :, :]
         else:
-            dim = int(Par.S[i]*2+1)
+            dim = int(Par.S[i] * 2 + 1)
             i_x_tmp, i_y_tmp, i_z_tmp = Pauli_matrices(dim)
             for k in range(0, Par.coupled_e_dim):
-                dim = int(Par.S[k]*2+1)
+                dim = int(Par.S[k] * 2 + 1)
                 if k != i:
                     if k < i:
                         i_x_tmp = np.kron(np.eye(dim), i_x_tmp)
@@ -122,68 +133,72 @@ def create_Pauli_matrices(Par, ZE=False):
 # *****************************************************************************
 def create_Pauli_matrices_Nuc(Par, ZE=False):
     # reate Pauli matrices
-    dim_tot = Par.e_dimension*Par.dim_nuc_tot
-    i_p = np.zeros((Par.number_of_nuclei,3,dim_tot,dim_tot),
-                   dtype=np.complex64,order='C')
+    dim_tot = Par.e_dimension * Par.dim_nuc_tot
+    i_p = np.zeros(
+        (Par.number_of_nuclei, 3, dim_tot, dim_tot), dtype=np.complex64, order="C"
+    )
 
-    dim_electron = Par.e_dimension #electron spin dimension
-    for i in range(0,Par.number_of_nuclei):
-        i_x_tmp,i_y_tmp,i_z_tmp = Pauli_matrices(Par.dim_nuc[i])
+    dim_electron = Par.e_dimension  # electron spin dimension
+    for i in range(0, Par.number_of_nuclei):
+        i_x_tmp, i_y_tmp, i_z_tmp = Pauli_matrices(Par.dim_nuc[i])
         if Par.number_of_nuclei == 1:
-            i_p[i,0] = np.kron(np.eye(dim_electron),i_x_tmp)
-            i_p[i,1] = np.kron(np.eye(dim_electron),i_y_tmp)
-            i_p[i,2] = np.kron(np.eye(dim_electron),i_z_tmp)
+            i_p[i, 0] = np.kron(np.eye(dim_electron), i_x_tmp)
+            i_p[i, 1] = np.kron(np.eye(dim_electron), i_y_tmp)
+            i_p[i, 2] = np.kron(np.eye(dim_electron), i_z_tmp)
         else:
-            for k in range(0,Par.number_of_nuclei):
-                dim =  Par.dim_nuc[k]
+            for k in range(0, Par.number_of_nuclei):
+                dim = Par.dim_nuc[k]
                 if k != i:
                     if k < i:
-                        i_x_tmp = np.kron(np.eye(dim),i_x_tmp)
-                        i_y_tmp = np.kron(np.eye(dim),i_y_tmp)
-                        i_z_tmp = np.kron(np.eye(dim),i_z_tmp)
+                        i_x_tmp = np.kron(np.eye(dim), i_x_tmp)
+                        i_y_tmp = np.kron(np.eye(dim), i_y_tmp)
+                        i_z_tmp = np.kron(np.eye(dim), i_z_tmp)
                     else:
-                        i_x_tmp = np.kron(i_x_tmp,np.eye(dim))
-                        i_y_tmp = np.kron(i_y_tmp,np.eye(dim))
-                        i_z_tmp = np.kron(i_z_tmp,np.eye(dim))
-            i_p[i,0] = np.kron(np.eye(dim_electron),i_x_tmp)
-            i_p[i,1] = np.kron(np.eye(dim_electron),i_y_tmp)
-            i_p[i,2] = np.kron(np.eye(dim_electron),i_z_tmp)
+                        i_x_tmp = np.kron(i_x_tmp, np.eye(dim))
+                        i_y_tmp = np.kron(i_y_tmp, np.eye(dim))
+                        i_z_tmp = np.kron(i_z_tmp, np.eye(dim))
+            i_p[i, 0] = np.kron(np.eye(dim_electron), i_x_tmp)
+            i_p[i, 1] = np.kron(np.eye(dim_electron), i_y_tmp)
+            i_p[i, 2] = np.kron(np.eye(dim_electron), i_z_tmp)
     return i_p
 
 
-def create_seperate_Pauli_matrices_Nuc(Par, ZE = False):
-    #Create Pauli matrices
-    dim_tot = Par.e_dimension*Par.dim_nuc_tot
-    i_p = np.zeros((Par.coupled_e_dim,Par.number_of_nuclei,3,dim_tot,dim_tot),
-                   dtype=np.complex64,order='C')
+def create_seperate_Pauli_matrices_Nuc(Par, ZE=False):
+    # Create Pauli matrices
+    dim_tot = Par.e_dimension * Par.dim_nuc_tot
+    i_p = np.zeros(
+        (Par.coupled_e_dim, Par.number_of_nuclei, 3, dim_tot, dim_tot),
+        dtype=np.complex64,
+        order="C",
+    )
 
-    dim_electron = Par.e_dimension #electron spin dimension
-    for s in range(0,Par.coupled_e_dim):
-        for i in range(0,Par.number_of_nuclei):
-            dim_tmp = Par.dim_nuc[s,i]
+    dim_electron = Par.e_dimension  # electron spin dimension
+    for s in range(0, Par.coupled_e_dim):
+        for i in range(0, Par.number_of_nuclei):
+            dim_tmp = Par.dim_nuc[s, i]
             if dim_tmp > 1:
-                i_x_tmp,i_y_tmp,i_z_tmp = Pauli_matrices(Par.dim_nuc[s,i])
+                i_x_tmp, i_y_tmp, i_z_tmp = Pauli_matrices(Par.dim_nuc[s, i])
                 if Par.number_of_nuclei == 1:
-                    i_p[i,0] = np.kron(np.eye(dim_electron),i_x_tmp)
-                    i_p[i,1] = np.kron(np.eye(dim_electron),i_y_tmp)
-                    i_p[i,2] = np.kron(np.eye(dim_electron),i_z_tmp)
+                    i_p[i, 0] = np.kron(np.eye(dim_electron), i_x_tmp)
+                    i_p[i, 1] = np.kron(np.eye(dim_electron), i_y_tmp)
+                    i_p[i, 2] = np.kron(np.eye(dim_electron), i_z_tmp)
                 else:
-                    for k in range(0,Par.number_of_nuclei):
-                        dim =  Par.dim_nuc[s,k]
+                    for k in range(0, Par.number_of_nuclei):
+                        dim = Par.dim_nuc[s, k]
                         if k != i:
                             if k < i:
-                                i_x_tmp = np.kron(np.eye(dim),i_x_tmp)
-                                i_y_tmp = np.kron(np.eye(dim),i_y_tmp)
-                                i_z_tmp = np.kron(np.eye(dim),i_z_tmp)
+                                i_x_tmp = np.kron(np.eye(dim), i_x_tmp)
+                                i_y_tmp = np.kron(np.eye(dim), i_y_tmp)
+                                i_z_tmp = np.kron(np.eye(dim), i_z_tmp)
                             else:
-                                i_x_tmp = np.kron(i_x_tmp,np.eye(dim))
-                                i_y_tmp = np.kron(i_y_tmp,np.eye(dim))
-                                i_z_tmp = np.kron(i_z_tmp,np.eye(dim))
-                    if len(i_z_tmp[:,0]) != Par.dim_nuc_tot:
-                        dimfac = Par.dim_nuc_tot//len(i_z_tmp[:,0])
+                                i_x_tmp = np.kron(i_x_tmp, np.eye(dim))
+                                i_y_tmp = np.kron(i_y_tmp, np.eye(dim))
+                                i_z_tmp = np.kron(i_z_tmp, np.eye(dim))
+                    if len(i_z_tmp[:, 0]) != Par.dim_nuc_tot:
+                        dimfac = Par.dim_nuc_tot // len(i_z_tmp[:, 0])
                     else:
                         dimfac = 1
-                    i_p[s,i,0] = np.kron(np.eye(dim_electron*dimfac),i_x_tmp)
-                    i_p[s,i,1] = np.kron(np.eye(dim_electron*dimfac),i_y_tmp)
-                    i_p[s,i,2] = np.kron(np.eye(dim_electron*dimfac),i_z_tmp)
+                    i_p[s, i, 0] = np.kron(np.eye(dim_electron * dimfac), i_x_tmp)
+                    i_p[s, i, 1] = np.kron(np.eye(dim_electron * dimfac), i_y_tmp)
+                    i_p[s, i, 2] = np.kron(np.eye(dim_electron * dimfac), i_z_tmp)
     return i_p

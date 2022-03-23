@@ -12,8 +12,9 @@ import EPRsim.Tools as tool
 
 con = tool.physical_constants()
 
+
 def validate_spin_system(Param):
-    """ get_spin_system(Sys)
+    """get_spin_system(Sys)
 
     in:  Sys             (one class with definitions of spin system parameters)
 
@@ -31,7 +32,7 @@ def validate_spin_system(Param):
     """
     Param.iso = True
     if isinstance(Param.g, int) or isinstance(Param.g, float):
-        Param.g = np.ones(3)*Param.g
+        Param.g = np.ones(3) * Param.g
     elif len(Param.g) == 3:
         Param.g = Param.g
     else:
@@ -39,11 +40,11 @@ def validate_spin_system(Param):
     Param.g = np.asarray(Param.g)
     if Param.A is not None:
         get_hyperfines_from_Sys(Param)
-        Param.A = Param.A*1e6
-        Param._equiv = np.ones(Param._nA)*Param.n
-        Param._nofA = int(np.sum(np.ones(Param._nA)*Param.n))
+        Param.A = Param.A * 1e6
+        Param._equiv = np.ones(Param._nA) * Param.n
+        Param._nofA = int(np.sum(np.ones(Param._nA) * Param.n))
     else:
-        Param.A = 1.0*np.zeros(3)
+        Param.A = 1.0 * np.zeros(3)
         Param._nA = 1
         Param._equiv = np.ones(Param._nA)
     if isinstance(Param.lw, float) or isinstance(Param.lw, int):
@@ -53,7 +54,7 @@ def validate_spin_system(Param):
     if Param.lw[1] < 0.01:
         Param.lw[1] = 0.01
     # Swap Gaussian and Lorentzian
-    Param.lw = [Param.lw[1],  Param.lw[0]]
+    Param.lw = [Param.lw[1], Param.lw[0]]
     if Param.tcorr is not None or Param.logtcorr is not None:
         Param.iso = False
     if Param.logtcorr is not None:
@@ -71,12 +72,12 @@ def _redefine_tcorr(Param):
     elif len(Param.tcorr) == 1:
         Param._tcorriso = Param.tcorr[0]
     elif len(Param.tcorr) == 2:
-        Param._tcorriso = (1/3)*(Param.tcorr[0]*2+Param.tcorr[1])
+        Param._tcorriso = (1 / 3) * (Param.tcorr[0] * 2 + Param.tcorr[1])
     return
 
 
 def get_hyperfines_from_Sys(Param):
-    """ get_hyperfines_from_Sys(Sys)
+    """get_hyperfines_from_Sys(Sys)
 
     in:  Sys             (one class with definitions of spin system parameters)
 
@@ -91,15 +92,15 @@ def get_hyperfines_from_Sys(Param):
         Param._nA = 0
         return
     try:
-        dim = len(Param.Nucs.split(','))
+        dim = len(Param.Nucs.split(","))
         Param._nA = int(dim)
     except:
         Param._nA = 1
     if Param._nA == 1:
         if isinstance(Param.A, int) or isinstance(Param.A, float):
-            Param.A = np.ones(3)*Param.A
+            Param.A = np.ones(3) * Param.A
         elif len(Param.A) == 1:
-            Param.A = np.ones(3)*Param.A
+            Param.A = np.ones(3) * Param.A
         elif len(Param.A) == 3:
             Param.A = Param.A
         else:
@@ -107,9 +108,9 @@ def get_hyperfines_from_Sys(Param):
     else:
         for i in range(0, Param._nA):
             if isinstance(Param.A[i], int) or isinstance(Param.A[i], float):
-                Param.A[i] = np.ones(3)*Param.A[i]
+                Param.A[i] = np.ones(3) * Param.A[i]
             elif len(Param.A[i]) == 1:
-                Param.A[i] = np.ones(3)*Param.A[i]
+                Param.A[i] = np.ones(3) * Param.A[i]
             elif len(Param.A[i]) == 3:
                 Param.A[i] = Param.A[i]
             else:
@@ -118,6 +119,7 @@ def get_hyperfines_from_Sys(Param):
                 Param.A[i] = A
     Param.A = np.asarray(Param.A)
     return
+
 
 def get_D_from_Sys(Param):
     if Param.D is None:

@@ -17,6 +17,7 @@ import EPRsim.Nucdic as Nucdic
 import EPRsim.Tools as tool
 import EPRsim.FastMotion as FM
 import EPRsim.SolidState as SO
+
 # Load physical constans
 con = tool.physical_constants()
 
@@ -192,7 +193,7 @@ def simulate(Parameters):
         Param = Params[i]
         for k in range(0, len(Param.Sim_objects)):
             SimPar = Param.Sim_objects[k]
-            if SimPar.motion == 'fast':
+            if SimPar.motion == "fast":
                 Bfield, Int, warning = FM.fast_motion_kernel(Par[i], SimPar)
             else:
                 Bfield, Int, warning = SO.solid_state_kernel(Par[i], SimPar)
@@ -201,18 +202,18 @@ def simulate(Parameters):
                 break
             if warning == 2:
                 print("\nWARNING: Electron spin was reduced to S = 1/2!")
-            spectrum_tmp += SimPar._w[k]*Int
+            spectrum_tmp += SimPar._w[k] * Int
         weight = get_weighting_factor(Par[i])
         spectrum_tmp = tool.normalize2area(spectrum_tmp, Par[i].Harmonic)
-        spectrum += weight*spectrum_tmp
+        spectrum += weight * spectrum_tmp
         spectrum = tool.modulation_amplitude(Par[i].ModAmp, Bfield, spectrum)
         if Par[i].SNR is not None:
             spectrum = tool.add_noise(spectrum, Par[i].SNR)
         if Par[i].mwPhase != 0:
             spectrum = tool.phase_offset(Par[i].mwPhase, spectrum)
     if Par[0].verbosity:
-        eltime = time.time()-st
-        print("\nTotal time: "+str(round(eltime, 6))+" s\n")
+        eltime = time.time() - st
+        print("\nTotal time: " + str(round(eltime, 6)) + " s\n")
 
     return Bfield, spectrum, warning
 
@@ -278,7 +279,7 @@ def get_isotope_combinations(Param):
     if Param.Nucs is None:
         return
     Nucs = Param.Nucs
-    Nuc = Param.Nucs.split(',')
+    Nuc = Param.Nucs.split(",")
     try:
         hyperfine_dim = len(Nuc)
     except:
@@ -316,10 +317,14 @@ def check_eq_in_fast_motion(Param, Force=False):
         return
     if Param.n is None:
         return
-    if (Param.tcorr is not None or Param.logtcorr is not None or Force or
-       Param.motion == 'solid'):
+    if (
+        Param.tcorr is not None
+        or Param.logtcorr is not None
+        or Force
+        or Param.motion == "solid"
+    ):
         Nucs = Param.Nucs
-        Nuc = Nucs.split(',')
+        Nuc = Nucs.split(",")
         if isinstance(Param.n, int):
             if Param.n == 1:
                 Param.n = None
@@ -334,9 +339,9 @@ def check_eq_in_fast_motion(Param, Force=False):
                 if Param.n[0] == 1:
                     delattr(Param, "n")
                 Param.A = [Param.A]
-        new_A_tensors, expanded_Nucsvec = new_Nucsvec_and_tensors(eqiuvec, Nuc,
-                                                                  Param.A,
-                                                                  neqvec)
+        new_A_tensors, expanded_Nucsvec = new_Nucsvec_and_tensors(
+            eqiuvec, Nuc, Param.A, neqvec
+        )
 
         Param._m = Param.n
         Param.n = 1
@@ -363,7 +368,7 @@ def new_Nucsvec_and_tensors(eqiuvec, Nuc, A, neqvec):
     """
     expanded__Nucsvec = ""
     for i in range(0, neqvec):
-        expanded__Nucsvec += eqiuvec[i]*(Nuc[i]+",")
+        expanded__Nucsvec += eqiuvec[i] * (Nuc[i] + ",")
         A_tmp = np.tile(A[i], (eqiuvec[i], 1))
         if i == 0:
             new_A_tensors = A_tmp
@@ -473,7 +478,7 @@ def create_nucvec(Ind, NucIso):
             if k == 0:
                 strings_tmp += str(strings[k][i])
             else:
-                strings_tmp += ","+str(strings[k][i])
+                strings_tmp += "," + str(strings[k][i])
             if max(Ind[k][:]) == 0:
                 pass
             else:
@@ -519,13 +524,13 @@ def get_indexvector_isotopes(Nuc, hyperfine_dim):
     for i in range(0, hyperfine_dim):
         Iso = Nucdic.isotopes_catalogue(Nuc[i])
         NucIsotopes.append(Iso)
-        Indexvector = np.linspace(0, len(Iso)-1, len(Iso), dtype=np.int32)
+        Indexvector = np.linspace(0, len(Iso) - 1, len(Iso), dtype=np.int32)
         Indexvectors.append(Indexvector)
     return Indexvectors, NucIsotopes
 
 
 def remove_sub_threshold(Param, Sys__Nucsvec, w):
-    """ remove_sub_threshold(Sys__Nucsvec,w)
+    """remove_sub_threshold(Sys__Nucsvec,w)
 
     in:  Sys__Nucsvec          (vector with all isotope combinations)
          w                    (vector with the corresponding weighting factors)
@@ -535,7 +540,7 @@ def remove_sub_threshold(Param, Sys__Nucsvec, w):
     defined threshold. The threshold is defined as global variable at the top
     of this file and is called abund_threshold.
     """
-    s = len(Sys__Nucsvec)-1
+    s = len(Sys__Nucsvec) - 1
     for s in range(s, -1, -1):
         if w[s] < Param.abund_threshold:
             del Sys__Nucsvec[s]
@@ -546,9 +551,9 @@ def remove_sub_threshold(Param, Sys__Nucsvec, w):
 def read_single_isotope_comb(Param, _Nucsvec):
     if Param._nofA is None:
         return
-    if Param._nofA  > 1:
+    if Param._nofA > 1:
         try:
-            Nuc = _Nucsvec.split(',')
+            Nuc = _Nucsvec.split(",")
         except:
             Nuc = [_Nucsvec]
     else:
@@ -562,11 +567,11 @@ def read_single_isotope_comb(Param, _Nucsvec):
             continue
         Nucinfo = Nucdic.nuclear_properties(Nuc[i])
         N = Nucinfo[1]
-        gyro = 1*Nucinfo[0]
+        gyro = 1 * Nucinfo[0]
         Param._g_n.append(tool.gyro2gn(gyro))
-        Ispin = (N-1)/2
+        Ispin = (N - 1) / 2
         Param._I.append(Ispin)
-        Param._Iequiv.append(Ispin*Param._equiv[i])
+        Param._Iequiv.append(Ispin * Param._equiv[i])
         Param._mI.append(np.linspace(-Ispin, Ispin, N))
     return
 
@@ -606,7 +611,7 @@ def remove_permutations(Par, _Nucsvec, w, Force=False):
     as well as the new weighting factors are produced (call by reference).
     """
     if (Force or Par.tcorr is not None) and Par._m is not None:
-        s = len(_Nucsvec)-1
+        s = len(_Nucsvec) - 1
         if isinstance(Par._m, int):
             Par._m = [Par._m]
         for s in range(s, -1, -1):
@@ -618,8 +623,8 @@ def remove_permutations(Par, _Nucsvec, w, Force=False):
                 str2 = []
                 issame = True
                 for t in range(0, len(Par._m)):
-                    str1.append(str_tmp1[q:q+Par._m[t]])
-                    str2.append(str_tmp2[q:q+Par._m[t]])
+                    str1.append(str_tmp1[q : q + Par._m[t]])
+                    str2.append(str_tmp2[q : q + Par._m[t]])
                     if sorted(str1[t]) != sorted(str2[t]):
                         issame = False
                     q += Par._m[t]
@@ -656,10 +661,13 @@ def get_weighting_factor(Sys):
 
 def warningflag(n=0):
     if n == 0:
-        w0str = ("\nTreating equivalent nuclei for isotopes mixtures" +
-                 " might be very slow!\n")
+        w0str = (
+            "\nTreating equivalent nuclei for isotopes mixtures"
+            + " might be very slow!\n"
+        )
         print(w0str)
     return
+
 
 # *****************************************************************************
 # PUBLIC CLASSES
@@ -855,6 +863,7 @@ class Parameters(object):
     verbosity: True
     weight: 1
     """
+
     def __init__(self, **kwargs):
         self.Range = [330, 360]
         self.mwFreq = 9.6
@@ -862,7 +871,7 @@ class Parameters(object):
         self.g = con.g_free
         self.A = None
         self.Nucs = None
-        self.motion = 'solid'
+        self.motion = "solid"
         self.Harmonic = 1
         self.mwPhase = 0
         self.ModAmp = 0
@@ -943,6 +952,7 @@ class Validate_Parameters:
     For this the member function getInfo() can be used. All other member
     functions are private functions.
     """
+
     def __init__(self, Parameters):
         self.Sim_objects = []
         Param = copy(Parameters)
@@ -974,11 +984,11 @@ class Validate_Parameters:
         print("Number of explicitly treated isotope combinations: " + str(num))
         for i in range(0, num):
             obj = self.Sim_objects[i]
-            print("\nNumber: " + str(i+1))
+            print("\nNumber: " + str(i + 1))
             print("Treated nuclear spins: " + str(obj._Nucsvec))
             print("Nuclear spin quantum number:" + str(obj._I))
             print("Equivalent nuclear spins: " + str(obj._equiv))
-            print("Isotope mixture weight: "+str(obj._w[i]))
+            print("Isotope mixture weight: " + str(obj._w[i]))
             print("\n")
         print("\n")
 
