@@ -17,7 +17,7 @@ if run_all:
     P.lw = [0.2, 0.2]
     P.motion = "fast"
     B0, spc, flag = sim.simulate(P)
-    tool.plot(B0, spc)
+    tool.plot(B0, spc, fignum=1)
 
 
 # Simple example for the simulation of an anisotropic nitroxide spectrum (only 14N) in the fast-motion regime.
@@ -34,7 +34,7 @@ if run_all:
         Range=Ra, g=g, A=A, Nucs=Nucs, mwFreq=freq, lw=lw, tcorr=tcorr, motion=motion
     )
     B0, spc, flag = sim.simulate(Param)
-    tool.plot(B0, spc)
+    tool.plot(B0, spc, fignum=2)
 
 # Simple example for the simulation of an anisotropic nitroxide spectrum (only 14N) in the solid-state regime.
 if run_all:
@@ -47,7 +47,7 @@ if run_all:
     P.lw = [0.5, 0.2]
     P.motion = "solid"
     B0, spc, flag = sim.simulate(P)
-    tool.plot(B0, spc)
+    tool.plot(B0, spc, fignum=3)
 
 # Simple example for the simulation of an anisotropic nitroxide spectrum (only 14N) in the solid-state regime, coupled to an additional hydrogen nucleus.
 if run_all:
@@ -60,7 +60,7 @@ if run_all:
     P.lw = [0.5, 0.2]
     P.motion = "solid"
     B0, spc, flag = sim.simulate(P)
-    tool.plot(B0, spc)
+    tool.plot(B0, spc, fignum=4)
 
 
 # Simple example for the simulation of two radical species.
@@ -81,7 +81,7 @@ if run_all:
     P2.motion = "solid"
     P2.weight = 0.1
     B0, spc, flag = sim.simulate([P, P2])
-    tool.plot(B0, spc)
+    tool.plot(B0, spc, fignum=5)
 
 # spin-polarized triplet spectrum
 if run_all:
@@ -95,4 +95,4 @@ if run_all:
     P.Population = [0.2, 0.3, 0.4]
     P.Harmonic = 0
     B0, spc, flag = sim.simulate(P)
-    tool.plot(B0, spc)
+    tool.plot(B0, spc, fignum=6)

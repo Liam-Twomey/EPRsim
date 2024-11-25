@@ -851,7 +851,7 @@ def tensor_rotation(tensor, eulermatrix):
 # ************************************************************************
 
 
-def plot(field, spectrum, font=11):
+def plot(field, spectrum, font=11, fignum=1):
     """
     Plots cw-EPR data
 
@@ -908,7 +908,7 @@ def plot(field, spectrum, font=11):
 
     try:
         spectrum = spectrum / max(abs(spectrum))
-        fig = plt.figure()
+        fig = plt.figure(fignum)
         ax = fig.add_subplot(111)
         ax.margins(x=0, y=0.08)
         ax.set_xlabel(r"$magnetic\ field\, / \,  \rm{mT}$", fontsize=font)
