@@ -219,10 +219,10 @@ def preparation(Par, intensity):
     w[Par._ntheta - 1] = 0.5
     w2[Par._nphi - 1] = 0.5
     w2[0] = 0.5
-    # Weightig factors for the border of octant and sin(theta) weighting
+    # Weighting factors for the border of octant and sin(theta) weighting
     for k in range(0, Par._ntheta):
         theta = (math.pi / 2) * ((k) / (Par._ntheta - 1))
-        intensity[:, k, :] = intensity[:, k, :] * np.asscalar(w[k]) * math.sin(theta)
+        intensity[:, k, :] = intensity[:, k, :] * float(w[k]) * math.sin(theta)
     for k in range(0, Par._nphi):
         intensity[:, :, k] = intensity[:, :, k] * w2[k]
     return field, signal, w, w2, intensity

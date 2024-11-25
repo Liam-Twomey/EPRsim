@@ -155,7 +155,7 @@ def define_nKnots_pattern(Par):
     sinvector[0] = 2
     for i in range(1, Par.nKnots):
         theta = (math.pi / 2) * ((i) / (Par.nKnots - 1))
-        sinvector[i] = np.int(round(math.sin(theta) * Par.phinKnots + 0.4999))
+        sinvector[i] = int(round(math.sin(theta) * Par.phinKnots + 0.4999))
         if sinvector[i] < 4:
             sinvector[i] = 4
         if sinvector[i] > Par.phinKnots:
@@ -369,7 +369,7 @@ def zero_field_diag(Par, Knots_theta_vec, phiKnots):
                                     )
                                 Ham_tmp = create_Bilinear_Hamiltonian(*ags)
                                 Ham += Ham_tmp
-                    w, v = LAS.eigh(Ham, turbo=True, check_finite=True)
+                    w, v = LAS.eigh(Ham, driver="evd", check_finite=True) #driver="gvd"
                     w = np.real(w)
                     tmp = np.sum(v.real, axis=0)
                     s = np.where(tmp < 0)[0]
@@ -479,8 +479,8 @@ def FD_diagonalization(
             for m in range(0, n_explicit):
                 Hamilonian = Ham_ZFS[k, q] + Ham_FD[k, q] * field[m]
                 w, v = LAS.eigh(
-                    Hamilonian, overwrite_a=True, turbo=True, check_finite=False
-                )
+                    Hamilonian, overwrite_a=True, driver="evd", check_finite=False
+                ) # `driver = "gvd"` can replace `turbo=true` but "input b array to be supplied for generalized eigenvalue problems". Unsure how to implement.
                 if ispopu:
                     eigvec[:, k, q, m, :] = phase_eigenvectors(v, dimension)
                 else:

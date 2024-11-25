@@ -367,7 +367,7 @@ def resonance_loop(
                         eigv_2 = eigv_2 / np.linalg.norm(eigv_2)
                         pop1 = population_trans(rho_0[0, k, q], eigv_1, popu)
                         pop2 = population_trans(rho_0[0, k, q], eigv_2, popu)
-                        popdiff = np.asscalar(np.real(pop2 - pop1))
+                        popdiff = np.ndarray.item(np.real(pop2 - pop1))
                     else:
                         popdiff = thermal_popdiff(
                             Par.eigval[:, k, q, index - 1],

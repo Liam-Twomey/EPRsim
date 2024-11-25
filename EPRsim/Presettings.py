@@ -134,7 +134,7 @@ def get_number_of_coupled_electrons(Par):
 
 def get_full_nuclear_dimension(Par):
     if hasattr(Par, "ENucCoupling") and Par.SepHilbertspace:
-        Par.dim_nuc = np.ones((Par.coupled_e_dim, Par.number_of_nuclei), dtype=np.int)
+        Par.dim_nuc = np.ones((Par.coupled_e_dim, Par.number_of_nuclei), dtype=int)
         Par.dim_nuc_tot = 0
         for s in range(0, Par.coupled_e_dim):
             for i in range(0, Par.number_of_nuclei):
@@ -145,7 +145,7 @@ def get_full_nuclear_dimension(Par):
             if Par.dim_nuc_tot < Par.dim_nuc_tot_tmp:
                 Par.dim_nuc_tot = Par.dim_nuc_tot_tmp  # full nuclear dimension
     else:
-        Par.dim_nuc = np.zeros(Par.number_of_nuclei, dtype=np.int)
+        Par.dim_nuc = np.zeros(Par.number_of_nuclei, dtype=int)
         for i in range(0, Par.number_of_nuclei):
             if Par.number_of_nuclei > 1:
                 nucstring = Par.Nucs[i]  # each nuclei seperately

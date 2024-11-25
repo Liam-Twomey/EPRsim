@@ -59,9 +59,9 @@ def Pauli_matrices(dim):
     j_x = np.zeros((dim, dim))
     for i in range(0, dim - 1):
         d[i] = np.sqrt((i + 1) * (dim - 1 - (i)))
-    j_x = np.zeros((dim, dim), dtype=np.complex, order="C")
-    j_y = np.zeros((dim, dim), dtype=np.complex, order="C")
-    j_z = np.zeros((dim, dim), dtype=np.complex, order="C")
+    j_x = np.zeros((dim, dim), dtype=complex, order="C")
+    j_y = np.zeros((dim, dim), dtype=complex, order="C")
+    j_z = np.zeros((dim, dim), dtype=complex, order="C")
     for i in range(0, dim):
         j_z[i, i] = dim / 2.0 - i - 0.5
         if i + 1 <= dim - 1:
