@@ -2,12 +2,15 @@
 
 
 import EPRsim
+# Note this only works on non-packaged version, as it references the *folder* EPRsim.
+# In the packaged version, should use this instead:
+# from EPRsim import EPRsim, Tools
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-sim = EPRsim.EPRsim
-tool = EPRsim.Tools
+sim = EPRsim.EPRsim # sim = EPRsim #if packaged
+tool = EPRsim.Tools # tool = Tools #if packaged
 
 run_all = True
 
