@@ -35,7 +35,7 @@ def dec_eigvector_phase():
     the Python program is invoked.
     """
     if Numba == 1:
-        return jit(complex64[:, :](complex64[:, :], int32), nopython=True, cache=True)
+        return jit(complex128[:, :](complex128[:, :], int64), nopython=True, cache=True)
     else:
         return dec_identity
 
@@ -489,7 +489,8 @@ def FD_diagonalization(
     return eigvec, eigval
 
 
-@dec_eigvector_phase()
+# @dec_eigvector_phase()
+@jit(nopython=True,cache=True) if Numba==1 else None
 def phase_eigenvectors(v, dimension):
     # Previous method for phase change in eigenvectors
     for j in range(0, dimension):
