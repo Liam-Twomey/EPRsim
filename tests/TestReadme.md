@@ -1,0 +1,1 @@
+We use PyTest for unit testing. If you have installed pytest (`pip3 install pytest`), then running `pytest` in the `testing` directory in your terminal (not in IDLE) will run PyTest on all unit tests in files ending with '_test'.
