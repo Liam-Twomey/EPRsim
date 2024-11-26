@@ -1,17 +1,20 @@
+# Author: Liam Twomey
+
 from pathlib import Path
 from re import search
 from warnings import warn
+from pprint import pprint
 
 # all logic adapted from Stefan Stoll's EasySpin.
 
-def eprload(filename:str='.', scaling:str=''):
+def eprload(filename:str='.', scaling:str=None):
 	'''
 	arguments: filename: the name of a Bruker BES3T file (.DSC or .DTA), scale: a scaling factor for the data
 	outputs: returns tuple of three arguments, the abscissa (typically labelled B) the spectrum (typically S) and the experimental parameters (typically P)
 	'''
 	filePath = Path(filename)
 	stdFileExt = filePath.suffix.lower()
-	if len(scaling) ==0:
+	if scaling == None:
 		scale=False
 	else:
 		scale = True
@@ -120,16 +123,50 @@ def eprload(filename:str='.', scaling:str=''):
 				raise NotImplementedError("Unsupported file extension {stdFileExt}")
 	return (Data, Abscissa, Parameters)
 
-def eprload_BrukerBES3T():
+def eprload_BrukerBES3T(fileName, fileExt, scaling=None):
 	# BES3T file processing
 	# (Bruker EPR Standard for Spectrum Storage and Transfer)
 	#    .DSC: descriptor file
 	#    .DTA: data file
 	# used on Bruker ELEXSYS and EMX machines
 	# Code based on BES3T version 1.2 (Xepr 2.1)
-	print ('ok')
-	return
+	Parameters,err = readDSCfile(fileName, fileExt)
+	print(Parameters,err)
+	return (-1,-1,-1)
 
-def readDSCfile():
+def readDSCfile(fileName, extension, scaling=None):
+	'''
+	@spec
+	Read all lines from file into array (\n-delimited)
+	if line is terminated by \, append next line
+	split each line into key-value pairs
+	'''
+	Parameters = []
+	err = []
+	# with open(fileName,'r') as dictFile:
+	# 	reader = DictReader(dictFile,fieldnames=fnames)
+	# 	for row in reader:
+	# 		print('|',row['key'],'|',row['value'],'|')
+	# 	print(reader)
+	cleanKeys = []
+	cleanVals = []
+	with open(fileName,'r') as dictFile:
+		for line in dictFile:
+			lstrip = line.strip()
+			if (len(lstrip) != 0) and (lstrip[0] not in '#*.'):
+				lineList = line.split()
+				# cleanKeys.append(lineList)
+				cleanKeys.append(lineList[0])
+				if len(lineList) == 2:
+					cleanVals.append(lineList[1])
+				else:
+					cleanVals.append(lineList[1:])
+	lineDict = dict(zip(cleanKeys,cleanVals))
+	pprint(lineDict)
+	# print(cleanKeys)
+	return (None, None)
 
-def readDTAfile():
+def readDTAfile(DSCfilename):
+	None
+
+warn("running class source is not intended use")
