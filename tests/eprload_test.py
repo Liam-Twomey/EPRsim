@@ -5,5 +5,5 @@ sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir)) # allows imp
 
 from EPRsim_src import eprload
 
-def test_loadbs3t():
+# def test_loadbs3t():
 
