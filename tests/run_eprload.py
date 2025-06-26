@@ -1,11 +1,15 @@
+#! python3
 from pathlib import Path
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir)) # allows importing files from parent directory
-from EPRsim_src.eprload import *
+# sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir)) # allows importing files from parent directory
+# from EPRsim_src.eprload import *
+import eprload as el
+from pprint import pprint as pp
 
-eprFilePath = Path("tests/eprfiles")
+eprFilePath = Path("eprfiles")
+
 print(os.getcwd())
-brukertest = eprload(eprFilePath/'99090211.dta')
-brukertest = eprload(eprFilePath/'99090211.dsc')
-jeoltest = eprload(eprFilePath/'jeol/C60')
+# brukertest = el.eprload(eprFilePath/'99090211.dta')
+brukertest = el.eprload(eprFilePath/'bes3t'/'99090211.dsc',verbose=True)
+brukertest.show_params()
