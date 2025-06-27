@@ -6,7 +6,7 @@ from re import sub,match,search
 import numpy as np
 #from sre_constants import CHARSET
 from warnings import warn
-from pprint import pprint
+from pprint import pprint, pformat
 
 # all logic adapted from Stefan Stoll's EasySpin.
 class eprload:
@@ -39,7 +39,30 @@ class eprload:
 		else:
 			raise IOError("Please don't use mixed-case extensions!")
 		self.checkFileType()
-	
+
+	def __repr__(self):
+		return 	"Abscissa:\n"+pformat(self.Absc,width=40)+"\nSignal:\n"+pformat(self.Spec,indent=4,width=40)+\
+			"\nParameters:\n"+pformat(self.Param,indent=4,width=80)+"\nInternal values:"+"\n\tFilePath: "+str(self.filePath)+\
+			"\n\tFile Extension: "+str(self.fileExt)+"\n\tFile Extension Case: "+str(self.extCase).replace('0','Lower').replace('1','Upper')+\
+			"\n\tVerbose: "+str(self.verbose)+"\n\tScaling: "+str(self.scaling[0]).replace('1','None')+'\n\tAxis complexity is: '+\
+			str(self.isComplex).replace('1','CPLX').replace('0','REAL')
+
+	def __str__(self):
+		pfa = pformat(self.Absc)
+		pfs = pformat(self.Spec)
+		pfp = pformat(self.Param)
+		fst = f"eprload object with:\nAbscissa (B):\n {pfa} \nSpectrum (S):\n{pfp}\nParameters (P):\n{pfs}"
+		return fst
+
+	def getAbsc(self):
+		return self.Absc
+
+	def getSpec(self):
+		return self.Spec
+
+	def getParam(self):
+		return self.Param
+
 	def esfmt(self):
 		return (self.Absc, self.Spec, self.Param)
 		
@@ -158,7 +181,7 @@ class eprload:
 			warn('Keyword IKKF not found in .DSC file! Assuming IKKF=REAL.')
 			isComplex[0] = 0
 			nValsPerPoint = 1 # this is never passed to getBinaryMatrix
-		isComplex = np.array(isComplex)
+		self.isComplex = np.array(isComplex)
 		# XPTS, YPTS, ZPTS specify the number of data points in
 		#  x, y and z dimension.
 		if 'XPTS' in self.Param:
@@ -194,15 +217,15 @@ class eprload:
 				match char.upper():
 					# assign datatype of component data. Numpy naming uses byte len not bit.
 					case "C": 
-						numberFormat = 'i1' # int8
+						self.numberFormat = 'i1' # int8
 					case "S":
-						numberFormat = 'i2' # 'int16'
+						self.numberFormat = 'i2' # 'int16'
 					case "I":
-						numberFormat = 'i4' # 'int32'
+						self.numberFormat = 'i4' # 'int32'
 					case "F":
-						numberFormat =  'f4' # 'float32'
+						self.numberFormat =  'f4' # 'float32'
 					case "D":
-						numberFormat = 'f8' # 'float64'
+						self.numberFormat = 'f8' # 'float64'
 					case "A":
 						raise NotImplementedError("Cannot read BES3T data in ASCII format.")
 					case "0"|"N":
@@ -253,12 +276,15 @@ class eprload:
 					raise FileNotFoundError('AxisType is not defined for axis {axisNames[a]}')
 			else:
 				self.vprint(f'No abscissa for axis {axName}',1)
-			self.Absc = self.Absc.flatten()
+			# flatten array to minimal dimensionality, and drop all nan values
+			tmpabsc = self.Absc.flatten()
+			self.Absc = tmpabsc[~np.isnan(tmpabsc)]
+			del tmpabsc
 	#def BES3TSpecLoad(self):
 		# get data from .dta file
 		dtaExt = ['.DTA' if self.extCase else '.dta'][0]
-		self.vprint(f'Reading data from {dtaExt} file in {self.byteOrder}{numberFormat} format to self.Spec')
-		self.Spec = self.readBinaryDataMatrix(dtaExt,numberFormat,isComplex)
+		self.vprint(f'Reading data from {dtaExt} file in {self.byteOrder}{self.numberFormat} format to self.Spec')
+		self.Spec = self.readBinaryDataMatrix(dtaExt,self.byteOrder,self.numberFormat,self.isComplex)
 		if self.scaling[0] != '1':
 			self.Spec = self.scaleData()
 
@@ -293,7 +319,7 @@ class eprload:
 			axisType = 'IDX'
 			return axisType
 
-	def readBinaryDataMatrix(self,fileExt,numberFormat,isComplex) -> np.ndarray:
+	def readBinaryDataMatrix(self,fileExt,byteOrder,numberFormat,isComplex) -> np.ndarray:
 		'''
 		Description of Matlab function, line 147 onward:
 		Data = getmatrix([FullBaseName,SpcExtension],Dimensions,numberFormat,byteOrder,isComplex);
@@ -309,9 +335,9 @@ class eprload:
 			* If the row is not complex, then it is left alone.
 		* The resulting matrix is then reshaped to a [nx*ny*nz] array.
 		'''
-		isComplex = np.array(isComplex)
+
 		self.vprint('Axis complexity is: '+str(isComplex).replace('1','CPLX').replace('0','REAL'),1)
-		data = np.fromfile(self.filePath.with_suffix(fileExt),dtype=self.byteOrder+numberFormat)
+		data = np.fromfile(self.filePath.with_suffix(fileExt),dtype=byteOrder+numberFormat)
 		# self.vprint('Raw data length: '+str(len(data)),1)
 		nDataValuesPerPoint = len(isComplex)
 		nRealsPerPoint = sum(isComplex+1)
