@@ -2,7 +2,7 @@
 # Author: Liam Twomey
 
 from pathlib import Path,PurePath
-from re import sub,match
+from re import sub,match,search
 import numpy as np
 from sre_constants import CHARSET
 from warnings import warn
@@ -10,7 +10,7 @@ from pprint import pprint
 
 # all logic adapted from Stefan Stoll's EasySpin.
 class eprload:
-	def __init__(self, fileName:str, scaling:str='',verbose:bool=False):
+	def __init__(self, fileName:str, scaling:str='1',verbose:bool=False):
 		'''
         The parent eprload class acts as a wrapper for instrument-specific `eprload` functions.
         It determines the filetype of the entered file, then calls the appropriate method.
@@ -25,35 +25,60 @@ class eprload:
                 par:  experimental parameters (typically labelled P)
 		'''
 		self.filePath = Path(fileName) #if already a Path this won't effect anything
-		self.fileExt = self.filePath.suffix.upper()
+		self.fileExt = self.filePath.suffix
 		self.scaling = scaling
-		self.Param = {}
-		self.Absc = None
-		self.Signal = None
+		# self.Param = {}
 		self.verbose = verbose
-		pprint(f'Reading {self.filePath} with scale {self.scaling}') if self.verbose else None
+		self.vprint(f'`eprload` initalized on \"{self.filePath}\"')
+		if self.fileExt.isupper():
+			self.extCase = 1
+		elif self.fileExt.islower():
+			self.extCase = 0
+		else:
+			raise IOError("Please don't use mixed-case extensions!")
 		self.checkFileType()
 
 	def show_params(self):
 		'''
 		this is my current workaround to not being able to print properly.
 		'''
-		pprint('Parameters:')
+		print('Parameters:')
 		pprint(self.Param)
 
+	def vprint(self,output,indentLevel:int=0):
+		'''
+		A debug printer for easy output of debug/verbose info only when self.verbose=True
+		Prints `output` tabbed in by `indentlevel` tabs.
+		Does not tab output when type(output) is not a builtin.
+		'''
+		if indentLevel==0:
+			initStr = '>'
+		else:
+			initStr = '\t'*indentLevel
+		if not self.verbose: # get out of here ASAP if self.verbose is false
+			return
+		elif (output.__class__.__module__=='builtins'): # if obj is builtin class, doesn't need pprinting
+			print(initStr,output) # print indentLevel tabs, then the output
+			return
+		
+		else: # We fall here if the object needs pretty printing (i.e. is not builtin)
+			pprint(output)
+			return
+
 	def checkFileType(self):
-		match self.fileExt:
+		match self.fileExt.upper():
 			case '.DSC'|'.DTA':	
-				FileFormat = 'BrukerBES3T'
+				self.vprint('File type is Bruker BES3T')
 				if len(self.scaling) != 0:
-					if self.scaling.upper() in "NGPTC":
+					# 1 is the default internal value
+					if self.scaling.upper() in "NGPTC1":
 						self.loadBES3T(self.filePath,self.scaling)
 					else:
 						warn("Invalid scaling option supplied. Valid options are: N,P,G,T,C.")
 				else:
 					self.loadBES3T(self.filePath,self.fileExt)
 			case '.D01':
-				FileFormat = 'SpecMan'
+				self.vprint('File type is SpecMan')
 				warn("File type {FileFormat} not yet implemented.")
 				if scale:
 					warn("Scaling not supported for this filetype.")
@@ -62,7 +87,7 @@ class eprload:
 				raise NotImplementedError("File type {FileFormat} not yet implemented. Contact maintainers if you need it implemented.")
 			case _:
 				# Test for JEOL file
-				with open(filename,"rb") as fptr:
+				with open(self.filePath,"rb") as fptr:
 					identity = fptr.readline(16) # first 16 bytes = 16 ascii/utf-8 characters.
 				iddc = identity.decode('latin1')
 				isJeol = search('^spin|^cAcqu|^endor|^pAcqu|^cidep|^sod|^iso|^ani',iddc).group()
@@ -87,6 +112,9 @@ class eprload:
 		Code based on BES3T version 1.2 (Xepr 2.1)
 		'''
 		#### LOAD PARAMETERS FILE ####
+		self.Param = {}
+		dscExt = ['.DSC' if self.extCase else '.dsc'][0]
+		self.vprint(f"Reading parameters from {dscExt} file to self.Param")
 		with open(fileName) as tmpf:
 			lines = tmpf.readlines()
 			for line in lines:
@@ -105,7 +133,7 @@ class eprload:
 					# 	self.Param[tmpln[0]] = tmpln[1]
 					if len(tmpln[1:]) > 0:
 						self.Param[tmpln[0]] = tmpln[1:]
-		# return
+		self.vprint('Determining spectrum size and properties')
 		#### SETUP PARAMS FOR SPEC PARSING ####
 		# IKKF: Complex-data Flag
 		# CPLX indicates complex data, REAL indicates real data.
@@ -179,36 +207,43 @@ class eprload:
 				raise ValueError("IRFMT and IIFMT in .DSC file are not equal.")
 
 		# constructing abscissa vectors
-		pprint('Constructing Abscissa Vectors...') if self.verbose else None
+		self.vprint('Reading abscissas into self.Absc')
 		axisNames = ['X','Y','Z']
 		# I think I can rewrite this for loop in a way that makes more sense in python @TODO
+		self.Absc = {}
 		for a in range(len(axisNames)):
+			axName = axisNames[a]
 			if self.dimensions[a] >=1:
-				self.axisType = self.Param[f"{axisNames[a]}TYP"][0]
-				pprint(f'\tReading {axisNames[a]} axis type:{self.axisType}') if self.verbose else None
-				if self.axisType=="IGD":
+				axisType = self.Param[f"{axisNames[a]}TYP"][0]
+				self.vprint(f'Reading {axName} asbscissa of type {axisType}',1)
+				if axisType=="IGD":
 					#nonlinear axis, try to load companion file (.xgf, .ygf, .zgf)
-					self.Absc = self.readNonlinearAbscissa(a, axisType)
-				elif self.axisType=="IDX":
-					pprint (f'\tIDX, ax={axisNames[a]}')
+					self.Absc[axName] = self.readNonlinearAbscissa(a, axisType) 
+				elif axisType=="IDX":
 					absc_min = np.zeros(len(axisNames))
 					absc_width = np.zeros(len(axisNames))
-					pprint(self.Param[f"{axisNames[a]}MIN"][0])
 					absc_min[a] = self.Param[f"{axisNames[a]}MIN"][0]
 					absc_width[a] = self.Param[f"{axisNames[a]}WID"][0]
 					if absc_width[a] == 0:
 						warn(f"{axisNames[a]} has a width of 0.")
 						absc_min[a] == 1
 						absc_width[a] = self.dimensions[a]-1
-					self.Absc[a] = absc_min[a] + np.linspace(0,absc_width[a],num=self.dimensions[a])
-				elif self.axisType=="NTUP":
+					self.Absc[axName] = np.linspace(absc_min[a],absc_min[a]+absc_width[a],num=self.dimensions[a])
+					self.vprint(f'{axName} abscissa size: {self.Absc[axName].shape}',1)
+				elif axisType=="NTUP":
 					raise NotImplementedError('Cannot read data with NTUP axes.')
 				else:
 					raise FileNotFoundError('AxisType is not defined for axis {axisNames[a]}')
-		if len(self.Absc)==1:
+			else:
+				self.vprint(f'No abscissa for axis {axName}',1)
+
+		
+		# if len(self.Absc)==1:
 			# account for the abscissa being read as a column
-			self.Absc = self.abscissa[0][:]
-		dataMat = readBinaryDataMatrix(self,numberFormat,isComplex)
+			# self.Absc = self.Absc[0][:]
+		dtaExt = ['.DTA' if self.extCase else '.dta'][0]
+		self.vprint(f'Reading data from {dtaExt} file in {self.byteOrder}{numberFormat} format to self.Spec')
+		dataMat = readBinaryDataMatrix(self,dtaExt,numberFormat,isComplex)
 
 def readNonlinearAbscissa(self, a, axisNames):
 	'''
@@ -220,10 +255,10 @@ def readNonlinearAbscissa(self, a, axisNames):
     # Determine data format form XFMT/YMFT/ZFMT
 	DataFormat = self.Param[f'{AxisNames[a]}FMT'];
 	match DataFormat:
-		case 'D': sourceFormat = 'f8' #'float64';
-		case 'F': sourceFormat = 'f4' #'float32';
-		case 'I': sourceFormat = 'i4' #'int32';
-		case 'S': sourceFormat = 'i2' #'int16';
+		case 'D': sourceFormat = 'f8' #'float64'
+		case 'F': sourceFormat = 'f4' #'float32'
+		case 'I': sourceFormat = 'i4' #'int32'
+		case 'S': sourceFormat = 'i2' #'int16'
 		case '_': raise IOError(f'Cannot read data format {0} for companion file {1}',DataFormat,companionFileName);
 	# Open and read companion file
 	try:
@@ -234,7 +269,7 @@ def readNonlinearAbscissa(self, a, axisNames):
 		warn(f'Could not read companion file {0} for nonlinear axis. Assuming linear axis.'.format(companionFileName));
 		AxisType = 'IDX';
 
-def readBinaryDataMatrix(self,numberFormat,isComplex):
+def readBinaryDataMatrix(self,fileExt,numberFormat,isComplex):
 	'''
 	Description of Matlab function, line 147 onward:
 	Data = getmatrix([FullBaseName,SpcExtension],Dimensions,numberFormat,byteOrder,isComplex);
@@ -250,5 +285,18 @@ def readBinaryDataMatrix(self,numberFormat,isComplex):
 		- If the row is not complex, then it is left alone.
 	- The resulting matrix is then reshaped to a [nx*ny*nz] array.
 	'''
-	rawData = np.fromfile(self.filePath,dtype=self.byteOrder+numberFormat)
-	pprint(rawData)
+	isComplex = np.array(isComplex)
+	self.vprint('Axis complexity is: '+str(isComplex).replace('1','CPLX').replace('0','REAL'),1)
+	data = np.fromfile(self.filePath.with_suffix(fileExt),dtype=self.byteOrder+numberFormat)
+	self.vprint('Raw data length: '+str(len(data)),1)
+	nDataValuesPerPoint = len(isComplex)
+	nRealsPerPoint = sum(isComplex+1)
+	#remove non-existent axes since python doesn't start indices at 1
+	nonZeroDimProd =np.prod([dim for dim in self.dimensions if dim >0])
+	# find total number of values
+	N = nRealsPerPoint*nonZeroDimProd
+	data = np.reshape(data,(nRealsPerPoint,nonZeroDimProd)).flatten()
+	self.vprint('Loaded {0} values with shape {1}'.format(N,data.shape),1)
+	for k in range(nDataValuesPerPoint):
+		if isComplex[k]:
+			data[k] = np.complex64() # I think this should be taken care of at load?
