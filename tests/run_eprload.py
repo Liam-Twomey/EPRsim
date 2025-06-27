@@ -11,5 +11,5 @@ eprFilePath = Path("eprfiles")
 
 # print(os.getcwd())
 # brukertest = el.eprload(eprFilePath/'99090211.dta')
-brukertest = el.eprload(eprFilePath/'bes3t'/'99090211.dsc',verbose=True)
+brukertest = el.eprload(eprFilePath/'bes3t'/'99090211.dsc',verbose=True,scaling='n')
 # brukertest.show_params()

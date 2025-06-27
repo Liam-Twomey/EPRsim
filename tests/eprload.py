@@ -26,7 +26,7 @@ class eprload:
 		'''
 		self.filePath = Path(fileName) #if already a Path this won't effect anything
 		self.fileExt = self.filePath.suffix
-		self.scaling = scaling
+		self.scaling = scaling.upper()
 		# self.Param = {}
 		self.verbose = verbose
 		self.vprint(f'`eprload` initalized on \"{self.filePath}\"')
@@ -129,16 +129,16 @@ class eprload:
 								tmpln[attr] = float(tmpln[attr])
 							except ValueError:
 								None
-					# if len(tmpln[1:]) == 1:
-					# 	self.Param[tmpln[0]] = tmpln[1]
+					# this returns all keys as lists of length 1 or longer.
 					if len(tmpln[1:]) > 0:
 						self.Param[tmpln[0]] = tmpln[1:]
-		self.vprint('Determining spectrum size and properties')
+
 		#### SETUP PARAMS FOR SPEC PARSING ####
+		self.vprint('Determining spectrum size and properties')
 		# IKKF: Complex-data Flag
 		# CPLX indicates complex data, REAL indicates real data.
+		isComplex = []
 		if 'IKKF' in self.Param.keys():
-			isComplex = []
 			nValsPerPoint = len(self.Param['IKKF'])
 			for dim in self.Param['IKKF']:
 				if dim =='CPLX':
@@ -149,8 +149,9 @@ class eprload:
 					warn(f"Unknown dimension complexity {dim} in IKKF field of .DSC file!")
 		else:
 			warn('Keyword IKKF not found in .DSC file! Assuming IKKF=REAL.');
-			isComplex = 0;
-			nValsPerPoint = 1;
+			isComplex[0] = 0;
+			nValsPerPoint = 1; # this is never passed to getBinaryMatrix
+		isComplex = np.array(isComplex)
 		# XPTS, YPTS, ZPTS specify the number of data points in
 		#  x, y and z dimension.
 		if 'XPTS' in self.Param:
@@ -237,66 +238,131 @@ class eprload:
 			else:
 				self.vprint(f'No abscissa for axis {axName}',1)
 
-		
-		# if len(self.Absc)==1:
-			# account for the abscissa being read as a column
-			# self.Absc = self.Absc[0][:]
+		# get data from .dta file
 		dtaExt = ['.DTA' if self.extCase else '.dta'][0]
 		self.vprint(f'Reading data from {dtaExt} file in {self.byteOrder}{numberFormat} format to self.Spec')
-		dataMat = readBinaryDataMatrix(self,dtaExt,numberFormat,isComplex)
+		self.Spec = self.readBinaryDataMatrix(dtaExt,numberFormat,isComplex)
+		if self.scaling[0] != '1':
+			self.Spec = self.scaleData()
 
-def readNonlinearAbscissa(self, a, axisNames):
-	'''
-	This function just parses the format of the accessory .XGF, .YGF, and .ZGF files for axisType IGD.
-	It determines the encoding method of these 
-	'''
-	#Nonlinear axis -> Try to read companion file (.XGF, .YGF, .ZGF)
-	companionFile = self.filePath.with_suffix(f'.{AxisNames[a]}GF')
-    # Determine data format form XFMT/YMFT/ZFMT
-	DataFormat = self.Param[f'{AxisNames[a]}FMT'];
-	match DataFormat:
-		case 'D': sourceFormat = 'f8' #'float64'
-		case 'F': sourceFormat = 'f4' #'float32'
-		case 'I': sourceFormat = 'i4' #'int32'
-		case 'S': sourceFormat = 'i2' #'int16'
-		case '_': raise IOError(f'Cannot read data format {0} for companion file {1}',DataFormat,companionFileName);
-	# Open and read companion file
-	try:
-		self.abscissa[a] = np.fromfile(companionFile,dtype=self.byteOrder+sourceFormat)
-		# with open(companionFile,'rb') as ocf:
-		# 	self.Abscissa[a] = ocf.read(Dimensions[a], SourceFormat, byteOrder)
-	except:
-		warn(f'Could not read companion file {0} for nonlinear axis. Assuming linear axis.'.format(companionFileName));
-		AxisType = 'IDX';
+	def readNonlinearAbscissa(self, a, axisNames):
+		'''
+		This function just parses the format of the accessory .XGF, .YGF, and .ZGF files for axisType IGD.
+		It determines the encoding method of these 
+		'''
+		#Nonlinear axis -> Try to read companion file (.XGF, .YGF, .ZGF)
+		companionFile = self.filePath.with_suffix(f'.{AxisNames[a]}GF')
+		# Determine data format form XFMT/YMFT/ZFMT
+		DataFormat = self.Param[f'{AxisNames[a]}FMT'];
+		match DataFormat:
+			case 'D': sourceFormat = 'f8' #'float64'
+			case 'F': sourceFormat = 'f4' #'float32'
+			case 'I': sourceFormat = 'i4' #'int32'
+			case 'S': sourceFormat = 'i2' #'int16'
+			case '_': raise IOError(f'Cannot read data format {0} for companion file {1}',DataFormat,companionFileName);
+		# Open and read companion file
+		try:
+			self.abscissa[a] = np.fromfile(companionFile,dtype=self.byteOrder+sourceFormat)
+			# with open(companionFile,'rb') as ocf:
+			# 	self.Abscissa[a] = ocf.read(Dimensions[a], SourceFormat, byteOrder)
+		except:
+			warn(f'Could not read companion file {0} for nonlinear axis. Assuming linear axis.'.format(companionFileName));
+			AxisType = 'IDX';
 
-def readBinaryDataMatrix(self,fileExt,numberFormat,isComplex):
-	'''
-	Description of Matlab function, line 147 onward:
-	Data = getmatrix([FullBaseName,SpcExtension],Dimensions,numberFormat,byteOrder,isComplex);
-	- opens file fullbasename.spcextension with format byteOrder+numberFormat
-	- Real and imaginary data are interspersed, so it just reads everything into a matrix
-	  sized to the total number of real points in all dimensions (nx*ny*nz).
-	- This data is then reshaped into a (nRealsPerPoint x (nx*ny*nz)) array, so each row is a different
-	  real value index, and each column is a new datapoint. 
-	- Now we cope with each datapoint having nDataValuesPerPoint values.
-		- Note: both Matlab and numpy index [row, column] so format is the same.
-		- We run through the isComplex array and compare it against the rows of the data,
-		  and if a row isComplex, then it and the row after it are combined into a complex number.
-		- If the row is not complex, then it is left alone.
-	- The resulting matrix is then reshaped to a [nx*ny*nz] array.
-	'''
-	isComplex = np.array(isComplex)
-	self.vprint('Axis complexity is: '+str(isComplex).replace('1','CPLX').replace('0','REAL'),1)
-	data = np.fromfile(self.filePath.with_suffix(fileExt),dtype=self.byteOrder+numberFormat)
-	self.vprint('Raw data length: '+str(len(data)),1)
-	nDataValuesPerPoint = len(isComplex)
-	nRealsPerPoint = sum(isComplex+1)
-	#remove non-existent axes since python doesn't start indices at 1
-	nonZeroDimProd =np.prod([dim for dim in self.dimensions if dim >0])
-	# find total number of values
-	N = nRealsPerPoint*nonZeroDimProd
-	data = np.reshape(data,(nRealsPerPoint,nonZeroDimProd)).flatten()
-	self.vprint('Loaded {0} values with shape {1}'.format(N,data.shape),1)
-	for k in range(nDataValuesPerPoint):
-		if isComplex[k]:
-			data[k] = np.complex64() # I think this should be taken care of at load?
+	def readBinaryDataMatrix(self,fileExt,numberFormat,isComplex):
+		'''
+		Description of Matlab function, line 147 onward:
+		Data = getmatrix([FullBaseName,SpcExtension],Dimensions,numberFormat,byteOrder,isComplex);
+		- opens file fullbasename.spcextension with format byteOrder+numberFormat
+		- Real and imaginary data are interspersed, so it just reads everything into a matrix
+		sized to the total number of real points in all dimensions (nx*ny*nz).
+		- This data is then reshaped into a (nRealsPerPoint x (nx*ny*nz)) array, so each row is a different
+		real value index, and each column is a new datapoint. 
+		- Now we cope with each datapoint having nDataValuesPerPoint values.
+			- Note: both Matlab and numpy index [row, column] so format is the same.
+			- We run through the isComplex array and compare it against the rows of the data,
+			and if a row isComplex, then it and the row after it are combined into a complex number.
+			- If the row is not complex, then it is left alone.
+		- The resulting matrix is then reshaped to a [nx*ny*nz] array.
+		'''
+		isComplex = np.array(isComplex)
+		self.vprint('Axis complexity is: '+str(isComplex).replace('1','CPLX').replace('0','REAL'),1)
+		data = np.fromfile(self.filePath.with_suffix(fileExt),dtype=self.byteOrder+numberFormat)
+		# self.vprint('Raw data length: '+str(len(data)),1)
+		nDataValuesPerPoint = len(isComplex)
+		nRealsPerPoint = sum(isComplex+1)
+		#remove non-existent axes since python doesn't start indices at 1 and get prod for total n points
+		nPoints =np.prod([dim for dim in self.dimensions if dim >0])
+		# find total number of values
+		N = nRealsPerPoint*nPoints
+		# reshape data into an array of with n rows 
+		data = np.reshape(data,(nRealsPerPoint,nPoints)).flatten()
+		self.vprint('Loaded {0} values with shape {1}'.format(N,data.shape),1)
+		for k in range(nDataValuesPerPoint):
+			if isComplex[k]:
+				data[k,:] = np.complex64(data[k,:],data[k+1,:]) #@TODO test with actual complex data
+				np.delete(data,k+1,axis=1)
+		self.vprint(f'Shape after complex condensation: {data.shape}',1)
+
+	def scaleData(self):
+		'''
+		Scales data, by the following parameters:
+			* N: Number of scans
+			* G: Reciever gain (dB)
+			* C: Conversion time (ms)
+			* P: Microwave Power (mW)
+			* T: Temperature (K)
+		'''
+		#check parameters
+		fNames = self.Param.keys()
+		prescaled = [True if ('SctNorm' in fNames) else False]
+		cw = [True if self.Param['EXPT']=='CW' else False]
+		self.vprint(f'Scaling data by method: {self.scaling[0]}')
+		self.vprint(f'Parameters are isPrescaled: {prescaled}, isCW: {cw}',1)
+		if 'N' in self.scaling: # scale by number of scans
+			if 'AVGS' not in fnames:
+				raise KeyError ('Missing AVGS field in the DSC file.')
+			nAverages = self.Param['AVGS'][0]
+			if prescaled:
+				raise RuntimeError (f'Scaling by number of scans not possible,\nsince data in DSC/DTA are already averaged\nover {nAverages} scans.')
+			else:
+				data = self.Spec/nAverages
+				return data
+		if cw:
+			if 'G' in self.scaling: # scale by reciever gain (dB)
+				if 'RCAG' not in fnames:
+					raise KeyError('Cannot scale by receiver gain, since RCAG is not in the parameter file.')
+				else:
+					ReceiverGaindB = self.Param['RCAG'][0]
+					# Xenon (according to Feb 2011 manual) uses 20*10^(RCAG/20)
+					ReceiverGain = 10^(ReceiverGaindB/20);
+					data = self.Spec/ReceiverGain;
+					return data
+
+			elif 'C' in self.scaling: # scale by conversion time (in seconds)
+				if 'SPTP' not in fnames:
+					raise KeyError('Cannot scale by conversion time, since SPTP is not in the parameter file.');
+				# Xenon (according to Feb 2011 manual) already scaled data by ConvTime if
+				# normalization is specified (SctNorm=True). Question: which units are used?
+				# Xepr (2.6b.2) scales by conversion time even if data normalization is
+				# switched off!
+				ConversionTime = self.Param['SPTP'][0] # in seconds
+				ConversionTime = ConversionTime*1000; # s -> ms
+				data = self.Spec/ConversionTime;
+				return data
+
+			elif 'P' in self.scaling: # scale by MW power (watts)
+				if 'MWPW' not in fnames:
+					raise KeyError('Cannot scale by microwave power, since MWPW is not in the parameter file.')
+				mwPower = self.Param['MWPW'][0]*1000 # in milliwatts
+				data = self.Spec/np.sqrt(mwPower)
+				return data
+
+			elif 'T' in self.scaling: # scale by temp (K)
+				if 'STMP' not in fnames:
+					raise KeyError('Cannot scale by temperature, since STMP is not in the parameter file.')
+				Temperature = self.Param['STMP'][0]
+				data = self.Spec*Temperature
+				return data
+			else:
+				raise RuntimeError(f'The method \"{self.scaling}\" only applies to CW data.')
