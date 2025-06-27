@@ -11,6 +11,8 @@ __pycache__/
 # emacs
 flycheck_*.el
 .projectile
+# vim
+*.swp
 
 # Images
 *.jpg
