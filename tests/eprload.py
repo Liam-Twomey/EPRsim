@@ -10,19 +10,21 @@ from pprint import pprint
 
 # all logic adapted from Stefan Stoll's EasySpin.
 class eprload:
-	def __init__(self, fileName:str, scaling:str='1',verbose:bool=False, esfmt=True):
+	def __init__(self, fileName:(str | Path), scaling:str='1',verbose:bool=False): 
 		'''
         The parent eprload class acts as a wrapper for instrument-specific `eprload` functions.
         It determines the filetype of the entered file, then calls the appropriate method.
 
 		Args:
-            filename: the name of a EPR data file
-            scale: a scaling factor for the data
+            * filename: the name of a EPR data file
+            * scaling: a scaling factor for the data
+			* verbose: a flag passed for printing of debug statements (specified by self.vprint())
+			* esfmt: (WIP) a flag passed to allow return of just the self.Absc, self.Spec, and self 
         returns:
             (absc,spec, par) where...
-                absc: abscissa (typically labelled B)
-                spec: spectrum (typically labelled S) 
-                par:  experimental parameters (typically labelled P)
+                * absc: abscissa (typically labelled B)
+                * spec: spectrum (typically labelled S) 
+                * par:  experimental parameters (typically labelled P)
 		'''
 		self.filePath = Path(fileName) #if already a Path this won't effect anything
 		self.fileExt = self.filePath.suffix
@@ -37,7 +39,10 @@ class eprload:
 		else:
 			raise IOError("Please don't use mixed-case extensions!")
 		self.checkFileType()
-
+	
+	def esfmt(self):
+		return (self.Absc, self.Spec, self.Param)
+		
 	def show_params(self):
 		'''
 		this is my current workaround to not being able to print properly.
@@ -69,14 +74,11 @@ class eprload:
 		match self.fileExt.upper():
 			case '.DSC'|'.DTA':	
 				self.vprint('File type is Bruker BES3T')
-				if len(self.scaling) != 0:
-					# 1 is the default internal value
-					if self.scaling.upper() in "NGPTC1":
-						self.loadBES3T(self.filePath,self.scaling)
-					else:
-						raise RuntimeError("Invalid scaling option supplied. Valid options are: N,P,G,T,C.")
+				# 1 is the default internal value
+				if self.scaling.upper() in "NGPTC1":
+					self.loadBES3T()
 				else:
-					self.loadBES3T(self.filePath,self.fileExt)
+					raise RuntimeError("Invalid scaling option supplied. Valid options are: N,P,G,T,C.")
 			case '.D01':
 				self.vprint('File type is SpecMan')
 				raise NotImplementedError("File type {FileFormat} not yet implemented.")
@@ -104,20 +106,23 @@ class eprload:
 					raise NotImplementedError(f"Unsupported file extension {self.fileExt}")
 
 # Parse arguments
-	def loadBES3T(self,fileName:PurePath, scaling=None):
+	def loadBES3T(self) -> None:
 		'''
 		BES3T file processing
 		(Bruker EPR Standard for Spectrum Storage and Transfer)
-			.DSC: descriptor file
-			.DTA: data file
+		* .DSC: descriptor file
+		* .DTA: data file
 		used on Bruker ELEXSYS and EMX machines
 		Code based on BES3T version 1.2 (Xepr 2.1)
 		'''
-		#### LOAD PARAMETERS FILE ####
+#		BES3TParamLoad()
+#		BES3TParamParse()
+
+#	def BES3TParamLoad(self):
 		self.Param = {}
 		dscExt = ['.DSC' if self.extCase else '.dsc'][0]
 		self.vprint(f"Reading parameters from {dscExt} file to self.Param")
-		with open(fileName.with_suffix(dscExt)) as tmpf:
+		with open(self.filePath.with_suffix(dscExt)) as tmpf:
 			lines = tmpf.readlines()
 			for line in lines:
 				if (not match(r"[*,#]",line)) and (len(line) > 0):
@@ -134,8 +139,8 @@ class eprload:
 					# this returns all keys as lists of length 1 or longer.
 					if len(tmpln[1:]) > 0:
 						self.Param[tmpln[0]] = tmpln[1:]
-
-		#### SETUP PARAMS FOR SPEC PARSING ####
+	
+#	def BES3TParamParse(self):
 		self.vprint('Determining spectrum size and properties')
 		# IKKF: Complex-data Flag
 		# CPLX indicates complex data, REAL indicates real data.
@@ -150,9 +155,9 @@ class eprload:
 				else:
 					warn(f"Unknown dimension complexity {dim} in IKKF field of .DSC file!")
 		else:
-			warn('Keyword IKKF not found in .DSC file! Assuming IKKF=REAL.');
-			isComplex[0] = 0;
-			nValsPerPoint = 1; # this is never passed to getBinaryMatrix
+			warn('Keyword IKKF not found in .DSC file! Assuming IKKF=REAL.')
+			isComplex[0] = 0
+			nValsPerPoint = 1 # this is never passed to getBinaryMatrix
 		isComplex = np.array(isComplex)
 		# XPTS, YPTS, ZPTS specify the number of data points in
 		#  x, y and z dimension.
@@ -200,20 +205,22 @@ class eprload:
 						numberFormat = 'f8' # 'float64'
 					case "A":
 						raise NotImplementedError("Cannot read BES3T data in ASCII format.")
-					case "0"|"N": raise ValueError("No BES3T data found.")
-					case _: raise ValueError("Unknown value for IRFMT in .DSC file.")
+					case "0"|"N":
+						raise ValueError("No BES3T data found.")
+					case _:
+						raise ValueError("Unknown value for IRFMT in .DSC file.")
 		else:
 			raise ValueError("Keyword IRFMT not found in .DSC file.")
 		# We enforce IRFMT and IIFMT to be identical.
 		if "IIFMT" in self.Param:
-			if self.Param["IIFMT"] != self.P["IRFMT"]:
+			if self.Param["IIFMT"] != self.Param["IRFMT"]:
 				raise ValueError("IRFMT and IIFMT in .DSC file are not equal.")
 
-		# constructing abscissa vectors
+#	def BES3TAbscLoad(self):
 		self.vprint('Reading abscissas into self.Absc')
 		axisNames = ['X','Y','Z']
 		# I think I can rewrite this for loop in a way that makes more sense in python @TODO
-		self.Absc = {}
+		self.Absc = np.full([len(axisNames), max(self.dimensions)], np.nan) 
 		for a in range(len(axisNames)):
 			axName = axisNames[a]
 			if self.dimensions[a] >=1:
@@ -221,25 +228,33 @@ class eprload:
 				self.vprint(f'Reading {axName} asbscissa of type {axisType}',1)
 				if axisType=="IGD":
 					#nonlinear axis, try to load companion file (.xgf, .ygf, .zgf)
-					self.Absc[axName] = self.readNonlinearAbscissa(a, axisType) 
-				elif axisType=="IDX":
+					tmp_nla = self.readNonlinearAbscissa(a, axisType) 
+					if type(tmp_nla) is np.ndarray:
+						self.Absc[a,:] = tmp_nla
+					elif type(tmp_nla) is str: 
+						axisType = ''
+					else:
+						raise RuntimeError("Undefined return from readNonLinearAbscissa")
+					del tmp_nla
+				if axisType=="IDX": # not elif to allow for nonlinearabscissa error handling 2l above
 					absc_min = np.zeros(len(axisNames))
 					absc_width = np.zeros(len(axisNames))
 					absc_min[a] = self.Param[f"{axisNames[a]}MIN"][0]
 					absc_width[a] = self.Param[f"{axisNames[a]}WID"][0]
 					if absc_width[a] == 0:
 						warn(f"{axisNames[a]} has a width of 0.")
-						absc_min[a] == 1
+						absc_min[a] = 1
 						absc_width[a] = self.dimensions[a]-1
-					self.Absc[axName] = np.linspace(absc_min[a],absc_min[a]+absc_width[a],num=self.dimensions[a])
-					self.vprint(f'{axName} abscissa size: {self.Absc[axName].shape}',1)
+					self.Absc[a,:] = np.linspace(absc_min[a],absc_min[a]+absc_width[a],num=self.dimensions[a])
+					self.vprint(f'{axName} abscissa size: {self.Absc[a].shape}',1)
 				elif axisType=="NTUP":
 					raise NotImplementedError('Cannot read data with NTUP axes.')
 				else:
 					raise FileNotFoundError('AxisType is not defined for axis {axisNames[a]}')
 			else:
 				self.vprint(f'No abscissa for axis {axName}',1)
-
+			self.Absc = self.Absc.flatten()
+	#def BES3TSpecLoad(self):
 		# get data from .dta file
 		dtaExt = ['.DTA' if self.extCase else '.dta'][0]
 		self.vprint(f'Reading data from {dtaExt} file in {self.byteOrder}{numberFormat} format to self.Spec')
@@ -253,39 +268,46 @@ class eprload:
 		It determines the encoding method of these 
 		'''
 		#Nonlinear axis -> Try to read companion file (.XGF, .YGF, .ZGF)
-		companionFile = self.filePath.with_suffix(f'.{AxisNames[a]}GF')
+		companionFile = self.filePath.with_suffix(f'.{axisNames[a]}GF')
 		# Determine data format form XFMT/YMFT/ZFMT
-		DataFormat = self.Param[f'{AxisNames[a]}FMT'];
+		DataFormat = self.Param[f'{axisNames[a]}FMT']
 		match DataFormat:
-			case 'D': sourceFormat = 'f8' #'float64'
-			case 'F': sourceFormat = 'f4' #'float32'
-			case 'I': sourceFormat = 'i4' #'int32'
-			case 'S': sourceFormat = 'i2' #'int16'
-			case '_': raise IOError(f'Cannot read data format {0} for companion file {1}',DataFormat,companionFileName);
+			case 'D':
+				sourceFormat = 'f8' #'float64'
+			case 'F':
+				sourceFormat = 'f4' #'float32'
+			case 'I':
+				sourceFormat = 'i4' #'int32'
+			case 'S':
+				sourceFormat = 'i2' #'int16'
+			case '_':
+				raise IOError(f'Cannot read data format {0} for companion file {1}',DataFormat,companionFile);
 		# Open and read companion file
 		try:
-			self.abscissa[a] = np.fromfile(companionFile,dtype=self.byteOrder+sourceFormat)
+			tmpAbsc = np.fromfile(companionFile,dtype=self.byteOrder+sourceFormat)
 			# with open(companionFile,'rb') as ocf:
 			# 	self.Abscissa[a] = ocf.read(Dimensions[a], SourceFormat, byteOrder)
+			return tmpAbsc
 		except:
-			warn(f'Could not read companion file {0} for nonlinear axis. Assuming linear axis.'.format(companionFileName));
-			AxisType = 'IDX';
+			warn(f'Could not read companion file {companionFile} for nonlinear axis. Assuming linear axis.')
+			axisType = 'IDX'
+			return axisType
 
-	def readBinaryDataMatrix(self,fileExt,numberFormat,isComplex):
+	def readBinaryDataMatrix(self,fileExt,numberFormat,isComplex) -> np.ndarray:
 		'''
 		Description of Matlab function, line 147 onward:
 		Data = getmatrix([FullBaseName,SpcExtension],Dimensions,numberFormat,byteOrder,isComplex);
-		- opens file fullbasename.spcextension with format byteOrder+numberFormat
-		- Real and imaginary data are interspersed, so it just reads everything into a matrix
+		* opens file fullbasename.spcextension with format byteOrder+numberFormat
+		* Real and imaginary data are interspersed, so it just reads everything into a matrix
 		sized to the total number of real points in all dimensions (nx*ny*nz).
-		- This data is then reshaped into a (nRealsPerPoint x (nx*ny*nz)) array, so each row is a different
+		* This data is then reshaped into a (nRealsPerPoint x (nx*ny*nz)) array, so each row is a different
 		real value index, and each column is a new datapoint. 
-		- Now we cope with each datapoint having nDataValuesPerPoint values.
-			- Note: both Matlab and numpy index [row, column] so format is the same.
-			- We run through the isComplex array and compare it against the rows of the data,
+		* Now we cope with each datapoint having nDataValuesPerPoint values.
+			* Note: both Matlab and numpy index [row, column] so format is the same.
+			* We run through the isComplex array and compare it against the rows of the data,
 			and if a row isComplex, then it and the row after it are combined into a complex number.
-			- If the row is not complex, then it is left alone.
-		- The resulting matrix is then reshaped to a [nx*ny*nz] array.
+			* If the row is not complex, then it is left alone.
+		* The resulting matrix is then reshaped to a [nx*ny*nz] array.
 		'''
 		isComplex = np.array(isComplex)
 		self.vprint('Axis complexity is: '+str(isComplex).replace('1','CPLX').replace('0','REAL'),1)
@@ -305,8 +327,9 @@ class eprload:
 				data[k,:] = np.complex64(data[k,:],data[k+1,:]) #@TODO test with actual complex data
 				np.delete(data,k+1,axis=1)
 		self.vprint(f'Shape after complex condensation: {data.shape}',1)
+		return data
 
-	def scaleData(self):
+	def scaleData(self) -> np.ndarray|None:
 		'''
 		Scales data, by the following parameters:
 			* N: Number of scans
