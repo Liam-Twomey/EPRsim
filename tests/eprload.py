@@ -4,13 +4,13 @@
 from pathlib import Path,PurePath
 from re import sub,match,search
 import numpy as np
-from sre_constants import CHARSET
+#from sre_constants import CHARSET
 from warnings import warn
 from pprint import pprint
 
 # all logic adapted from Stefan Stoll's EasySpin.
 class eprload:
-	def __init__(self, fileName:str, scaling:str='1',verbose:bool=False):
+	def __init__(self, fileName:str, scaling:str='1',verbose:bool=False, esfmt=True):
 		'''
         The parent eprload class acts as a wrapper for instrument-specific `eprload` functions.
         It determines the filetype of the entered file, then calls the appropriate method.
@@ -74,32 +74,34 @@ class eprload:
 					if self.scaling.upper() in "NGPTC1":
 						self.loadBES3T(self.filePath,self.scaling)
 					else:
-						warn("Invalid scaling option supplied. Valid options are: N,P,G,T,C.")
+						raise RuntimeError("Invalid scaling option supplied. Valid options are: N,P,G,T,C.")
 				else:
 					self.loadBES3T(self.filePath,self.fileExt)
 			case '.D01':
 				self.vprint('File type is SpecMan')
-				warn("File type {FileFormat} not yet implemented.")
-				if scale:
-					warn("Scaling not supported for this filetype.")
-			case ('.par'|'.spc'|'.spe'|'.xml'|'.esr'|'.dat'|'.json'|'.eco'|'.plt'|'.spk'|'.ref'|'.d00'):
+				raise NotImplementedError("File type {FileFormat} not yet implemented.")
+				#if self.scaling[0]!='1':
+				#	warn("Scaling not supported for this filetype.")
+			case ('.PAR'|'.SPC'|'.SPE'|'.XML'|'.ESR'|'.DAT'|'.JSON'|'.ECO'|'.PLT'|'.SPK'|'.REF'|'.D00'):
 				#Cover all other file formats 
-				raise NotImplementedError("File type {FileFormat} not yet implemented. Contact maintainers if you need it implemented.")
+				raise NotImplementedError("File type {FileFormat} not yet implemented and does not have a roadmap. Contact maintainers if you need it implemented.")
 			case _:
 				# Test for JEOL file
 				with open(self.filePath,"rb") as fptr:
 					identity = fptr.readline(16) # first 16 bytes = 16 ascii/utf-8 characters.
 				iddc = identity.decode('latin1')
-				isJeol = search('^spin|^cAcqu|^endor|^pAcqu|^cidep|^sod|^iso|^ani',iddc).group()
-				if len(isJeol) >= 0:
-					FileFormat = 'JEOL'
-					warn("File type {FileFormat} not yet implemented.")
-					if scale:
-						warn("Scaling not supported for this filetype.")
-					# [Data,Abscissa,Parameters] = eprload_jeol(FileName);
+				try:
+					isJeol = search('^spin|^cAcqu|^endor|^pAcqu|^cidep|^sod|^iso|^ani',iddc).group()
+					if len(isJeol) >= 0:
+						self.vprint('File type is JEOL')
+						if self.scaling[0]!='1':
+							warn("Scaling not supported for this filetype.")
+						# [Data,Abscissa,Parameters] = eprload_jeol(FileName);
+				except AttributeError:
+					raise NotImplementedError(f"File format {self.fileExt} not yet implemented.")
 
 				else:
-					raise NotImplementedError("Unsupported file extension {stdFileExt}")
+					raise NotImplementedError(f"Unsupported file extension {self.fileExt}")
 
 # Parse arguments
 	def loadBES3T(self,fileName:PurePath, scaling=None):
@@ -115,7 +117,7 @@ class eprload:
 		self.Param = {}
 		dscExt = ['.DSC' if self.extCase else '.dsc'][0]
 		self.vprint(f"Reading parameters from {dscExt} file to self.Param")
-		with open(fileName) as tmpf:
+		with open(fileName.with_suffix(dscExt)) as tmpf:
 			lines = tmpf.readlines()
 			for line in lines:
 				if (not match(r"[*,#]",line)) and (len(line) > 0):
@@ -320,17 +322,17 @@ class eprload:
 		self.vprint(f'Scaling data by method: {self.scaling[0]}')
 		self.vprint(f'Parameters are isPrescaled: {prescaled}, isCW: {cw}',1)
 		if 'N' in self.scaling: # scale by number of scans
-			if 'AVGS' not in fnames:
+			if 'AVGS' not in fNames:
 				raise KeyError ('Missing AVGS field in the DSC file.')
 			nAverages = self.Param['AVGS'][0]
 			if prescaled:
-				raise RuntimeError (f'Scaling by number of scans not possible,\nsince data in DSC/DTA are already averaged\nover {nAverages} scans.')
+				raise RuntimeError (f'Scaling by number of scans not possible, as DSC/DTA data are are already averaged over {nAverages} scans.')
 			else:
 				data = self.Spec/nAverages
 				return data
 		if cw:
 			if 'G' in self.scaling: # scale by reciever gain (dB)
-				if 'RCAG' not in fnames:
+				if 'RCAG' not in fNames:
 					raise KeyError('Cannot scale by receiver gain, since RCAG is not in the parameter file.')
 				else:
 					ReceiverGaindB = self.Param['RCAG'][0]
@@ -340,7 +342,7 @@ class eprload:
 					return data
 
 			elif 'C' in self.scaling: # scale by conversion time (in seconds)
-				if 'SPTP' not in fnames:
+				if 'SPTP' not in fNames:
 					raise KeyError('Cannot scale by conversion time, since SPTP is not in the parameter file.');
 				# Xenon (according to Feb 2011 manual) already scaled data by ConvTime if
 				# normalization is specified (SctNorm=True). Question: which units are used?
@@ -352,14 +354,14 @@ class eprload:
 				return data
 
 			elif 'P' in self.scaling: # scale by MW power (watts)
-				if 'MWPW' not in fnames:
+				if 'MWPW' not in fNames:
 					raise KeyError('Cannot scale by microwave power, since MWPW is not in the parameter file.')
 				mwPower = self.Param['MWPW'][0]*1000 # in milliwatts
 				data = self.Spec/np.sqrt(mwPower)
 				return data
 
 			elif 'T' in self.scaling: # scale by temp (K)
-				if 'STMP' not in fnames:
+				if 'STMP' not in fNames:
 					raise KeyError('Cannot scale by temperature, since STMP is not in the parameter file.')
 				Temperature = self.Param['STMP'][0]
 				data = self.Spec*Temperature
