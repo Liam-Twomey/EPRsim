@@ -23,9 +23,6 @@ cd EPRsim
 python3 -m build
 pip3 install .
 ```
-- clone or download this repository
-
-- `python setup.py install` (or `develop`)
 
 ### Installing from PyPI
 
