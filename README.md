@@ -13,9 +13,19 @@ Fortunately, Darien Morrow forked the PyPI package into a repository, and added 
 - Loading of Bruker BES3T (.DSC/.DTA) files
 ## Installation
 ### Install from source
-This project uses the `setuptools` build system, via the `build` module. To install setuptools
+This project uses the `setuptools` build system, via the `build` module. 
 
 Requires Python 3; python 3.10+ is strongly recommended.
+
+It is highly recommended (but not required) to setup a virtual environment for EPRsim with:
+
+```shell
+python -m venv <venvName>
+source <venvName>/bin/activate
+pip3 install build pytest
+```
+Each time you open a terminal, you will need to run `source <venvName>/bin/activate` to activate the virtual environment
+Then, to install the program:
 
 ```shell
 git clone https:/github.com/LiamTwomey/EPRsim
