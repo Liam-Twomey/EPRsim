@@ -31,6 +31,10 @@ dependencies = [
 	'matplotlib',
 	'pathlib',
 ]
+
+[project.optional-dependencies]
+devel=['sphinx','pytest','setuptools']
+
 [project.urls]
 Repository = "https://github.com/LiamTwomey/EPRsim"
 Issues = "https://github.com/Liam-Twomey/EPRsim/issues"

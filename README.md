@@ -33,8 +33,8 @@ Then, to install the program:
 ```shell
 git clone https:/github.com/LiamTwomey/EPRsim
 cd EPRsim
-python3 -m build
-pip3 install .
+python -m build
+pip install .
 ```
 
 ### Installing from PyPI
@@ -49,7 +49,19 @@ This fork has been tested with Python 3.12, Numba 0.60.0, scipy 1.14.1, numpy 2.
 
 ### Installing for development
 
-To develop, clone the repo, as above, but after building use `pip3 install --editable .` to make it reflect code changes.
+To install for development, instead use:
+
+```shell
+git clone https:/github.com/LiamTwomey/EPRsim
+cd EPRsim
+python -m build
+pip install --editable '.[develop]'.
+```
+
+This does two things:
+
+1. Install the development dependencies `pytest` and `sphinx` for testing and documentation, respectively.
+2. Installs the package in editable format, so changes to the `src` directory are reflected on next import, without needing to rebuild.
 
 ### Testing
 This package uses `pytest` for testing. After installing pytest (`pip3 install pytest`), running the terminal command `pytest` from anywhere in the repository will execute the tests in `./tests/`.
