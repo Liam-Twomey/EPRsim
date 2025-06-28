@@ -1,0 +1,55 @@
+[project]
+name = "EPRsim"
+version = "0.1.1"
+description = "A Python library for loading and simulating EPR spectra."
+authors = [
+	{name = "Stefan Rein", email = "stephan.rein@physchem.uni-freiburg.de"},
+	{name = "Darien Morrow"},
+	{name = "Liam Twomey"},
+]
+maintainers = [
+	{name="Liam Twomey"},
+]
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["photophysics","spectroscopy","science","electron","paramagnetic","resonance"]
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE.txt","tests/eprfiles/LICENSE.md"]
+classifiers = [
+	"Private :: Do Not Upload",
+	"Devlopment Status :: 4 - Beta",
+	"Intended Audience :: Scientists",
+	"Programming Language :: Python :: 3",
+	"Programming Language :: Python :: 3.10",
+	"Programming Language :: Python :: 3.11",
+	"Programming Language :: Python :: 3.12",
+]
+dependencies = [
+	'numpy',
+	'scipy',
+	'numba',
+	'matplotlib',
+	'pathlib',
+]
+[project.urls]
+Repository = "https://github.com/LiamTwomey/EPRsim"
+Issues = "https://github.com/Liam-Twomey/EPRsim/issues"
+Homepage = "https://github.com/LiamTwomey/EPRsim"
+
+[project.scripts]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["eprsim"]
+
+[pytest]
+testpaths = ["tests"]
+norecursedirs = ["eprfiles"]
+
+[tool.pytest.ini_options]
+addopts = [
+	"--import-mode=importlib",
+]
