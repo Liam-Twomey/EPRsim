@@ -17,12 +17,12 @@ This project uses the `setuptools` build system, via the `build` module. To inst
 
 Requires Python 3; python 3.10+ is strongly recommended.
 
-'''shell
+```shell
 git clone https:/github.com/LiamTwomey/EPRsim
 cd EPRsim
 python3 -m build
 pip3 install .
-'''
+```
 - clone or download this repository
 
 - `python setup.py install` (or `develop`)
