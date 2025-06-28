@@ -19,7 +19,7 @@ try:
     Numba = 1
 except ImportError:
     Numba = 0
-import EPRsim.Tools as tool
+import eprsim.Tools as tool
 
 # *****************************************************************************
 # Physical constants and unit conversion factors + global default settings

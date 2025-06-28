@@ -1,4 +1,4 @@
-from .__version__ import *
+#from .__version__ import *
 from . import Convolutions
 from . import Direct_conversion_to_Field
 from . import EPRsim
@@ -14,4 +14,5 @@ from . import SolidState
 from . import spectral_processing
 from . import Tools
 from . import Validate_input_parameter
-from . import eprload 
+# single-function modules
+from EPRload import eprload 

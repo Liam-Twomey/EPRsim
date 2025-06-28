@@ -1,7 +1,7 @@
 """ demo of basic functionality. Originally from https://pypi.org/project/EPRsim/ """
 
 
-import EPRsim_src as es
+import eprsim as es
 # Note this only works on non-packaged version, as it references the *folder* EPRsim.
 # In the packaged version, should use this instead:
 # from EPRsim import EPRsim, Tools

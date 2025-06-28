@@ -48,3 +48,8 @@ packages = ["eprsim"]
 [pytest]
 testpaths = ["tests"]
 norecursedirs = ["eprfiles"]
+
+[tool.pytest.ini_options]
+addopts = [
+	"--import-mode=importlib",
+]

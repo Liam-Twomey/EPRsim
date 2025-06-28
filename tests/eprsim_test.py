@@ -1,4 +1,4 @@
-from EPRsim_src import EPRsim, Tools
+from EPRsim import EPRsim, Tools
 import numpy as np
 import matplotlib.pyplot as plt
 
