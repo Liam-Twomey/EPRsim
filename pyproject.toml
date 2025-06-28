@@ -43,10 +43,10 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["eprsim"]
+packages = ["src"]
 
 [pytest]
-testpaths = ["tests"]
+testpaths = ["test"]
 norecursedirs = ["eprfiles"]
 
 [tool.pytest.ini_options]

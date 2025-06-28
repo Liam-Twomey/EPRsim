@@ -1,8 +1,0 @@
-numpy
-scipy
-numba
-matplotlib
-pathlib
-re
-warnings
-pprint
