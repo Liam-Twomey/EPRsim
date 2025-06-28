@@ -4,13 +4,16 @@ From the original PyPI:
 > EPRsim is an Open-source simulation package for cw-EPR spectra. EPRsim has been developed in the group of Prof. Dr. Stefan Weber at the University of Freiburg, Freiburg im Breisgau, Germany, during the last couple of years. EPRsim was developed by Stephan Rein. The program uses several concepts described in [1]. EPRsim is open-source and available free of charge.
 
 ## A bit of history
-The PyPI [page](https://pypi.org/project/EPRsim/) appears to be abandoned, and the website listed for [documentation](https://www.radicals.uni-freiburg.de/de/software) contains no reference to it. I have also been unable to get in contact with Prof. Dr. Stefan Weber, in whose lab this software was developed, to get access to this documentation
+The PyPI [page](https://pypi.org/project/EPRsim/) appears to be abandoned, and the website listed for [documentation](https://www.radicals.uni-freiburg.de/de/software) contains no reference to it. I have also been unable to get in contact with Prof. Dr. Stefan Weber, in whose lab this software was developed, to get access to this documentation.
 
-Fortunately, Darien Morrow forked the PyPI package into a repository, and added a couple of demos. I have decided to (slowly, but surely) reimplement as much of the Matlab package [Easyspin](Easyspin.org)
+Fortunately, Darien Morrow forked the PyPI package into a repository, and added a couple of demos. I have decided to (slowly, but surely) reimplement as much of the Matlab package [Easyspin](Easyspin.org) as possible.
 
 ## Current capabilities
 - Simulation of EPR spectra in fast motion, 
 - Loading of Bruker BES3T (.DSC/.DTA) files
+
+Please see the file `EPRsim-coverpage.md` for existing documentation on use of EPRsim.
+
 ## Installation
 ### Install from source
 This project uses the `setuptools` build system, via the `build` module. 
