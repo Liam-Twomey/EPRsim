@@ -14,7 +14,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 keywords = ["photophysics","spectroscopy","science","electron","paramagnetic","resonance"]
 license = "GPL-3.0-or-later"
-license-files = ["LICENSE.txt","tests/eprfiles/LICENSE.md"]
+license-files = ["LICENSE.txt","test/eprfiles/LICENSE.md"]
 classifiers = [
 	"Private :: Do Not Upload",
 	"Devlopment Status :: 4 - Beta",

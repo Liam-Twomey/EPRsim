@@ -7,12 +7,11 @@ __pycache__/
 
 # vim swap files
 *.sw?
+*.swp
 
 # emacs
 flycheck_*.el
 .projectile
-# vim
-*.swp
 
 # Images
 *.jpg
@@ -71,11 +70,8 @@ coverage.xml
 *.log
 
 # Sphinx documentation
-docs/_build/
+doc/_build/
 
 # PyBuilder
 target/
 
-# Google Drive
-*desktop.inibuild/
-dist/
