@@ -15,5 +15,6 @@ documentation for details.
    :maxdepth: 2
    :caption: Contents:
 
-   packaging 
    og-coverpage
+   packaging 
+   testing

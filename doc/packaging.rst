@@ -18,9 +18,49 @@ Updating to modern setuptools
 
 The package originally used the `setup.py` method to build the package. For original setyup config, see :ref:`ogSetupCode`.
 
-To be in line with what setuptools now expects, I needed to convert this to a `pyproject.toml` file. This wasn't too hard (see file in package root directory), but it led to unexpected behavior in packaging. Whereas previously, each file was treated as subpackage of EPRsim, and so could be imported with, for instance `from EPRsim import Tools`, the `__init__.py` now appeared to treat everything as a single module with no components.
+To be in line with what setuptools now expects, I needed to convert this to a `pyproject.toml` file. This wasn't too hard (see file in package root directory), but it led to unexpected behavior in packaging. Whereas previously, each file was treated as subpackage of EPRsim, and so could be imported with, for instance `from eprsim import Tools`, the `__init__.py` now appeared to treat everything as a single module with no components.
 
-Evidently, the default behavior for setuptools is now that each subpackage must have its own directory and `__init__.py` file.
+Evidently, the `default behavior`_ for python packages is now that each subpackage must have its own directory and `__init__.py` file. The code is in the structure below: 
+
+.. _default behavior: https://packaging.python.org/en/latest/guides/packaging-namespace-packages/
+
+.. code::
+
+    src/
+    ├── __init__.py
+    ├── EPRsim.py
+    ├── EPRload.py
+    ├── Convolutions.py
+    ├── Direct_conversion_to_Field.py
+    ├── FastMotion.py
+    ├── Hamiltonian_Eig.py
+    ├── Hamiltonian_Point_Group.py
+    ├── Interpolation_lib.py
+    ├── Nucdic.py
+    ├── Pauli_generators.py
+    ├── Presettings.py
+    ├── resfield_full.py
+    ├── SolidState.py
+    ├── spectral_processing.py
+    ├── Tools.py
+    └── Validate_input_parameter.py
+
+The outcome I *want* is to be able to `import eprsim`, or `from eprsim import tools`. What I *get* is that the package only imports `EPRsim.py`.
+
+After a *lot* of faffing about, I found the issue was in the `pyproject.toml`, where if no package path is defined, it looks for a subfolder with the package name. Since my package folder is called src, it finds nothing. I thought I dealt with it by setting the following:
+
+.. code :: toml
+
+   [tool.setuptools]
+   package-dir = {"" = "src"}
+
+However, as it turns out that forces the automatic discovery system to use the `src-layout` option. To allow using `flat-layout` without naming the source folder `eprsim`, I had to use:
+
+.. code :: toml
+
+   [tool.setuptools.package_dir]
+   eprsim="src"
+
 
 .. _ogSetupCode:
 
