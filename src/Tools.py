@@ -150,7 +150,7 @@ def pseudo_field_modulation(modamp, field, spectrum):
 			Field modulated intesity vector of the EPR signal.
 
 	Notes
-	-------
+	-----
 	The pseudo-field modulation is calculated as pointwise multiplication
 	of the Fourier transform of the signal vector :math:`S(B_0)` with a
 	Bessel function of first kind :math:`J(B_0^{-1}, a_0)`:
@@ -224,7 +224,7 @@ def GHz2mT(freq, giso=None):
 			Magnetic field in mT.
 
 	Notes
-	-------
+	-----
 	The function convertes a frequency value or vector into
 	a magnetic field value or vector, respectively.
 	The conversion is calculates using:
@@ -283,7 +283,7 @@ def mT2GHz(field, giso=None):
 			Frequency in GHz.
 
 	Notes
-	-------
+	-----
 	The function convertes a frequency value or vector into
 	a magnetic field value or vector, respectively.
 	The conversion is calculates using:
@@ -356,7 +356,7 @@ def modulation_amplitude(modamp, field, spectrum):
 	pseudo_field_modulation : Pseudo-field modulation of EPR spectra
 
 	Notes
-	-------
+	-----
 
 	The function does not calculate an approximation of a derivative
 	(for this see pseudo_field_modulation()). It merely takes into account
@@ -404,7 +404,7 @@ def phase_offset(gamma, spc, unit="rad"):
 			Real-valued EPR signal vector with phase offset.
 
 	Notes
-	-------
+	-----
 
 	The function takes the signal vector and applies a Hilbert
 	transform to reconstruct the imaginary part. The signal
@@ -458,7 +458,7 @@ def convolution_L(width, field, spectrum):
 				Intensity vector of the EPR signal convoluted with a Lorentzian
 
 	Notes
-	-------
+	-----
 	The function convolutes the EPR signal with a Lorentzian function of a
 	given line-width. The function uses a FFT approach to calculate the
 	signal convolution.
@@ -507,7 +507,7 @@ def convolution_G(width, field, spectrum):
 
 
 	Notes
-	-------
+	-----
 	The function convolutes the EPR signal with a Gaussian function of a
 	given line-width. The function uses a FFT approach to calculate the
 	signal convolution.
@@ -549,7 +549,7 @@ def normalize2area(spectrum, Harmonic=1):
 				Intensity vector of the EPR signal normalized to the area
 
 	Notes
-	-------
+	-----
 
 	Normalizes EPR signals to their area. The function can be applied
 	to absorptive EPR signals and EPR signals measured as first derivative.
@@ -594,7 +594,7 @@ def generalized_Pascal(n, I):
 
 
 	Notes
-	-------
+	-----
 
 	Uses a general approach to calulate the relevant row of a generalized
 	Pascal triangle, a generalization of a Pascal triangle which is only
@@ -675,7 +675,7 @@ def gyro2gn(gyro):
 
 
 	Notes
-	-------
+	-----
 	The function convertes the gyromagnetic ratio into a
 	nuclear g-factor using:
 
@@ -722,7 +722,7 @@ def add_noise(spc, SNR):
 
 
 	Notes
-	-------
+	-----
 	Adds Gaussian noise (white noise to a signal). The noise level is
 	reference to the maximum intesity of the noise-free signal. SNR decribes
 	the relative singal-to-noise ratio where the input variable
@@ -757,13 +757,13 @@ def add_noise(spc, SNR):
 	>>> spc = tool.add_noise(spc, 10)
 	>>> tool.plot(field, spc)
 
-	.. figure:: ../docfigures/Noisfree.png
-		:width: 60 %
-		:align: center
+	#.. figure:: ../docfigures/Noisfree.png
+	#	:width: 60 %
+	#	:align: center
 
-	.. figure:: ../docfigures/SNR_10.png
-		:width: 60 %
-		:align: center
+	#.. figure:: ../docfigures/SNR_10.png
+	#	:width: 60 %
+	#	:align: center
 
 	Example for adding noise directly by passing the information to
 	the simulation routine.
@@ -783,9 +783,9 @@ def add_noise(spc, SNR):
 	>>> field, spc = sim.simulate(Param)
 	>>> tool.plot(field, spc)
 
-	.. figure:: ../docfigures/SNR_30.png
-		:width: 60 %
-		:align: center
+	#.. figure:: ../docfigures/SNR_30.png
+	#	:width: 60 %
+	#	:align: center
 	"""
 	maxSNR = np.max(np.abs(spc))
 	lenghtspc = len(spc)
@@ -885,9 +885,9 @@ def plot(field, spectrum, font=11, fignum=1):
 	>>> field, spc = sim.simulate(Param)
 	>>> tool.plot(field, spc)
 
-	.. figure:: ../docfigures/Plot_1_example.png
-		:width: 60 %
-		:align: center
+	#.. figure:: ../docfigures/Plot_1_example.png
+	#	:width: 60 %
+	#	:align: center
 
 	Plot of a spimple isotropic nixtroxide EPR spectrum with adjusted
 	label-fontsize.
@@ -900,9 +900,9 @@ def plot(field, spectrum, font=11, fignum=1):
 	>>> field, spc = sim.simulate(Param)
 	>>> tool.plot(field, spc, 14)
 
-	.. figure:: ../docfigures/Plot_2_example.png
-		:width: 60 %
-		:align: center
+	#.. figure:: ../docfigures/Plot_2_example.png
+	#	:width: 60 %
+	#	:align: center
 
 	"""
 
