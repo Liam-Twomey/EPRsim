@@ -2,12 +2,13 @@ EPRsim
 ======
 
 From the original PyPI: 
+
     EPRsim is an Open-source simulation package for cw-EPR spectra.
-EPRsim has been developed in the group of Prof. Dr. Stefan Weber
-at the University of Freiburg, Freiburg im Breisgau, Germany,
-during the last couple of years. EPRsim was developed by Stephan Rein.
-The program uses several concepts described in [1]. EPRsim is open-source
-and available free of charge.
+    EPRsim has been developed in the group of Prof. Dr. Stefan Weber
+    at the University of Freiburg, Freiburg im Breisgau, Germany,
+    during the last couple of years. EPRsim was developed by Stephan Rein.
+    The program uses several concepts described in [1]. EPRsim is open-source
+    and available free of charge.
 
 A bit of history
 ----------------
