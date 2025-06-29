@@ -55,7 +55,6 @@ environment for EPRsim with:
 
    python -m venv <venvName>
    source <venvName>/bin/activate
-   pip3 install build pytest
 
 Each time you open a terminal, you will need to run
 ``source <venvName>/bin/activate`` to activate the virtual environment
@@ -63,6 +62,7 @@ Then, to install the program:
 
 .. code:: shell
 
+   pip3 install build
    git clone https:/github.com/LiamTwomey/EPRsim
    cd EPRsim
    python -m build
