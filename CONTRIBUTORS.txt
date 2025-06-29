@@ -1,8 +1,0 @@
-Maintainers (alphabetical by last name)
-  Darien Morrow <darienmorrow@gmail.com> (@darienmorrow)
-  Liam Twomey (@Liam-Twomey)
-
-Contributors (alphabetical by last name)
-  (original) Stephan Rein stephan.rein@physchem.uni-freiburg.de, University of Freiburg
-  Liam Twomey, University of California at Davis
-
