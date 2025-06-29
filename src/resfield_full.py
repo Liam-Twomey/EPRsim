@@ -8,8 +8,8 @@ Created on Thu Oct 26 14:41:32 2017
 
 import numpy as np
 from scipy import interpolate
-from . import Hamiltonian_Eig
 import scipy.sparse as sparse
+from . import Hamiltonian_Eig
 
 define_nKnots_pattern = Hamiltonian_Eig.define_nKnots_pattern
 
@@ -19,7 +19,7 @@ try:
     Numba = 1
 except ImportError:
     Numba = 0
-import eprsim.Tools as tool
+from . import Tools as tool
 
 # *****************************************************************************
 # Physical constants and unit conversion factors + global default settings
