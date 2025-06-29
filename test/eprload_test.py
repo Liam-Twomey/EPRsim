@@ -1,7 +1,7 @@
 #! python3
 # This test file tests the functionality of the eprload module
 # using data in the eprfiles subdirectory.
-from EPRsim import EPRload
+from eprsim.EPRload import * 
 from pathlib import Path
 import numpy as np
 import pytest as pt
@@ -17,6 +17,7 @@ srchPath = Path(baseDir)
 impFiles = [] 
 for ext in implExt:
 	impFiles = impFiles + list(srchPath.rglob(ext))
+print('files:',)
 
 #### Testing Bruker file loading
 
@@ -34,7 +35,7 @@ def test_bruker_object_gen():
 #			eprload(i)
 
 def test_esfmt():
-	x = es.eprload(impFiles[0]).esfmt()
+	x = eprload(impFiles[0]).esfmt()
 	assert(type(x) is tuple)
 	assert(len(x) == 3)
 	assert(type(x[0]) is np.ndarray)
@@ -43,12 +44,12 @@ def test_esfmt():
 
 def test_parse():
 	simpleFiles = [baseDir + "/bes3t/strong1.dta", baseDir + "/esp/strong1esp.spc"]
-	sf1 = es.eprload(simpleFiles[0])
+	sf1 = eprload(simpleFiles[0])
 	assert np.isreal(sf1.Param["XPTS"])
 	assert np.isreal(sf1.Param["XMIN"])
 	assert np.isreal(sf1.Param["XWID"])
 	with pt.raises(NotImplementedError):
-		sf2 = es.eprload(simpleFiles[1]) # have not yet implemented spc files
+		sf2 = eprload(simpleFiles[1]) # have not yet implemented spc files
 		assert np.isreal(sf2.Param["MF"])
 		assert np.isreal(sf2.Param["GST"])
 		assert np.isreal(sf2.Param["MP"])
