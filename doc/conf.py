@@ -9,7 +9,7 @@
 project = 'EPRsim'
 copyright = '2025, Stefan Rein, Darien Morrow, Liam Twomey'
 author = 'Stefan Rein, Darien Morrow, Liam Twomey'
-release = '0.1.1'
+release = '0.1.2'
 # -- Imports and Setup -------------------------------------------------------
 import sys # for autodoc
 from pathlib import Path # for autodoc
@@ -19,7 +19,10 @@ sys.path.insert(0, str(Path('..', 'src').resolve()))
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc']
+extensions = [
+	'numpydoc',
+	'sphinx.ext.autodoc',
+]
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']

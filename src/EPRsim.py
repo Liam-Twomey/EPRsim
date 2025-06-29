@@ -27,17 +27,15 @@ con = tool.physical_constants()
 # *****************************************************************************
 
 def simulate(Parameters):
-    """
-    Simulation function for cw-EPR simulations.
+    """Simulation function for cw-EPR simulations.
 
     Parameters
-    ----------
+	----------
     Parameters : :class:`object`
                 Object with all simulation parameters.
 
     Returns
-    -------
-
+	-------
     field : :class:`numpy.ndarray`
     	Magnetic field vector.
 
@@ -214,30 +212,32 @@ def simulate(Parameters):
 
 
 def redefine_nuclear_coupling(Param):
-    """
-	Parameters:
-	-----------
-    
+    """ Redefines the spin system for the hyperfine coupling according to the
+	superimposed requirements. **Very important function!**
+
+	Parameters
+	----------
 	Sys
 		A Parameter object with one defined spin system.
 
-    Very important function! Redefines the spin system for the hyperfine
-    coupling according to the superimposed requirements. The definitions are
+	Notes
+	-----
+    The definitions are
     necessarily different for the fast-motion and isotropic regime if a number
     of equivalent nuclei is passed. Additionally pure isotopes can be evaluated
     directly, while isotope mixtures requires an expansion also in the
     isotropic regime. This function depends on multiple subfunctions. The
     general workflow is:
-
-        1. Get the hyperfines and Nucs definition from the Sys class
-        2. Check if equivalent nuclei are defined in the fast motion regime
-        3. If 2 is true: Get an expansion with all combination of isotopes
-        4. Check if equivalent nuclei are defined with nonpure isotopes
-        5. If 4 is True: Do the same as in 2 and 3 for fast motion.
-        6. Remove all isotopes mixture below a given probability threshold
-        7. Remove uncessary permutation of isotopes within a equivalent group
-
-    Caution: Works directly on the Sys class member variables due to call by
+	
+    1. Get the hyperfines and Nucs definition from the Sys class
+    2. Check if equivalent nuclei are defined in the fast motion regime
+    3. If 2 is true: Get an expansion with all combination of isotopes
+    4. Check if equivalent nuclei are defined with nonpure isotopes
+    5. If 4 is True: Do the same as in 2 and 3 for fast motion.
+    6. Remove all isotopes mixture below a given probability threshold
+    7. Remove uncessary permutation of isotopes within a equivalent group
+	
+    **Caution:** Works directly on the Sys class member variables due to call by
     reference!
     All mentioned steps are only relevant if a number of equivalent coupling
     nuclei is given!
@@ -259,14 +259,13 @@ def redefine_nuclear_coupling(Param):
 
 def get_isotope_combinations(Param):
     """
-	Parameters:
-	-----------
+	Parameters
+	----------
 	Sys
 		A Parameter object with one defined spin system.
 
-	Returns:
-	--------
-
+	Returns
+	-------
     nuc_vec
 		vector with nuclear strings of all isotopes comb.
     weight
@@ -297,14 +296,15 @@ def get_isotope_combinations(Param):
 
 def check_eq_in_fast_motion(Param, Force=False):
     """
-	Parameters:
-	-----------
-    
+	Parameters
+	----------
 	Sys:
 		One class with definitions of spin system parameters
 	Force:
 		Force the vector expansion without further cond.
-
+	
+	Notes
+	-----
     **Caution:** Works directly on the passed variables due to call by reference.
     Equivalent nuclei has to treated separetely in the fast motion regime.
     Therefore if an input is given as `Sys.n = [2,2], Sys.Nucs = "N,H" and
@@ -361,70 +361,70 @@ def check_eq_in_fast_motion(Param, Force=False):
 
 
 def new_Nucsvec_and_tensors(eqiuvec, Nuc, A, neqvec):
-    """
-	Parameters:
-	-----------
-
-    eqiuvec: list
+	"""
+	Subfunction of check_equiv_and_fast_motion(). Creates the new
+	hyperfine tensors and nuclear string. For detailed description see
+	check_equiv_and_fast_motion().
+	
+	Parameters
+	----------
+	eqiuvec: list
 		n-vector [n1, n2, ...]
+	
 	Nuc: str
-		string with couling nuclei)
-    A:
+		String with couling nuclei
+	A
 		hyperfine-tensors
-    neqvec:                        
+	neqvec                        
 		lenght of the n-vector
-
-	Returns:
-	--------
-
+	
+	Returns
+	-------
 	new_A_tensors:
 		new composed hyperfine tensors
-    expanded_Nucsvec
-		new (full) string with couling nuclei
-
-    Subfunction of check_equiv_and_fast_motion(). Creates the new
-    hyperfine tensors and nuclear string. For detailed description see
-    check_equiv_and_fast_motion().
-
-    """
-    expanded__Nucsvec = ""
-    for i in range(0, neqvec):
-        expanded__Nucsvec += eqiuvec[i] * (Nuc[i] + ",")
-        A_tmp = np.tile(A[i], (eqiuvec[i], 1))
-        if i == 0:
-            new_A_tensors = A_tmp
-        else:
-            new_A_tensors = np.concatenate((new_A_tensors, A_tmp), axis=0)
-    expanded__Nucsvec = expanded__Nucsvec[:-1]
-    return new_A_tensors, expanded__Nucsvec
+	expanded_Nucsvec:
+		New (full) string with couling nuclei
+	
+	"""
+	expanded__Nucsvec = ""
+	for i in range(0, neqvec):
+		expanded__Nucsvec += eqiuvec[i] * (Nuc[i] + ",")
+		A_tmp = np.tile(A[i], (eqiuvec[i], 1))
+		if i == 0:
+			new_A_tensors = A_tmp
+		else:
+			new_A_tensors = np.concatenate((new_A_tensors, A_tmp), axis=0)
+	expanded__Nucsvec = expanded__Nucsvec[:-1]
+	return new_A_tensors, expanded__Nucsvec
 
 
 def coupled_isotopes_indexvector(Indexvec):
     """
-	Parameters:
-	-----------
+    Takes the index vector of a single element (eg. N) and creates the
+    coupled vector using tensor products.
 
+	Parameters
+	----------
     Indexvec
 		Vectors with indices according to the number of isotopes
 
-	Returns:
-	--------
-
+	Returns
+	-------
     Indecvec
 		coupled index vector
 
-    Takes the index vector of a single element (eg. N) and creates the
-    coupled vector using tensor products.
-    If the Sys.Nucs input is "N,H" the corresponding input Indexvector
-    (generated by the function get_indexvector_isotopes()) is :math:`[0,1],[0,1]`
-
+	Notes
+	-----
+	If the Sys.Nucs input is "N,H" the corresponding input Indexvector
+	(generated by the function get_indexvector_isotopes()) is :code:`[0,1],[0,1]`.
+	
 	The returned index vectors after applying a sequence of tensor products is
-	:math:`[0,0,1,1],[0,1,0,1]`
-
-    This coupled index vectors are returned. This index vectors are the basis
-    to set up nuclear spin systems with all combinations of isotopes.
-
-    """
+	:code:`[0,0,1,1],[0,1,0,1]`.
+	
+	This coupled index vectors are returned. This index vectors are the basis
+	to set up nuclear spin systems with all combinations of isotopes.
+	
+	"""
     dim = []
     dimen = len(Indexvec)
     for i in range(0, dimen):
@@ -441,9 +441,12 @@ def coupled_isotopes_indexvector(Indexvec):
 
 def create_nucvec(Ind, NucIso):
     """
+    Takes the index vectors from the tensor products (Ind) and
+    the corresponding vectors with the nuclear isotopes and creates
+    a mixture of all possible isotopes combinations.
+
 	Parameters
 	----------
-
 	Ind:
 		indexvectors for each nuclei
 	NucIso:
@@ -451,24 +454,22 @@ def create_nucvec(Ind, NucIso):
 
 	Returns
 	-------
-
     Sys_String
 		vector with all isotopes combinations
     Sys_isotope_weight
 		vector with corresponding weighting factors
-
-    Takes the index vectors from the tensor products (Ind) and
-    the corresponding vectors with the nuclear isotopes and creates
-    a mixture of all possible isotopes combinations.
-    If eg. "N,H" is passed for Sys.Nucs  than the index vectors (Ind) created
-    by the functions get_indexvector_isotopes() and
-    coupled_isotopes_indexvector() are :math:`[0,0,1,1],[0,1,0,1H]` with the
-	NucIso vectors :math:`["14N","15N"],["1H',"2H"]`
-
-    This functions now creates  vectors (Sys_String) with all possinle isotopes
-	combinations :math:`["14N,1H"],["14N,2H"],["15N,1H"],["15N,2H"]`
+	
+	Notes
+	-----
+	If eg. "N,H" is passed for Sys.Nucs  than the index vectors (Ind) created
+	by the functions get_indexvector_isotopes() and coupled_isotopes_indexvector()
+	are :code:`[0,0,1,1],[0,1,0,1H]` with the NucIso vectors
+	:code:`["14N","15N"],["1H',"2H"]`.
+	
+    These functions now creates vectors (Sys_String) with all possinle isotopes
+	combinations :code:`["14N,1H"],["14N,2H"],["15N,1H"],["15N,2H"]`
     and the corresponding probabilities of the isotope mixtures
-	(Sys_isotope_weight) :math:`[0.9962104048, 0.0001095952, 0.0036795952, 4.048e-07]`
+	(Sys_isotope_weight) :code:`[0.9962104048, 0.0001095952, 0.0036795952, 4.048e-07]`
 
     Less suprisingly is the isotope mixture with 14N and 1H by far the most
     probable due to their natural abundance.
@@ -516,66 +517,71 @@ def create_nucvec(Ind, NucIso):
 
 
 def get_indexvector_isotopes(Nuc, hyperfine_dim):
-    """
-	Parameters:
-	-----------
-
-    Nuc
+	"""
+	The function takes the input for a given Sys.Nucs string and a number
+	of couling nuclei and creates an indexvector for each nuclei.
+	
+	Parameters
+	----------
+	Nuc
 		String with couling nuclei
-    hyperfine_dim
+	hyperfine_dim
 		number of treated nuclei
-
-	Returns:
-	--------
-
-    Indexvectors
+	
+	Returns
+	-------
+	Indexvectors
 		indexvectors for each nuclei
-    NucIsotopes
+	NucIsotopes
 		vector with isotopes for each nuclei
-
-    The function takes the input for a given Sys.Nucs string and a number
-    of couling nuclei and creates an indexvector for each nuclei. This
-    index vector runs from 0 to N-1, where N is the number of isotopes for
-    a nuclei. If for example the nuclei is a "H" (hydrogen) or a
-    "Mg" (magnesium) the indexvector is:
-
+	
+	Notes
+	-----
+	The index vector runs from 0 to N-1, where N is the number of isotopes for
+	a nuclei. If for example the nuclei is a "H" (hydrogen) or a
+	"Mg" (magnesium) the indexvector is:
+	
 	.. code:: python3
-
+	
 		Indexvector["H"] = [0,1]
 		Indexvector["Mg"] = [0,1,2]
-
-    This is because "H" has two stable isotopes and "Mg" has three stable
-    isotopes.
-    The function also produces a vector where the isotopes (NucIsotopes) for
-    each nuclei are listed as strings. For a "Mg" or a "H" the NucIsotope
-    vector is:
-
+	
+	This is because "H" has two stable isotopes and "Mg" has three stable
+	isotopes. The function also produces a vector where the isotopes (NucIsotopes)
+	for each nuclei are listed as strings. For a "Mg" or a "H" the NucIsotope
+	vector is:
+	
 	.. code:: python3
-
+	
 		NucIsotopes["H"] = ["1H,"2H"]
-		NucIsotopes["Mg"] = ["24Mg","25Mg",
-
-    The Indexvectors (vector of indexvectors) as well as the NucIsotopes
-    (vector of NucIsotopes) are returned.
-
-    """
-    NucIsotopes = []
-    Indexvectors = []
-    for i in range(0, hyperfine_dim):
-        Iso = Nucdic.isotopes_catalogue(Nuc[i])
-        NucIsotopes.append(Iso)
-        Indexvector = np.linspace(0, len(Iso) - 1, len(Iso), dtype=np.int32)
-        Indexvectors.append(Indexvector)
-    return Indexvectors, NucIsotopes
+		NucIsotopes["Mg"] = ["24Mg","25Mg","26Mg"]:mwfreq
+	
+	The Indexvectors (vector of indexvectors) as well as the NucIsotopes
+	(vector of NucIsotopes) are returned.
+	
+	"""
+	NucIsotopes = []
+	Indexvectors = []
+	for i in range(0, hyperfine_dim):
+		Iso = Nucdic.isotopes_catalogue(Nuc[i])
+		NucIsotopes.append(Iso)
+		Indexvector = np.linspace(0, len(Iso) - 1, len(Iso), dtype=np.int32)
+		Indexvectors.append(Indexvector)
+	return Indexvectors, NucIsotopes
 
 
 def remove_sub_threshold(Param, Sys__Nucsvec, w):
-    """remove_sub_threshold(Sys__Nucsvec,w)
+    """
+	Parameters
+	----------
+    Sys__Nucsvec
+		Vector with all isotope combinations)
+    w
+		Vector with the corresponding weighting factors)
 
-    in:  Sys__Nucsvec          (vector with all isotope combinations)
-         w                    (vector with the corresponding weighting factors)
-
-    Caution: Works directly on the passed variables due to call by reference.
+	Notes
+	-----
+    **Caution** Works directly on the passed variables due to call by reference.
     Deletes all isotopes combinations with a combined probability below the
     defined threshold. The threshold is defined as global variable at the top
     of this file and is called abund_threshold.
@@ -618,34 +624,41 @@ def read_single_isotope_comb(Param, _Nucsvec):
 
 
 def remove_permutations(Par, _Nucsvec, w, Force=False):
-    """remove_double_combinations(Sys,Sys__Nucsvec,w,Force =False)
+    """Removes permutations which are doubled. 
+	
+	Parameters
+	----------
+	Sys
+		One class with definitions of spin system parameters
+	Sys__Nucsvec
+		Vector with all combinations of isotopes
+	w
+		corresponding weighting factors
+	Force: bool
+		forces the operations independent of the conditions
 
-    in:  Sys             (one class with definitions of spin system parameters)
-         Sys__Nucsvec     (vector with all combinations of isotopes)
-         w               (corresponding weighting factors)
-         Force=False    (forces the operations independent of the conditions)
+   Notes
+   -----
+	**Caution:** Works directly on the passed variables due to call by reference.
+	Assume a spin system with n = [2,2], Nucs = "N,H" is transformed in the
+	fast-motion regime to a system "N,N,H,H". There requirement is still that
+	the coupling is to equivalent nuclei (in general the A-tensor is identical
+	within the H's and N's). The isotopes combiniations above the probability
+	threshhold will be:
 
-    Caution: Works directly on the passed variables due to call by reference.
-    Removes permutations which are doubled. Assume a spin system with
-    n = [2,2], Nucs = "N,H" is transformed in the fast-motion regime to a
-    system "N,N,H,H". There requirement is still that the coupling is
-    to equivalent nuclei (in general the A-tensor is identical within the
-    H's and N's). The isotopes combiniations above the probability threshhold
-    will be:
-
-        1. "14N,14N,1H,1H"
-        2. "14N,15N,1H,1H"
-        3. "15N,14N,1H,1H"
-        4. "14N,14N,2H,1H"
-        5. "14N,14N,1H,2H"
+    1. `"14N,14N,1H,1H"`
+    2. `"14N,15N,1H,1H"`
+    3. `"15N,14N,1H,1H"`
+    4. `"14N,14N,2H,1H"`
+    5. `"14N,14N,1H,2H"`
 
     Since 2. and 3. (and 4 and 5) are indentical (just a perumation of a
     isotope within the equivalent coupling nuclei group) one of them can be
     removed and the other douled in weight. Leaving:
 
-        1. "14N,14N,1H,1H"
-        2. "14N,15N,1H,1H"    weight*2
-        3. "14N,14N,1H,2H"    weight*2
+    1. `"14N,14N,1H,1H"`
+    2. `"14N,15N,1H,1H"`    weight*2
+    3. `"14N,14N,1H,2H"`    weight*2
 
     This was a description using an example of the very general procedure
     implemented in this function. The new reduced list of isotope combinations
@@ -811,20 +824,25 @@ class Parameters(object):
 
     Returns
     -------
-    Parameters :   :class:`object`
-                Contains attributes according to keyword arguments or the
-                attributes have their default values.
+
+    Parameters : :class:`object`
+    	Contains attributes according to keyword arguments or the
+    	attributes have their default values.
 
 
 
     See Also
     --------
-    simulate :  Function which uses the Parameters object for simulation.
 
-    Validate_Parameters : A class which validates a object of class Parameters.
+    simulate
+		Function which uses the Parameters object for simulation.
+
+    Validate_Parameters
+		A class which validates a object of class Parameters.
 
     Notes
-    -------
+    -----
+
     This class is needed to create in instance of the class
     Parameter. This instance is provided to the simulation function
     simulate().
@@ -955,6 +973,7 @@ class Parameters(object):
     def attributes(self):
         """
         Prints all attributes with assigned values
+
         """
         sortedkeys = sorted(self.__dict__, key=str.lower)
         for keys in sortedkeys:
@@ -966,34 +985,17 @@ class Validate_Parameters:
     """
     Gets simulation information from a object of class Parameters
 
-    Parameters
-    ----------
-    Parameters : :class:`object`
-                 Object of the class Parameters.
-
-
-    Returns
-    -------
-    Ob :        :class:`object`
-                Object of the class Validate_Parameter
-
-
-
-    See Also
-    --------
-    getInfo :  Get information about a forthcoming simulation of a defined
-               Parameter object.
-
-    Notes
-    -------
-
     Evaluates a object of the class Parameters. This function is used
     in the simulation framework to redefine parameters and is therefore
     a internal class of cwEPRsim.
-    However, an object of  Validate_Parameters can be used to get information
-    about a potential simulation before such is carried out.
-    For this the member function getInfo() can be used. All other member
-    functions are private functions.
+
+	However, an object of Validate_Parameters can be used to get information about 
+	a potential simulation before such is carried out. For this the member function
+	getInfo() can be used. All other member functions are private functions.
+    See Also
+    --------
+	getInfo:
+		Get information about a forthcoming simulation of a defined Parameter object.
 
     """
 
@@ -1015,9 +1017,6 @@ class Validate_Parameters:
     def getInfo(self):
         """
         Gets information about the potential simulation of a set of parameters
-
-        Notes
-        -------
 
         Prints valuable information about the potential simulation for
         a the set of parameters used to construct the object of the

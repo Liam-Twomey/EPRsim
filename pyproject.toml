@@ -1,6 +1,6 @@
 [project]
 name = "eprsim"
-version = "0.1.1"
+version = "0.1.2"
 description = "A Python library for loading and simulating EPR spectra."
 authors = [
 	{name = "Stefan Rein", email = "stephan.rein@physchem.uni-freiburg.de"},
@@ -33,7 +33,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-devel=['sphinx','pytest','setuptools']
+devel=['pytest','setuptools','sphinx','numpydoc','furo']
 
 [project.urls]
 Repository = "https://github.com/LiamTwomey/EPRsim"
