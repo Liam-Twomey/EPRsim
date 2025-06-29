@@ -1,7 +1,3 @@
-.. contents::
-   :depth: 3
-..
-
 EPRsim
 ======
 
