@@ -18,6 +18,7 @@ documentation for details.
     Overview <overview>
     eprsim
     eprload
+    tools
     Devel - packaging <packaging>
     Devel - testing <testing>
     Devel - Docs <docdoc>

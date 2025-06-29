@@ -72,7 +72,7 @@ in front of the docstring must be a tab character! Linters do not check for
 correct rST syntax in a python file. The documentation formatting will be
 all sorts of messed up if the docstring indentation is inconsistent.
 The whole package uses tabs anyway; if you see a file not doing so, please fix
-it! Vim :code:`Ctrl+Q r` makes it easy.
+it! Vim :code:`:set noexpandtab` then :code:`:retab!` makes it easy.
 
 Documentation in the :code:`doc` subdirectory. :code:`index.rst` indicates which
 :code:`.rst` files to include in the documentation. There is one documentation
