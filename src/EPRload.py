@@ -25,8 +25,8 @@ class eprload:
 			Request printout of debug information for this object. Debug info is implemented
 			via :py:meth:`vprint`.
 
-		Returns:
-		--------
+		Returns
+		-------
 		`eprload` object with the attributes:
 		
 		#.. attr:: Absc
@@ -128,8 +128,9 @@ class eprload:
 		Checks through the list of known EPR filetypes. Calls the appropriate file read method
 		if implemented; throws an error if it is not implemented or not a known EPR file.
 
-		Possible calls:
-		---------------
+		Notes
+		-----
+		The following are viable filetypes to the function:
 
 		.DTA, .DSC: loadBrukerBES3T()
 			Loads data from Bruker ELEXSYS and EMX spectrometers.
@@ -143,7 +144,7 @@ class eprload:
 			Load Active Spectrum data.
 		.dat, .json: not implemented
 			Load Adani data.
-		*no extension*: not implemented
+		no extension: not implemented
 			Load JEOL data.
 		.epr: not implemented
 			Load CIQTEK data.
@@ -198,6 +199,9 @@ class eprload:
 		'''
 		File loading for BES3T (Bruker EPR Standard for Spectrum Storage and Transfer)
 		format. Interpreter based on BES3T version 1.2 (Xepr 2.1).
+		
+		Notes
+		-----
 
 		Instuments:
 			Bruker ELEXSYS and EMX spectrometers.
@@ -361,9 +365,8 @@ class eprload:
 		This function parses the format of the accessory .XGF, .YGF, and .ZGF files
 		for axisType IGD.
 		
-		Parameters:
-		-----------
-
+		Parameters
+		----------
 		a: int 
 			Index of the axis passed.
 		axisNames: list
@@ -401,9 +404,8 @@ class eprload:
 		Method called by :meth:`loadBES3T` to actually read in the information from
 		a .DTA file.
 
-		Parameters:
-		-----------
-
+		Parameters
+		----------
 		fileExt:str
 			File extension of the .DTA file to be read (i.e. .DTA or .dta)
 		byteOrder: str
@@ -413,14 +415,14 @@ class eprload:
 		isComplex: list
 			List of bool, one item per experiment dimension. True if the axis is complex, False if not.
 
-		Returns:
-		--------
+		Returns
+		-------
 		
 		data: np.ndarray
 			A nx*ny*nz array of the data from each 
 
-		Mechanism:
-		----------
+		Notes
+		-----
 
 		#. Open file `self.fileName.fileExt` using `np.readfile` with format byteOrder+numberFormat.
 			* Real and imaginary data are interspersed, so it just reads everything into an
@@ -461,6 +463,9 @@ class eprload:
 		'''
 			A class method of eprload(), called when a scaling factor is passed
 			to the constructor in the *scaling* argument.
+			
+			Parameters
+			----------
 
 			===== =============== =====  =============================
 			Value Scale By        Units  Limitations
