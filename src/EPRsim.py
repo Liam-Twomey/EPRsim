@@ -36,13 +36,13 @@ def simulate(Parameters):
 
     Returns
 	-------
-    field : :class:`numpy.ndarray`
+    field : numpy.ndarray
     	Magnetic field vector.
 
-    spectrum : :class:`numpy.ndarray`
+    spectrum : numpy.ndarray
     	Intesity vector of the cw-EPR signal.
 
-    flag : :class:`list`
+    flag : list
     	Flags with warning codes (description pleas find below)
 
     See Also
