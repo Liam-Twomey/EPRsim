@@ -111,8 +111,11 @@ Testing
 
 This package uses ``pytest`` for testing. After installing pytest
 (``pip3 install pytest``), running the terminal command ``pytest`` from
-anywhere in the repository will execute the tests in ``./tests/``. ###
-Contributing I would welcome other contributors who would like to help
+anywhere in the repository will execute the tests in ``./tests/``.
+
+Contributing
+------------
+I would welcome other contributors who would like to help
 make a working EPR simulation program which does not depend on
 proprietary software. Please feel free to get in touch.
 
