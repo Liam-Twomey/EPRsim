@@ -10,22 +10,34 @@ from pprint import pprint, pformat
 
 # all logic adapted from Stefan Stoll's EasySpin.
 class eprload:
-	def __init__(self, fileName:(str | Path), scaling:str='1',verbose:bool=False): 
-		'''
-        The parent eprload class acts as a wrapper for instrument-specific `eprload` functions.
-        It determines the filetype of the entered file, then calls the appropriate method.
+	'''
+		The parent eprload class acts as a wrapper for instrument-specific `eprload`
+		functions. It determines the filetype of the entered file, then calls the
+		appropriate method.
+	
+		Parameters
+		----------
+		filename : str or Path
+			The name of (one of) the EPR data files to be loaded.
+		scaling : {n, p, g, t, c}
+			Data attribute to scale by, see :py:meth: `eprload.scaleData` method
+		verbose:
+			Request printout of debug information for this object. Debug info is implemented
+			via :py:meth:`vprint`.
 
-		Args:
-            * filename: the name of a EPR data file
-            * scaling: a scaling factor for the data
-			* verbose: a flag passed for printing of debug statements (specified by self.vprint())
-			* esfmt: (WIP) a flag passed to allow return of just the self.Absc, self.Spec, and self 
-        returns:
-            (absc,spec, par) where...
-                * absc: abscissa (typically labelled B)
-                * spec: spectrum (typically labelled S) 
-                * par:  experimental parameters (typically labelled P)
-		'''
+		Returns:
+		--------
+		`eprload` object with the attributes:
+		
+		#.. attr:: Absc
+		#	Magnetic field abscissa(s) loaded from file, often labelled "B".
+		#.. attr:: Spec
+		#	Signal component of the data, often labelled "S". 
+		#.. attr:: Par
+		#	Experimental parameters read from parameter file, often called "P".
+	
+    '''
+	def __init__(self, fileName:(str | Path), scaling:str='1',verbose:bool=False): 
 		self.filePath = Path(fileName) #if already a Path this won't effect anything
 		self.fileExt = self.filePath.suffix
 		self.scaling = scaling.upper()
@@ -41,6 +53,10 @@ class eprload:
 		self.checkFileType()
 
 	def __repr__(self):
+		'''
+		Allows for printing of the class object.
+
+		'''
 		return 	"Abscissa:\n"+pformat(self.Absc,width=40)+"\nSignal:\n"+pformat(self.Spec,indent=4,width=40)+\
 			"\nParameters:\n"+pformat(self.Param,indent=4,width=80)+"\nInternal values:"+"\n\tFilePath: "+str(self.filePath)+\
 			"\n\tFile Extension: "+str(self.fileExt)+"\n\tFile Extension Case: "+str(self.extCase).replace('0','Lower').replace('1','Upper')+\
@@ -48,6 +64,10 @@ class eprload:
 			str(self.isComplex).replace('1','CPLX').replace('0','REAL')
 
 	def __str__(self):
+		'''
+		Allows for pretty-printing of the object's Absc, Spec, and Param attributes.
+
+		'''
 		pfa = pformat(self.Absc)
 		pfs = pformat(self.Spec)
 		pfp = pformat(self.Param)
@@ -55,29 +75,39 @@ class eprload:
 		return fst
 
 	def getAbsc(self):
+		'''
+		Returns the Absc attribute of the object.
+
+		'''
 		return self.Absc
 
 	def getSpec(self):
+		'''
+		Returns the Spec attribute of the object.
+
+		'''
 		return self.Spec
 
 	def getParam(self):
+		'''
+		Returns the Param attribute of the object.
+
+		'''
 		return self.Param
 
 	def esfmt(self):
+		'''
+		(WIP) Returns spectrum in EasySpin format: (B, Spc, P) or (Absc,Spec,Param)
+
+		'''
 		return (self.Absc, self.Spec, self.Param)
 		
-	def show_params(self):
-		'''
-		this is my current workaround to not being able to print properly.
-		'''
-		print('Parameters:')
-		pprint(self.Param)
-
-	def vprint(self,output,indentLevel:int=0):
+	def vprint(self,output:str,indentLevel:int=0):
 		'''
 		A debug printer for easy output of debug/verbose info only when self.verbose=True
 		Prints `output` tabbed in by `indentlevel` tabs.
 		Does not tab output when type(output) is not a builtin.
+
 		'''
 		if indentLevel==0:
 			initStr = '>'
@@ -94,6 +124,41 @@ class eprload:
 			return
 
 	def checkFileType(self):
+		'''
+		Checks through the list of known EPR filetypes. Calls the appropriate file read method
+		if implemented; throws an error if it is not implemented or not a known EPR file.
+
+		Possible calls:
+		---------------
+
+		.DTA, .DSC: loadBrukerBES3T()
+			Loads data from Bruker ELEXSYS and EMX spectrometers.
+		.dO1, .exp: loadSpecMan()
+			Loads data collected by SpecMan from a homebuilt instrument.
+		.spc, .par: not implemented 
+			Load Bruker ESP and WinEPR data.
+		.spe, .xml: not implemented
+			Load Magnettech data.
+		.ESR: not implemented
+			Load Active Spectrum data.
+		.dat, .json: not implemented
+			Load Adani data.
+		*no extension*: not implemented
+			Load JEOL data.
+		.epr: not implemented
+			Load CIQTEK data.
+		.PLT: not implemented
+			Load MAGRES data.
+		.eco: not implemented
+			Load qese, tryscore data.
+		.spk, .ref: not implemented
+			Load Varian data.
+		.d00, .exp: not implemented
+			Load ESE data.
+
+		If your data is in ASCII formats, use pandas.read_csv() to open it.
+
+		'''
 		match self.fileExt.upper():
 			case '.DSC'|'.DTA':	
 				self.vprint('File type is Bruker BES3T')
@@ -131,12 +196,15 @@ class eprload:
 # Parse arguments
 	def loadBES3T(self) -> None:
 		'''
-		BES3T file processing
-		(Bruker EPR Standard for Spectrum Storage and Transfer)
-		* .DSC: descriptor file
-		* .DTA: data file
-		used on Bruker ELEXSYS and EMX machines
-		Code based on BES3T version 1.2 (Xepr 2.1)
+		File loading for BES3T (Bruker EPR Standard for Spectrum Storage and Transfer)
+		format. Interpreter based on BES3T version 1.2 (Xepr 2.1).
+
+		Instuments:
+			Bruker ELEXSYS and EMX spectrometers.
+		Extensions: (.DSC,.DTA)
+			* .DSC: descriptor file
+			* .DTA: data file
+
 		'''
 #		BES3TParamLoad()
 #		BES3TParamParse()
@@ -288,10 +356,19 @@ class eprload:
 		if self.scaling[0] != '1':
 			self.Spec = self.scaleData()
 
-	def readNonlinearAbscissa(self, a, axisNames):
+	def readNonlinearAbscissa(self, a, axisNames) -> None:
 		'''
-		This function just parses the format of the accessory .XGF, .YGF, and .ZGF files for axisType IGD.
-		It determines the encoding method of these 
+		This function parses the format of the accessory .XGF, .YGF, and .ZGF files
+		for axisType IGD.
+		
+		Parameters:
+		-----------
+
+		a: int 
+			Index of the axis passed.
+		axisNames: list
+			List of axis names for the spectrum
+
 		'''
 		#Nonlinear axis -> Try to read companion file (.XGF, .YGF, .ZGF)
 		companionFile = self.filePath.with_suffix(f'.{axisNames[a]}GF')
@@ -321,19 +398,44 @@ class eprload:
 
 	def readBinaryDataMatrix(self,fileExt,byteOrder,numberFormat,isComplex) -> np.ndarray:
 		'''
-		Description of Matlab function, line 147 onward:
-		Data = getmatrix([FullBaseName,SpcExtension],Dimensions,numberFormat,byteOrder,isComplex);
-		* opens file fullbasename.spcextension with format byteOrder+numberFormat
-		* Real and imaginary data are interspersed, so it just reads everything into a matrix
-		sized to the total number of real points in all dimensions (nx*ny*nz).
-		* This data is then reshaped into a (nRealsPerPoint x (nx*ny*nz)) array, so each row is a different
-		real value index, and each column is a new datapoint. 
-		* Now we cope with each datapoint having nDataValuesPerPoint values.
-			* Note: both Matlab and numpy index [row, column] so format is the same.
+		Method called by :meth:`loadBES3T` to actually read in the information from
+		a .DTA file.
+
+		Parameters:
+		-----------
+
+		fileExt:str
+			File extension of the .DTA file to be read (i.e. .DTA or .dta)
+		byteOrder: str
+			String denoting the endianness of the data to be read, either '>' for big-endian, and '<' for little-endian.
+		numberFormat: str
+			Numpy-formatted number format string, i.e. 'i4' for int32, 'f8' for float64. 
+		isComplex: list
+			List of bool, one item per experiment dimension. True if the axis is complex, False if not.
+
+		Returns:
+		--------
+		
+		data: np.ndarray
+			A nx*ny*nz array of the data from each 
+
+		Mechanism:
+		----------
+
+		#. Open file `self.fileName.fileExt` using `np.readfile` with format byteOrder+numberFormat.
+			* Real and imaginary data are interspersed, so it just reads everything into an
+			  nx*ny*nz matrix (i.e. total number of points in all dimensions.
+		#. This data is then np.reshape()d into a :math:`(nRealsPerPoint :times (nx*ny*nz))`
+		   array, so each row is a different real value index, and each column is a new
+		   datapoint. 
+		#. Now we cope with each datapoint having nDataValuesPerPoint values.
+			* Note: both Matlab and numpy index [row, column].
 			* We run through the isComplex array and compare it against the rows of the data,
-			and if a row isComplex, then it and the row after it are combined into a complex number.
+			  and if a row isComplex, then it and the row after it are combined into an
+			  np.complex128 complex number.
 			* If the row is not complex, then it is left alone.
-		* The resulting matrix is then reshaped to a [nx*ny*nz] array.
+		#. The resulting matrix is then reshaped to an array of [[Absc X],[Absc Y],[Absc Z]].
+		
 		'''
 
 		self.vprint('Axis complexity is: '+str(isComplex).replace('1','CPLX').replace('0','REAL'),1)
@@ -357,12 +459,19 @@ class eprload:
 
 	def scaleData(self) -> np.ndarray|None:
 		'''
-		Scales data, by the following parameters:
-			* N: Number of scans
-			* G: Reciever gain (dB)
-			* C: Conversion time (ms)
-			* P: Microwave Power (mW)
-			* T: Temperature (K)
+			A class method of eprload(), called when a scaling factor is passed
+			to the constructor in the *scaling* argument.
+
+			===== =============== =====  =============================
+			Value Scale By        Units  Limitations
+			===== =============== =====  =============================
+			n     number of scans --     non-Bruker only
+			g     reciever gain   dB     CW Bruker ESP only 
+			c     conversion time ms     CW Bruker ESP only
+			p     microwave power mW     CW Bruker only
+			t     temperature     K      CW Internal temp control only
+			===== =============== =====  =============================
+
 		'''
 		#check parameters
 		fNames = self.Param.keys()

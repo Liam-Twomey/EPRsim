@@ -78,7 +78,7 @@ Original Setup Code
 -------------------
 
 setup.py
-^^^^^^^^
+~~~~~~~~
 
 .. code :: python
 
@@ -126,7 +126,7 @@ setup.py
     )
 
 requirements.txt
-^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~
 
 .. code::  
 
@@ -136,7 +136,7 @@ requirements.txt
     matplotlib
 
 src/__init__.py
-^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~
 
 .. code:: python
 
@@ -158,7 +158,7 @@ src/__init__.py
     from . import Validate_input_parameter
 
 src/__version__.py
-^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
@@ -181,3 +181,4 @@ src/__version__.py
             __version__ += "-" + __branch__
     else:
         __branch__ = None
+

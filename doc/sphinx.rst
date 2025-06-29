@@ -10,6 +10,7 @@ EPRsim documentation is written in the `reStructuredText`_ format, using `Sphinx
 To build documentation, `pip install sphinx` to your project venv (or install eprsim with the `[devel]` tag), then run `make html` in the `doc` directory. The html documentation will be built into `doc/_build/html`; to access them conveniently open `index.html` from that directory.
 
 .. _reStructuredText: https://docutils.sourceforge.io/rst.html
+.. _Sphinx: https://www.sphinx-doc.org/en/master/index.html
 
 Useful Links
 ------------

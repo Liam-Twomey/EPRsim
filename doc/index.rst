@@ -12,10 +12,12 @@ documentation for details.
 
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 2
+    :caption: Contents:
 
-   og-coverpage
-   packaging 
-   testing
-   sphinx
+    og-coverpage
+    eprsim
+    eprload
+    packaging 
+    testing
+    sphinx
