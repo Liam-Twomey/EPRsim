@@ -1,9 +1,11 @@
-*****************************
-Original EPRsim Documentation
-*****************************
+******************
+Original PyPI Page
+******************
 
-   This information was copied from the original PyPI page, rearranged
+   This information was copied from the original `PyPI page`_, rearranged
    for clarity by LPT.
+
+.. _PyPI page: https://pypi.org/project/EPRsim/
 
 Open-source simulation package for cw-EPR spectra. EPRsim has been
 developed in the group of Prof. Dr. Stefan Weber at the University of

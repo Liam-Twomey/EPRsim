@@ -3,18 +3,24 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+# -- Imports and Setup -------------------------------------------------------
+import sys # for autodoc
+from pathlib import Path # for autodoc
+sys.path.insert(0, str(Path('..', 'src').resolve()))
+#from . import __version__ # for autoversioning
+from importlib.metadata import version
+release = version('eprsim')
+# for example take major/minor
+version = '.'.join(release.split('.'))
+
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'EPRsim'
 copyright = '2025, Stefan Rein, Darien Morrow, Liam Twomey'
 author = 'Stefan Rein, Darien Morrow, Liam Twomey'
-release = '0.1.2'
-# -- Imports and Setup -------------------------------------------------------
-import sys # for autodoc
-from pathlib import Path # for autodoc
-sys.path.insert(0, str(Path('..', 'src').resolve()))
-
+release = version#__version__ 
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -23,6 +29,8 @@ extensions = [
 	'numpydoc',
 	'sphinx.ext.autodoc',
 ]
+
+numpydoc_class_members_toctree=False
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']

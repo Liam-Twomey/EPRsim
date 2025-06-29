@@ -13,8 +13,19 @@ pytest
 sphinx
     Documentation framework
 
-Updating to modern setuptools
------------------------------
+Packaging Info
+--------------
+* The package and its documentation read the package version from
+  :code:`__version__` in :code:`src/__init__.py`.
+* The :code:`pyproject.toml` file's configuration should be stable.
+* Building via :code:`python -m build`, then :code:`pip install -e .`
+  should allow changes to any package files without needing to
+  rebuild, but if any settings are changed in in :code:`__init__.py`
+  or :code:`pyproject.toml`, then the package will need to be rebuilt.
+
+
+Troubleshooting update to modern setuptools
+-------------------------------------------
 
 The package originally used the `setup.py` method to build the package. For original setyup config, see :ref:`ogSetupCode`.
 

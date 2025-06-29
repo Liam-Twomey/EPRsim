@@ -15,9 +15,10 @@ documentation for details.
     :maxdepth: 2
     :caption: Contents:
 
-    og-coverpage
+    Overview <overview>
     eprsim
     eprload
-    packaging 
-    testing
-    sphinx
+    Devel - packaging <packaging>
+    Devel - testing <testing>
+    Devel - Docs <docdoc>
+    og-coverpage
