@@ -29,11 +29,10 @@ possible.
 Current capabilities
 --------------------
 
--  Simulation of EPR spectra in fast motion,
+-  Simulation of EPR spectra in fast motion, slow, motion, and solid-state regimes.
 -  Loading of Bruker BES3T (.DSC/.DTA) files
 
-Please see the file ``EPRsim-coverpage.md`` for existing documentation
-on use of EPRsim.
+Please see the documentation `docs/_build/html/index.html` for more information on using EPRsim.
 
 Installation
 ------------
