@@ -18,3 +18,4 @@ documentation for details.
    og-coverpage
    packaging 
    testing
+   sphinx

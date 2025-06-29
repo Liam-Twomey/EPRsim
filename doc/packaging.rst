@@ -61,6 +61,16 @@ However, as it turns out that forces the automatic discovery system to use the `
    [tool.setuptools.package_dir]
    eprsim="src"
 
+Info Sources
+~~~~~~~~~~~~
+
+* Setuptools `package discovery documentation`_.
+* A `wierd corner`_ of the setuptools documentation which I only saw on the source GitHub.
+* The Python Packaging `user guide`_.
+
+.. _package discovery documentation: https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
+.. _wierd corner: https://github.com/pypa/setuptools/blob/main/docs/userguide/package_discovery.rst
+.. _user guide: https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
 
 .. _ogSetupCode:
 

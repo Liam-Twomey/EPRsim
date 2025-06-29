@@ -1,5 +1,3 @@
-.. contents::
-   :depth: 3
 ..
 
 Testing Information

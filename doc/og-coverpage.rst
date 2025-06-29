@@ -1,10 +1,6 @@
-.. contents::
-   :depth: 3
-..
-
-********************
-EPRsim documentation
-********************
+*****************************
+Original EPRsim Documentation
+*****************************
 
    This information was copied from the original PyPI page, rearranged
    for clarity by LPT.
@@ -17,7 +13,12 @@ concepts described in  [#f1]_. EPRsim is open-source and available free of
 charge.
 
 Find the full documentation at the link below:
-https://www.radicals.uni-freiburg.de/de/software ## Installation
+https://www.radicals.uni-freiburg.de/de/software 
+
+Installation
+============
+
+    Note: this information is outdated. Follow instructions on GitHub for installing from source.
 
 Install EPRsim via pip:
 
