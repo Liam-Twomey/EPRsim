@@ -29,7 +29,7 @@ possible.
 Current capabilities
 --------------------
 
--  Simulation of EPR spectra in fast motion, slow, motion, and solid-state regimes (by Stefan Rein).
+-  Simulation of EPR spectra in fast motion, slow, motion, and solid-state regimes (by Stephan Rein).
 -  Loading of Bruker BES3T (.DSC/.DTA) files (by Liam Twomey).
 
 Documentation
