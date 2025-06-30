@@ -12,7 +12,9 @@ To use the eprload class:
 
 Documentation
 =============
-.. module:: EPRload
-.. autoclass:: eprload
-    :members:
+# .. module:: EPRload
+# .. autoclass:: eprload
+#     :members:
+
+.. automodule:: EPRload
 

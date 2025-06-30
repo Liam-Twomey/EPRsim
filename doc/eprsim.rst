@@ -8,49 +8,69 @@ Basic Use
 =========
 
 
-Documentation
-=============
+EPRsim User Guide
+=================
 
 The `Parameters` object
 -----------------------
 
 .. autoclass:: Parameters
+   :members:
 
-The `Validate_Parameters` class
--------------------------------
-
-.. autoclass:: Validate_Parameters
-
-The `Simulations_Params` object
--------------------------------
-
-.. autoclass:: Simulation_Params
-
-The `Simulate`` function
-------------------------
+The `Simulate` function
+-----------------------
 
 .. autofunction:: simulate
 
-Simulation components
----------------------
+EPRsim Backend Documentation
+============================
 
-.. autofunction:: remove_permutations
-.. autofunction:: read_single_isotope_comb
-.. autofunction:: remove_sub_threshold
-.. autofunction:: get_indexvector_isotopes
-.. autofunction:: create_nucvec
-.. autofunction:: coupled_isotopes_indexvector
-.. autofunction:: new_Nucsvec_and_tensors
-.. autofunction:: check_eq_in_fast_motion
-.. autofunction:: get_isotope_combinations
-.. autofunction:: redefine_nuclear_coupling
+Fast-Motion Simulation
+----------------------
 
-Miscellaneous flags, functions, and errors
-------------------------------------------
+.. automodule:: FastMotion
+    :members:
 
-.. autofunction:: check_if_instance
-.. autofunction:: get_weighting_factor
-.. autofunction:: warningflag
+Solid-State simulation
+----------------------
 
+.. automodule:: SolidState
+   :members:
 
+Parameter Validation
+--------------------
+
+.. autoclass:: Validate_Parameters
+   :members:
+
+.. autoclass:: Simulation_Params
+   :members:
+
+Internal Simulation Utilities
+------------------------------
+
+.. autofunction:: EPRsim.remove_permutations
+.. autofunction:: EPRsim.read_single_isotope_comb
+.. autofunction:: EPRsim.remove_sub_threshold
+.. autofunction:: EPRsim.get_indexvector_isotopes
+.. autofunction:: EPRsim.create_nucvec
+.. autofunction:: EPRsim.coupled_isotopes_indexvector
+.. autofunction:: EPRsim.new_Nucsvec_and_tensors
+.. autofunction:: EPRsim.check_eq_in_fast_motion
+.. autofunction:: EPRsim.get_isotope_combinations
+.. autofunction:: EPRsim.redefine_nuclear_coupling
+
+Output utilities
+----------------
+
+.. autofunction:: EPRsim.check_if_instance
+.. autofunction:: EPRsim.get_weighting_factor
+.. autofunction:: EPRsim.warningflag
+
+The Tools module
+================
+.. module:: Tools
+.. autoclass:: physical_constants
+.. autofunction:: pseudo_field_modulation
+.. autofunction:: degree_in_rad
 

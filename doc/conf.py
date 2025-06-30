@@ -6,14 +6,14 @@
 # -- Imports and Setup -------------------------------------------------------
 import sys # for autodoc
 from pathlib import Path # for autodoc
-sys.path.insert(0, str(Path('..', 'src').resolve()))
-#from . import __version__ # for autoversioning
+sys.path.insert(0, str(Path('../src').resolve()))
+
 from importlib.metadata import version
 release = version('eprsim')
 # for example take major/minor
 version = '.'.join(release.split('.'))
 
-
+import mock # to allow building with import statements
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
@@ -26,11 +26,12 @@ release = version#__version__
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-	'numpydoc',
-	'sphinx.ext.autodoc',
+	'sphinx.ext.napoleon',
 ]
 
 numpydoc_class_members_toctree=False
+#mock_modules = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot', 'Tools',
+#	'Convolutions','Direct_conversion_to_field',]
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
