@@ -1,149 +1,76 @@
-eprsim package
-==============
+######
+EPRsim
+######
 
-Submodules
-----------
+.. module:: EPRsim
 
-eprsim module
--------------
+Basic Use
+=========
 
-.. automodule:: eprsim
+
+EPRsim User Guide
+=================
+
+The `Parameters` object
+-----------------------
+
+.. autoclass:: Parameters
    :members:
-   :show-inheritance:
-   :undoc-members:
 
-eprsim.Convolutions module
---------------------------
+The `Simulate` function
+-----------------------
 
-.. automodule:: eprsim.Convolutions
+.. autofunction:: simulate
+
+EPRsim Backend Documentation
+============================
+
+Fast-Motion Simulation
+----------------------
+
+.. automodule:: FastMotion
+    :members:
+
+Solid-State simulation
+----------------------
+
+.. automodule:: SolidState
    :members:
-   :show-inheritance:
-   :undoc-members:
 
-eprsim.Direct\_conversion\_to\_Field module
--------------------------------------------
-
-.. automodule:: eprsim.Direct_conversion_to_Field
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-eprsim.EPRload module
----------------------
-
-.. automodule:: eprsim.EPRload
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-eprsim.EPRsim module
+Parameter Validation
 --------------------
 
-.. automodule:: eprsim.EPRsim
+.. autoclass:: Validate_Parameters
    :members:
-   :show-inheritance:
-   :undoc-members:
 
-eprsim.FastMotion module
-------------------------
-
-.. automodule:: eprsim.FastMotion
+.. autoclass:: Simulation_Params
    :members:
-   :show-inheritance:
-   :undoc-members:
 
-eprsim.Hamiltonian\_Eig module
+Internal Simulation Utilities
 ------------------------------
 
-.. automodule:: eprsim.Hamiltonian_Eig
-   :members:
-   :show-inheritance:
-   :undoc-members:
+.. autofunction:: EPRsim.remove_permutations
+.. autofunction:: EPRsim.read_single_isotope_comb
+.. autofunction:: EPRsim.remove_sub_threshold
+.. autofunction:: EPRsim.get_indexvector_isotopes
+.. autofunction:: EPRsim.create_nucvec
+.. autofunction:: EPRsim.coupled_isotopes_indexvector
+.. autofunction:: EPRsim.new_Nucsvec_and_tensors
+.. autofunction:: EPRsim.check_eq_in_fast_motion
+.. autofunction:: EPRsim.get_isotope_combinations
+.. autofunction:: EPRsim.redefine_nuclear_coupling
 
-eprsim.Hamiltonian\_Point\_Group module
----------------------------------------
+Output utilities
+----------------
 
-.. automodule:: eprsim.Hamiltonian_Point_Group
-   :members:
-   :show-inheritance:
-   :undoc-members:
+.. autofunction:: EPRsim.check_if_instance
+.. autofunction:: EPRsim.get_weighting_factor
+.. autofunction:: EPRsim.warningflag
 
-eprsim.Interpolation\_lib module
---------------------------------
+The Tools module
+================
+#.. module:: Tools
+#.. autoclass:: physical_constants
+#.. autofunction:: pseudo_field_modulation
+#.. autofunction:: degree_in_rad
 
-.. automodule:: eprsim.Interpolation_lib
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-eprsim.Nucdic module
---------------------
-
-.. automodule:: eprsim.Nucdic
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-eprsim.Pauli\_generators module
--------------------------------
-
-.. automodule:: eprsim.Pauli_generators
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-eprsim.Presettings module
--------------------------
-
-.. automodule:: eprsim.Presettings
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-eprsim.SolidState module
-------------------------
-
-.. automodule:: eprsim.SolidState
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-eprsim.Tools module
--------------------
-
-.. automodule:: eprsim.Tools
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-eprsim.Validate\_input\_parameter module
-----------------------------------------
-
-.. automodule:: eprsim.Validate_input_parameter
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-eprsim.resfield\_full module
-----------------------------
-
-.. automodule:: eprsim.resfield_full
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-eprsim.spectral\_processing module
-----------------------------------
-
-.. automodule:: eprsim.spectral_processing
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-Module contents
----------------
-
-.. automodule:: eprsim
-   :members:
-   :show-inheritance:
-   :undoc-members:
