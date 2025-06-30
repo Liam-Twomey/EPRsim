@@ -7,7 +7,6 @@ Created on Sat Oct 21 14:35:34 2017
 
 import numpy as np
 
-
 def check_tensor(tensor, ani, inft, iso):
 	k = check_off_diag(tensor)
 	if not k:
@@ -29,18 +28,16 @@ def mul_and_add_tensors(mul, add, tensor):
 
 def Symmetry_Group(Par):
 	"""
-	Determin the symmetry group of a (pre-processed) Hamiltonian
+	Determine the symmetry group of a (pre-processed) Hamiltonian
 
 	 Parameters
 	 ----------
-	 Par :	   :class:`object`
-			   Object with all user-defined parameters.
-
+	 Par : `object`
+		Object with all user-defined parameters.
 
 	 See Also
 	 --------
 	 Parameters : Class of Parameters (with a full list of parameters)
-
 
 	 Notes
 	 -----
@@ -49,17 +46,15 @@ def Symmetry_Group(Par):
 	 group determines how many octants of a hemisphere are calculated
 	 and how many points, at maxmimum, of theta and phi are caluclated.
 
-	 ========  ================  ============	====================
-	 sym_grou	 Point group		Octants		   max nphi/ntheta
-	 ========  ================  ============	====================
-	  -1			 O3				   1			   4/4
-	   0		   Dhinfty			   1		  400/4  or  4/400
-	   1			 D2h			   1			  400/400
-	   2			 C2h			   2			  800/400
-	   4			 Ci				   4			 1600/400
-	 ========  ================  ===========	====================
-
-
+	 =========  ============  ======== ====================
+	 Sym group  Point group   Octants  max nphi/ntheta
+	 =========  ============  ======== ====================
+	  -1        O3            1        4/4
+	   0        Dhinfty       1        400/4  or  4/400
+	   1        D2h           1        400/400
+	   2        C2h           2        800/400
+	   4        Ci            4        1600/400
+	 =========  ============  ======== ====================
 
 	 Examples
 	 --------

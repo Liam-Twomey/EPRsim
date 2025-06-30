@@ -13,11 +13,11 @@ Copyright, Stephan Rein, 2019
 import numpy as np
 import time as time
 from copy import copy
-from eprsim import Validate_input_parameter as Val
-from eprsim import Nucdic as Nucdic
-from eprsim import Tools as tool
-from eprsim import FastMotion as FM
-from eprsim import SolidState as SO
+from . import Validate_input_parameter as Val
+from . import Nucdic as Nucdic
+from . import Tools as tool
+from . import FastMotion as FM
+from . import SolidState as SO
 
 # Load physical constans
 con = tool.physical_constants()
@@ -1046,6 +1046,17 @@ class Validate_Parameters:
 
 
 class Simulation_Params:
+	"""
+	A class object which holds the parameters for a simulation.
+
+	Parameters
+	----------
+	Par:
+		A Parameters object
+	k
+		Index into the _Nucsvec attribute of Par.
+		
+	"""
     def __init__(self, Par, k):
         self._Nucsvec = Par._Nucsvec[k]
         self._equiv = Par._equiv

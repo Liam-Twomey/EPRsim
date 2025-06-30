@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#! python3
 # -*- coding: utf-8 -*-
 """
 A collection of functions, used for EPR data processing
@@ -867,7 +867,7 @@ def plot(field, spectrum, font=11, fignum=1):
 		   Font size of the axis labels.
 
 	Notes
-	-------
+	-----
 	The function relies on the matplotlib data visualization framework.
 	The function creates high-quality figures of cwEPR spectra. Margins
 	are set adaptively. The fontsize can be adjusted if necessary.

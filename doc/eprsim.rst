@@ -69,8 +69,8 @@ Output utilities
 
 The Tools module
 ================
-.. module:: Tools
-.. autoclass:: physical_constants
-.. autofunction:: pseudo_field_modulation
-.. autofunction:: degree_in_rad
+#.. module:: Tools
+#.. autoclass:: physical_constants
+#.. autofunction:: pseudo_field_modulation
+#.. autofunction:: degree_in_rad
 

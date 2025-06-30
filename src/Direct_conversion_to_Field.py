@@ -22,8 +22,8 @@ voigt_convolution_Lorentz()
 
 import numpy as np
 import math as math
-from . import Convolutions
 from scipy import stats
+from . import Convolutions
 
 voigt_convolution_Gauss = Convolutions.voigt_convolution_Gauss
 voigt_convolution_Lorentz = Convolutions.voigt_convolution_Lorentz

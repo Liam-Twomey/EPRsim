@@ -206,15 +206,14 @@ def nuclear_properties(nucleus, style=1):
 	-------
 	The different styles are listed in the table.
 
-	=======  ================  =================   ================
-	 style		prop[0]			   prop[1]				prop[2]
-	=======  ================  =================   ================
-	style=1   gyro. in MHz/mT	 multiplicity	   nat. abundance
-	style=2   gyro. in MHz/mT  spin quantum num.   nat. abundance
-	style=3  nuclear g-factor	 multiplicity	   nat. abundance
-	style=4  nuclear g-factor  spin quantum num.   nat. abundance
-	=======  ================  =================   ================
-
+	=======  ================ ================= ================
+	style    prop[0]          prop[1]           prop[2]
+	=======  ================ ================= ================
+	style=1  gyro. in MHz/mT  multiplicity      nat. abundance
+	style=2  gyro. in MHz/mT  spin quantum num. nat. abundance
+	style=3  nuclear g-factor multiplicity      nat. abundance
+	style=4  nuclear g-factor spin quantum num. nat. abundance
+	=======  ================ ================= ================
 
 	Examples
 	--------

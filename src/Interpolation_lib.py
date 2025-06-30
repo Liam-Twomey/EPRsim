@@ -7,8 +7,8 @@ for field or angle grids. Mostly resonance fields and corresponding
 intensities are interpolated over theta and phi to obtain a finer grid without
 the need of expensive quantum chemical calculations.
 As every calculation runs through the function
- spline_interpolation_angle_grid() this is used to weight the intensities
- with a probality function either about theta or ph (or both).
+spline_interpolation_angle_grid() this is used to weight the intensities
+with a probality function either about theta or ph (or both).
 
 Main functions:
 spline_interpolation_angle_grid()
@@ -29,12 +29,26 @@ from scipy import interpolate
 
 
 def spline_interpolation_angle_grid(Par, intensity, res):
-	"""spline_interpolation_angle_grid(Par,Par, intensity, res,Par._nphi,Par._ntheta):
+	"""
+	
+	Parameters
+	----------
+	Par
+		must have Par._nphi and Par._ntheta
+	intensity
 
-	input: Par,Par, intensity, res,Par._nphi,Par._ntheta
+	Returns
+	-------
+	intensity
 
-	output: intensity, res, theta, phi
+	res
 
+	theta
+
+	phi
+
+	Notes
+	-----
 	Algorithm:
 	The number of theta and phi values are taken to make a rectangular
 	homoneneous grid over theta and phi.
@@ -92,11 +106,20 @@ def spline_interpolation_angle_grid(Par, intensity, res):
 
 
 def make_orientationdepency_theta(intensity, theta, pos_theta, sigma_theta):
-	"""make_orientationdepency_theta(intensity,theta,pos_theta,sigma_theta)
+	"""
+	Parameters
+	----------
+	intensity
 
-	input: intensity,theta,pos_theta,sigma_theta
+	theta
 
-	output: intensity
+	pos_theta
+
+	sigma_theta
+
+	Returns
+	-------
+	intensity
 
 	Algorithm:
 	Makes a weighting of the unbiased intensities with a Gaussian distribution

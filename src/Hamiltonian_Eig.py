@@ -50,16 +50,34 @@ def dec_identity(ob):
 
 def create_Bilinear_Hamiltonian(Tensor, S, I, eulermatrix):
 	"""
-	input: Tensor,Par.Pauli,Par.I, phi, theta, psi = 0
+	Parameter
+	---------
+	Tensor
 
-	output: Ham
+	Par
 
+	Pauli
+
+	Par.I
+	phi
+
+	theta
+
+	psi = 0
+	
+	Returns
+	-------
+	Ham
+		Hamiltonian object
+
+	Notes
+	-----
 	Algorithm:
 	Create an arbitrary bilinear interaction Hamiltonian between the spin
 	vector Par.Pauli and Par.I and the interaction matrix Tensor.
 	Rotates tensor for a given theta, phi and psi angle (default is zero).
 	T' = Tensor(phi,theta,psi)
-	H = S*T'*Par.I
+	H = S\*T'\*Par.I
 	Returns the bilinear Zeeman Hamiltonian.
 
 	(c) Stephan Rein, 31.10.2017
@@ -89,7 +107,7 @@ def create_linear_Hamiltonian(Tensor, S, eulermatrix, z=True):
 	multiplications are spared compared to a bilinear interaction.
 	Rotates tensor for a given theta, phi and psi angle (default is zero).
 	T' = Tensor(phi,theta,psi)
-	H = S*T'*u_i
+	H = S\*T'\*u_i
 	with u_i the i-th component of a canoncial vector (either x or z)
 	Returns the linear Zeeman Hamiltonian for a unit vector on one side.
 

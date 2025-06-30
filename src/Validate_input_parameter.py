@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#! python3
 # -*- coding: utf-8 -*-
 """
 Created on Mon Mar 11 10:14:47 2019
