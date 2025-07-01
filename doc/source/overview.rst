@@ -2,19 +2,24 @@
 Project overview
 ****************
 
-What is EPRsim
-==============
+What is EPRsim ?
+================
 
 EPRsim is a Python 3 package for the interpretation of EPR spectra. It consists of
-two major components:
+three major components:
 
 EPRsim
     Functions for simulation of EPR spectra; currently limited to CW spectra.
 EPRload
     A class for loading experimental EPR data; currently limited to Bruker
     and Specman data.
+Tools
+    Miscellaneous utilities for handling experimental and simulated EPR data.
 
-Both components follow the conventions of Stefan Stoll's `EasySpin`_ where possible.
+These components follow the conventions of Stefan Stoll's `EasySpin`_ where possible.
+All other compoents of this package and the documentation are private modules utilized
+by the EPRsim module, and don't apply to the end user.
+
 EPRsim was originally developed by Stephan Rein in the lab of Prof. Dr. Stefan Weber.
 Although it was slightly intimidating to be the first non Ste(f|ph)an to work on
 these projects, EPRload was adapted from the EasySpin implementation by Liam Twomey,
