@@ -13,10 +13,21 @@ EPRsim documentation
     Overview <overview>
     eprsim
     eprload
+    tools
+    presettings
     fastmotion
     solidstate
-    tools
-    Devel - packaging <packaging>
-    Devel - testing <testing>
-    Devel - Docs <docdoc>
+    nucdic
+    validate_input
+    convolutions
+    pauli_gen
+    resfield
+    conv2field
+    hamil_eig
+    hamil_pointgroup
+    interpolation
+    spectral_proc
+    Documenting <docdoc>
+    Packaging <packaging>
+    Testing <testing>
     og-coverpage

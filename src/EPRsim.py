@@ -1005,6 +1005,10 @@ class Validate_Parameters:
 	--------
 	getInfo:
 		Get information about a forthcoming simulation of a defined Parameter object.
+	validate_spin_system:
+		Validate parameters in a spin system
+	redefine_nuclear_coupling
+	read_single_isotope_comb
 
 	"""
 

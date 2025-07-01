@@ -154,16 +154,24 @@ def make_orientationdepency_theta(intensity, theta, pos_theta, sigma_theta):
 
 
 def make_orientationdepency_phi(Par, intensity, phi, pos_phi, sigma_phi):
-	"""make_orientationdepency_phi(intensity,phi,pos_phi,sigma_phi)
-
-	input: intensity,phi,pos_phi,sigma_phi
-
-	output: intensity
-
-	Algorithm:
+	"""
 	Makes a weighting of the unbiased intensities with a Gaussian distribution
 	about a given phi angle pos_phi. The standard deviation of the Gaussian
 	is given by sigma_phi.
+	
+	Parameters
+	----------
+	intensity
+	phi
+	pos_phi
+	sigma_phi
+
+	Returns
+	-------
+	intensity
+
+	Notes
+	-----
 	The output is a intessity distribtion with:
 	I = I*P(phi)  and P(phi) = exp(-(phi-pos_phi)^2/sigma_phi^2).
 	It is calculated in a vectorized fashion for all theta values and
@@ -183,14 +191,25 @@ def make_orientationdepency_phi(Par, intensity, phi, pos_phi, sigma_phi):
 	return intensity
 
 
-def spline_interpolation_analytical_resInt(
-	Par, intensity, resonance, ntransitions, phi
-):
-	"""spline_interpolation_analytical_resInt(intensity,resonance,ntransitions,Par._ntheta,Par._nphi,phi)
+def spline_interpolation_analytical_resInt(Par, intensity, resonance, ntransitions, phi):
+	"""
+	Creates spile interpolation for a triangle grid used in the projective
+	spectrum reconstruction method.
 
-	input: intensity,resonance,ntransitions,Par._ntheta,Par._nphi,phi
+	Parameters
+	----------
+	Par
+		To read _ntheta, _nphi values
+	intensity
+	resonance
+	ntransitions
+	phi 
 
-	output: resonance, intensity, phi_proj
+	Returns
+	-------
+	resonance
+	intensity
+	phi_proj
 
 	Algorithm:
 	Creates spile interpolation for a triangle grid used in the projective
@@ -234,15 +253,21 @@ def spline_interpolation_analytical_resInt(
 
 
 def spline_interpol_phi_proj(Par, phimax):
-	"""spline_interpol_phi_proj(Par._ntheta, phimax)
-
-	input: Par._ntheta, phimax
-
-	output: phi_proj
-
-	Algorithm:
+	"""
 	Creates spile interpolation for a triangle grid.
-	Therefore it runs for phi between 0 and pi/2:
+
+	Parameters
+	----------
+	Par
+		_ntheta, phimax
+
+	Returns
+	-------
+	phi_proj
+
+	Notes
+	-----
+	Interpolation runs for phi between 0 and pi/2:
 	i = 0,1,2 ....., n	and   n = 1, ..... Par._ntheta-1
 	phi(i,n) = (pi/2)*i/n
 
@@ -256,17 +281,24 @@ def spline_interpol_phi_proj(Par, phimax):
 
 
 def field_interpol(field, signal, Par):
-	"""field_interpol(field,signal,Par,Par)
-
-	input: field,signal,Par,Par
-
-	output: field,signal
-
-	Algorithm:
+	"""
 	Takes aribtray spectrum/field functions and returns the
 	field and corresponding spectrum for the given user range and
 	the user given number of points.
 
+	Parameters
+	----------
+	field
+	signal
+	Par
+	
+	Returns
+	-------
+	field
+	signal
+
+	Notes
+	-----
 	(c) Stephan Rein, University of Freiburg, 31.10.2017
 	"""
 	# Allocation
