@@ -401,17 +401,16 @@ class eprload:
 
 	def readBinaryDataMatrix(self,fileExt,byteOrder,numberFormat,isComplex) -> np.ndarray:
 		'''
-		Method called by :meth:`loadBES3T` to actually read in the information from
-		a .DTA file.
-
+		Method called by loadBES3T to actually read in the information from a .DTA file.
+			
 		Parameters
 		----------
 		fileExt:str
 			File extension of the .DTA file to be read (i.e. .DTA or .dta)
 		byteOrder: str
-			String denoting the endianness of the data to be read, either '>' for big-endian, and '<' for little-endian.
+			String denoting the endianness of the data to be read, either > for big-endian, and <for little-endian.
 		numberFormat: str
-			Numpy-formatted number format string, i.e. 'i4' for int32, 'f8' for float64. 
+			Numpy-formatted number format string, i.e. i4 for int32, f8 for float64. 
 		isComplex: list
 			List of bool, one item per experiment dimension. True if the axis is complex, False if not.
 
@@ -419,14 +418,14 @@ class eprload:
 		-------
 		
 		data: np.ndarray
-			A nx*ny*nz array of the data from each 
-
+			A :code:`nx*ny*nz` array of the data from each 
+		
 		Notes
 		-----
-
-		#. Open file `self.fileName.fileExt` using `np.readfile` with format byteOrder+numberFormat.
-			* Real and imaginary data are interspersed, so it just reads everything into an
-			  nx*ny*nz matrix (i.e. total number of points in all dimensions.
+		#. Open file :code:`self.fileName.fileExt` using :code:`np.readfile` with
+		   format byteOrder+numberFormat. Real and imaginary data are interspersed,
+		   so it just reads everything into an `nx*ny*nz` matrix (i.e. total number of
+		   points in all dimensions.
 		#. This data is then np.reshape()d into a :math:`(nRealsPerPoint :times (nx*ny*nz))`
 		   array, so each row is a different real value index, and each column is a new
 		   datapoint. 
@@ -436,7 +435,7 @@ class eprload:
 			  and if a row isComplex, then it and the row after it are combined into an
 			  np.complex128 complex number.
 			* If the row is not complex, then it is left alone.
-		#. The resulting matrix is then reshaped to an array of [[Absc X],[Absc Y],[Absc Z]].
+		#. The resulting matrix is then reshaped to an array of :code:`[[Absc X],[Absc Y],[Absc Z]]`.
 		
 		'''
 
@@ -464,8 +463,8 @@ class eprload:
 			A class method of eprload(), called when a scaling factor is passed
 			to the constructor in the *scaling* argument.
 			
-			Parameters
-			----------
+			Notes
+			-----
 
 			===== =============== =====  =============================
 			Value Scale By        Units  Limitations

@@ -8,7 +8,7 @@ Basic Use
 
 Documentation
 =============
-.. automodule:: modname
+.. automodule:: src.modname
     :members:
 
 

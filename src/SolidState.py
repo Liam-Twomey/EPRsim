@@ -1,7 +1,7 @@
 #! python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue Feb	7 09:58:57 2017
+Created on Tue Feb 7 09:58:57 2017
 
 @author: Stephan Rein
 
@@ -30,6 +30,21 @@ pseudo_modulation = Convolutions.pseudo_modulation
 
 
 def solid_state_kernel(Par1, SimPar1):
+	"""
+	Kernel for solid state simulation.
+
+	Parameters
+	----------
+	Par1
+	SimPar1
+
+	Returns
+	-------
+	magnetic_field
+	spectrum
+	warning
+
+	"""
 	Par = deepcopy(Par1)
 	SimPar = deepcopy(SimPar1)
 	# st= time.time()
@@ -60,6 +75,10 @@ def solid_state_kernel(Par1, SimPar1):
 
 
 def print_info(Par):
+	"""
+	Prints info about the solid state simulation run.
+
+	"""
 	print("\n*******************************************")
 	print("*************RUN SOLID STATE*************")
 	print("*******************************************\n")

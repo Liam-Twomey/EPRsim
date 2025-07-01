@@ -16,8 +16,8 @@ from copy import copy
 from . import Validate_input_parameter as Val
 from . import Nucdic as Nucdic
 from . import Tools as tool
-from . import FastMotion as FM
-from . import SolidState as SO
+from . import FastMotion as fm
+from . import SolidState as so
 
 # Load physical constans
 con = tool.physical_constants()
@@ -182,9 +182,9 @@ def simulate(Parameters):
         for k in range(0, len(Param.Sim_objects)):
             SimPar = Param.Sim_objects[k]
             if SimPar.motion == "fast":
-                Bfield, Int, warning = FM.fast_motion_kernel(Par[i], SimPar)
+                Bfield, Int, warning = fm.fast_motion_kernel(Par[i], SimPar)
             else:
-                Bfield, Int, warning = SO.solid_state_kernel(Par[i], SimPar)
+                Bfield, Int, warning = so.solid_state_kernel(Par[i], SimPar)
             if warning == 1:
                 spectrum = Int
                 break

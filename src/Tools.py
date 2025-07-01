@@ -14,7 +14,49 @@ from scipy import signal
 
 class physical_constants:
 	"""
-	Collection of constants used in EPR simulations
+	Collection of constants used in EPR simulations.
+
+	Attributes
+	----------
+	kb
+		Boltzman constant; 1.38064852e-23 J/K
+	T 
+		Standard temperature; 300.0 K
+	h
+		Planck constant; 6.62607015e-34 J*s
+	J2Hz
+		Joule to Hz conversion; 1.50919e33
+	beta
+		Bohr magenton; 9.27401007e-24 J/T
+	beta_n
+		Nuclear Bohr magneton; 5.050783699e-27 J/T
+	g_free
+		g-factor of the free electron; 2.0023193
+	m0
+		Rest mass of the electron. 9.10938356e-31 kg
+	MHz2mT
+		MHz to mT conversion. (1e9 * `h`) / (`g_free` * `beta`)
+	mT2MHz
+		mT to MHz conversion; 1 / `MHz2mT`
+	hbar
+		Planks constant in angular frequencies; `h` / (2 * pi)
+	g_n
+		Nuclear g-factor for a proton; 5.5856946803
+	eps0
+		Electric constant in (A*s)/(V*m); 8.85417e-12
+	T2mT
+		T to mT conversion; 1e3
+	mT2T 
+		mT to T conversion; 1e-3
+	GHz2Hz
+		GHz to Hz conversion; 1e9
+	Hz2GHz
+		Hz to GHz conversion; 1e-9
+	Hz2MHz
+		Hz to MHz conversion; 1e-6
+	MHz2Hz
+		MHz to Hz conversion; 1e6
+
 	"""
 
 	def __init__(self):
@@ -57,7 +99,7 @@ class physical_constants:
 
 	def print_all_constants(self):
 		"""
-		Prints a list of available constants and their meaning
+		Prints a list of available constants and their meaning.
 
 		Examples
 		--------
@@ -80,7 +122,7 @@ class physical_constants:
 		INFORMATION ABOUT ALL CONSTANTS:
 		kb:		 Boltzman constant in J/K
 		T:		 Standard temperature in K
-		h:		 Plank constant in J*s
+		h:		 Plank constant in J*si
 		J2Hz:	 Joule to Hertz
 		beta:	 Bohr magenton in J/T
 		beta_n:  Nuclear Bohr magneton in J/T
@@ -134,20 +176,19 @@ def pseudo_field_modulation(modamp, field, spectrum):
 
 	Parameters
 	----------
-	amp :	:class:`float`
-			Modulation amplitude in mT.
+	amp: float
+		Modulation amplitude in mT.
 
-	field : :class:`numpy.ndarray`
-			Magnetic field vector.
+	field: numpy.ndarray
+		Magnetic field vector.
 
-	spc :	:class:`numpy.ndarray`
-			Signal vector of the EPR signal.
-
+	spc :numpy.ndarray
+		Signal vector of the EPR signal.
 
 	Returns
 	-------
-	spcm :	:class:`numpy.ndarray`
-			Field modulated intesity vector of the EPR signal.
+	spcm :numpy.ndarray
+		Field modulated intesity vector of the EPR signal.
 
 	Notes
 	-----
@@ -167,16 +208,15 @@ def pseudo_field_modulation(modamp, field, spectrum):
 			  \\dfrac{(-1)^m}{m! \\Gamma (m+2)}
 			  \\left(\\dfrac{a_0k}{2}\\right)^{2m+1},
 
-	where :math:`\\Gamma` is the Gamma function.
+	where :math:`\\Gamma` is the Gamma function. [1]_
 	Note that non-zero intenities of the signal vector at the edges of the
 	magetic field will lead to artifacts.
 
 
 	References
 	----------
-	[1] : J. S. Hyde, M. Pasenkiewicz-Gierula, A. Jesmanowicz, W. E. Antholine,
-	Appl. Magn. Reson. 1990, 1, 483-496.
-
+	.. [1] : J. S. Hyde, M. Pasenkiewicz-Gierula, A. Jesmanowicz, W. E. Antholine,
+	   Appl. Magn. Reson. 1990, 1, 483-496.
 
 	Examples
 	--------
@@ -187,6 +227,7 @@ def pseudo_field_modulation(modamp, field, spectrum):
 	>>> field, spc = np.loadtxt("Absorptive_EPR_spectrum.txt")
 	>>> modAmp = 0.1
 	>>> spc_mod = tool.pseudo_field_modulation(modAmp, field, spc)
+
 	"""
 	modamp = max(0.001, modamp)
 	# Set up x-axis in inverse field domain
@@ -213,15 +254,15 @@ def GHz2mT(freq, giso=None):
 
 	Parameters
 	----------
-	freq :	:class:`numpy.ndarray` or :class:`float`
-			Frequency in GHz.
-	giso :	 :class:`float`, optional
-			Isotropic g-value.
+	freq: numpy.ndarray or float
+		Frequency in GHz.
+	giso: float, optional
+		Isotropic g-value.
 
 	Returns
 	-------
-	field : :class:`numpy.ndarray` or :class:`float`
-			Magnetic field in mT.
+	field: numpy.ndarray float
+		Magnetic field in mT.
 
 	Notes
 	-----
@@ -273,14 +314,14 @@ def mT2GHz(field, giso=None):
 	Parameters
 	----------
 	field : :class:`numpy.ndarray` or :class:`float`
-			Magnetic field in mT.
-	giso :	 :class:`float`, optional
-			Isotropic g-value.
+		Magnetic field in mT.
+	giso : :class:`float`, optional
+		Isotropic g-value.
 
 	Returns
 	-------
-	freq  : :class:`numpy.ndarray` or :class:`float`
-			Frequency in GHz.
+	freq: :class:`numpy.ndarray` or :class:`float`
+		Frequency in GHz.
 
 	Notes
 	-----
@@ -347,7 +388,7 @@ def modulation_amplitude(modamp, field, spectrum):
 
 	Returns
 	-------
-	spectrumm : :class:`numpy.ndarray`
+	spectrum : :class:`numpy.ndarray`
 				Intensity vector of the EPR signal after taking the modulation
 				amplitude into account.
 
@@ -751,19 +792,20 @@ def add_noise(spc, SNR):
 	>>> lw = [0.1, 0.1]
 	>>> tcorr = 7e-10
 	>> Param2 = sim.Parameters(mwFreq=mwFreq, A=A, Nucs=Nucs, g=g, Range=Range,
-							  tcorr=tcorr, lw=lw)
+		tcorr=tcorr, lw=lw)
 	>>> field, spc = sim.simulate(Param2)
 	>>> tool.plot(field, spc)
 	>>> spc = tool.add_noise(spc, 10)
 	>>> tool.plot(field, spc)
+	
+	..
+		.. figure:: ../docfigures/Noisfree.png
+			:width: 60 %
+			:align: center
 
-	#.. figure:: ../docfigures/Noisfree.png
-	#	:width: 60 %
-	#	:align: center
-
-	#.. figure:: ../docfigures/SNR_10.png
-	#	:width: 60 %
-	#	:align: center
+		.. figure:: ../docfigures/SNR_10.png
+			:width: 60 %
+			:align: center
 
 	Example for adding noise directly by passing the information to
 	the simulation routine.
@@ -782,10 +824,11 @@ def add_noise(spc, SNR):
 							  tcorr=tcorr, lw=lw, SNR=SNR)
 	>>> field, spc = sim.simulate(Param)
 	>>> tool.plot(field, spc)
-
-	#.. figure:: ../docfigures/SNR_30.png
-	#	:width: 60 %
-	#	:align: center
+	
+	..
+		.. figure:: ../docfigures/SNR_30.png
+			:width: 60 %
+			:align: center
 	"""
 	maxSNR = np.max(np.abs(spc))
 	lenghtspc = len(spc)
@@ -796,14 +839,23 @@ def add_noise(spc, SNR):
 
 def Eulermatrix(phi, theta, psi=0):
 	"""
-	input: tensor, phi, theta
+	Euler transformation using y-convention.
+	
+	Parameters
+	----------
+	tensor
+	phi
+	theta
 
-	output: rotatedTensor
+	Returns
+	-------
+	rotatedTensor
 
-	Algorithm:
-	Euler transformation using y-convention. The euler matrix is set up
-	with the given angles. Phi and theta is necessary, psi is optional.
-	The Euler matrix is returned
+	Notes
+	-----
+	The euler matrix is set up with the given angles. Phi and theta is necessary,
+	psi is optional. The Euler matrix is returned.
+
 	"""
 	# Allocations
 	cosphi = np.cos(phi)
@@ -885,9 +937,10 @@ def plot(field, spectrum, font=11, fignum=1):
 	>>> field, spc = sim.simulate(Param)
 	>>> tool.plot(field, spc)
 
-	#.. figure:: ../docfigures/Plot_1_example.png
-	#	:width: 60 %
-	#	:align: center
+	..
+		.. figure:: ../docfigures/Plot_1_example.png
+			:width: 60 %
+			:align: center
 
 	Plot of a spimple isotropic nixtroxide EPR spectrum with adjusted
 	label-fontsize.
@@ -900,9 +953,10 @@ def plot(field, spectrum, font=11, fignum=1):
 	>>> field, spc = sim.simulate(Param)
 	>>> tool.plot(field, spc, 14)
 
-	#.. figure:: ../docfigures/Plot_2_example.png
-	#	:width: 60 %
-	#	:align: center
+	..
+		.. figure:: ../docfigures/Plot_2_example.png
+			:width: 60 %
+			:align: center
 
 	"""
 
