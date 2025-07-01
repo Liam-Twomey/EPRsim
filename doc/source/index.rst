@@ -11,6 +11,7 @@ EPRsim documentation
     :caption: Contents:
 
     Overview <overview>
+    eprsim
     eprload
     fastmotion
     solidstate

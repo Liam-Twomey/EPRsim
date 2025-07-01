@@ -208,3 +208,6 @@ of the project, then paths to modules have to be defined from that directory. So
 
  I have no idea what I changed (other than making sure there were no empty
  docstrings), and now it works?
+
+ Oh my god it's the tabbing again. Somehow EPRsim.py went back to tabbing by
+ spaces, and vim :code:`:retab!` fixed everything.
