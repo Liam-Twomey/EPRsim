@@ -1,4 +1,4 @@
-from eprsim import EPRsim#, Tools
+from eprsim import EPRsim #, Tools
 from pytest import raises
 import numpy as np
 #from test.data_helper import *
@@ -37,15 +37,15 @@ def sim_io_helper(testName:str,B0:np.ndarray, spc:np.ndarray,fPath:str, write=Fa
 		(B0 status, spc status). If reading, statuses will be the data, if writing
 		each value will be "written".
 	"""
-	BFile   = fPath+testName+"_B.bin"
-	spcFile = fPath+testName+"_spc.bin"
+	BFile   = fPath+testName+"_B.npy"
+	spcFile = fPath+testName+"_spc.npy"
 	if write:
-		B0.tofile(BFile)
-		spc.tofile(spcFile)
+		np.save(BFile, B0)
+		np.save(spcFile, spc)
 		return ("written", "written")
 	else:
-		Bt   = np.fromfile(BFile)
-		spct = np.fromfile(spcFile) 
+		Bt   = np.load(BFile)
+		spct = np.load(spcFile) 
 		return (Bt,spct)
 
 def sim_diff(BSim,SSim,BRef,SRef,Tol=0.001):

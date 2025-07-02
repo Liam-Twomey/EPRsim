@@ -6,21 +6,23 @@ from pathlib import Path
 import numpy as np
 import pytest as pt
 
-
 baseDir = "./eprfiles"
 
-### load all filenames
+def getFiles(patterns:list,path:Path):
+	files = []
+	for e in patterns:
+		files += list(path.rglob(e))
+	return files
 
+### find all filenames
 #allExt = ['*.dsc','*.dta','*.DSC','*.DTA', '*.spc','*.par','*.PAR','*.SPC','*.eco', '*.d00','*.d01']
-implExt = ['*.dsc','*.dta','*.DSC','*.DTA']#, '*.d01','.exp'] # implemented file extensions
+bExt = ['*.dsc','*.dta','*.DSC','*.DTA'] # bruker file extensions
+smExt = ['*.d01','.exp'] # specman file extensions
 srchPath = Path(baseDir)
-impFiles = [] 
-for ext in implExt:
-	impFiles = impFiles + list(srchPath.rglob(ext))
-print('files:',)
+bFiles = getFiles(bExt, srchPath)
+smFiles = getFiles(smExt,srchPath)
 
 #### Testing Bruker file loading
-
 def test_bruker_object_gen():
 	return
 
@@ -35,14 +37,14 @@ def test_bruker_object_gen():
 #			eprload(i)
 
 def test_esfmt():
-	x = eprload(impFiles[0]).esfmt()
+	x = eprload(bFiles[0]).esfmt()
 	assert(type(x) is tuple)
 	assert(len(x) == 3)
 	assert(type(x[0]) is np.ndarray)
 	assert(type(x[1]) is np.ndarray)
 	assert(type(x[2]) is dict)
 
-def test_parse():
+def test_parse_dsc():
 	simpleFiles = [baseDir + "/bes3t/strong1.dta", baseDir + "/esp/strong1esp.spc"]
 	sf1 = eprload(simpleFiles[0])
 	assert np.isreal(sf1.Param["XPTS"])
@@ -53,6 +55,7 @@ def test_parse():
 		assert np.isreal(sf2.Param["MF"])
 		assert np.isreal(sf2.Param["GST"])
 		assert np.isreal(sf2.Param["MP"])
+
 #def test_fileload():
 #	ext = ['*.dsc','*.dta','*.DSC','*.DTA', '*.spc','*.par',
 #		'*.PAR','*.SPC','*.eco', '*.d00','*.d01']

@@ -2,11 +2,11 @@
 # Author: Liam Twomey
 
 from pathlib import Path,PurePath
-from re import sub,match,search
+import re
 import numpy as np
-#from sre_constants import CHARSET
 from warnings import warn
 from pprint import pprint, pformat
+import tomllib
 
 # all logic adapted from Stefan Stoll's EasySpin.
 class eprload:
@@ -36,7 +36,7 @@ class eprload:
 		#.. attr:: Par
 		#	Experimental parameters read from parameter file, often called "P".
 	
-    '''
+	'''
 	def __init__(self, fileName:(str | Path), scaling:str='1',verbose:bool=False): 
 		self.filePath = Path(fileName) #if already a Path this won't effect anything
 		self.fileExt = self.filePath.suffix
@@ -57,7 +57,7 @@ class eprload:
 		Allows for printing of the class object.
 
 		'''
-		return 	"Abscissa:\n"+pformat(self.Absc,width=40)+"\nSignal:\n"+pformat(self.Spec,indent=4,width=40)+\
+		return	"Abscissa:\n"+pformat(self.Absc,width=40)+"\nSignal:\n"+pformat(self.Spec,indent=4,width=40)+\
 			"\nParameters:\n"+pformat(self.Param,indent=4,width=80)+"\nInternal values:"+"\n\tFilePath: "+str(self.filePath)+\
 			"\n\tFile Extension: "+str(self.fileExt)+"\n\tFile Extension Case: "+str(self.extCase).replace('0','Lower').replace('1','Upper')+\
 			"\n\tVerbose: "+str(self.verbose)+"\n\tScaling: "+str(self.scaling[0]).replace('1','None')+'\n\tAxis complexity is: '+\
@@ -170,9 +170,9 @@ class eprload:
 					raise RuntimeError("Invalid scaling option supplied. Valid options are: N,P,G,T,C.")
 			case '.D01':
 				self.vprint('File type is SpecMan')
-				raise NotImplementedError("File type {FileFormat} not yet implemented.")
-				#if self.scaling[0]!='1':
-				#	warn("Scaling not supported for this filetype.")
+				if self.scaling[0]!='1':
+					warn("Scaling not supported for this filetype.")
+				self.loadSpecMan()
 			case ('.PAR'|'.SPC'|'.SPE'|'.XML'|'.ESR'|'.DAT'|'.JSON'|'.ECO'|'.PLT'|'.SPK'|'.REF'|'.D00'):
 				#Cover all other file formats 
 				raise NotImplementedError("File type {FileFormat} not yet implemented and does not have a roadmap. Contact maintainers if you need it implemented.")
@@ -182,7 +182,7 @@ class eprload:
 					identity = fptr.readline(16) # first 16 bytes = 16 ascii/utf-8 characters.
 				iddc = identity.decode('latin1')
 				try:
-					isJeol = search('^spin|^cAcqu|^endor|^pAcqu|^cidep|^sod|^iso|^ani',iddc).group()
+					isJeol = re.search('^spin|^cAcqu|^endor|^pAcqu|^cidep|^sod|^iso|^ani',iddc).group()
 					if len(isJeol) >= 0:
 						self.vprint('File type is JEOL')
 						if self.scaling[0]!='1':
@@ -194,12 +194,24 @@ class eprload:
 				else:
 					raise NotImplementedError(f"Unsupported file extension {self.fileExt}")
 
-# Parse arguments
+#### LOAD BRUKER BE3T ####
+
+
 	def loadBES3T(self) -> None:
 		'''
 		File loading for BES3T (Bruker EPR Standard for Spectrum Storage and Transfer)
 		format. Interpreter based on BES3T version 1.2 (Xepr 2.1).
+	
+		Parameters
+		----------
+		self.filePath
+		self.extCase
+
 		
+		Returns
+		-------
+		None. Sets the self.Absc, self.Spec, and self.Signal attributes.
+
 		Notes
 		-----
 
@@ -210,30 +222,9 @@ class eprload:
 			* .DTA: data file
 
 		'''
-#		BES3TParamLoad()
-#		BES3TParamParse()
+		self.Param = self._readDSC()
+	#	self.Spec = self._load
 
-#	def BES3TParamLoad(self):
-		self.Param = {}
-		dscExt = ['.DSC' if self.extCase else '.dsc'][0]
-		self.vprint(f"Reading parameters from {dscExt} file to self.Param")
-		with open(self.filePath.with_suffix(dscExt)) as tmpf:
-			lines = tmpf.readlines()
-			for line in lines:
-				if (not match(r"[*,#]",line)) and (len(line) > 0):
-					tmpln = sub(r"\s+",' ',line).split()
-					for attr in range(len(tmpln)):
-						#cast to ints and floats where possible
-						try:
-							tmpln[attr]  = int(tmpln[attr])
-						except ValueError:
-							try:
-								tmpln[attr] = float(tmpln[attr])
-							except ValueError:
-								None
-					# this returns all keys as lists of length 1 or longer.
-					if len(tmpln[1:]) > 0:
-						self.Param[tmpln[0]] = tmpln[1:]
 	
 #	def BES3TParamParse(self):
 		self.vprint('Determining spectrum size and properties')
@@ -270,44 +261,50 @@ class eprload:
 		# big-endian (MSB first), Intel-based system little-endian (LSB first).
 		if "BSEQ" in self.Param:
 			if self.Param["BSEQ"][0]=='BIG':
-				self.byteOrder = '>'
+				byteOrder = '>'
 			elif self.Param["BSEQ"][0]=="LIT":
-				self.byteOrder = '<'
+				byteOrder = '<'
 			else:
+				byteOrder = ''
 				"Unknown byte order specified by BSEQ keyword of {filename}"
 		else:
 			warn('Keyword BSEQ not found in .DSC file! Assuming BSEQ=LIT.')
-			self.byteOrder = '<'
-		# IRFMT: Item Real Format
-		# IIFMT: Item Imaginary Format
+			byteOrder = '<'
+		self.byteOrder = byteOrder		
 		# Data format tag of BES3T is IRFMT for the real part and IIFMT
 		# for the imaginary part.
-		if "IRFMT" in self.Param:
+		if "IRFMT" in self.Param:# IRFMT: Item Real Format
 			if len(self.Param["IRFMT"]) != nValsPerPoint:
 				raise ValueError('Problem in BES3T DSC file: inconsistent IKKF and IRFMT fields.')
-			for char in self.Param["IRFMT"][0].split(','):
-				match char.upper():
-					# assign datatype of component data. Numpy naming uses byte len not bit.
-					case "C": 
-						self.numberFormat = 'i1' # int8
-					case "S":
-						self.numberFormat = 'i2' # 'int16'
-					case "I":
-						self.numberFormat = 'i4' # 'int32'
-					case "F":
-						self.numberFormat =  'f4' # 'float32'
-					case "D":
-						self.numberFormat = 'f8' # 'float64'
-					case "A":
-						raise NotImplementedError("Cannot read BES3T data in ASCII format.")
-					case "0"|"N":
-						raise ValueError("No BES3T data found.")
-					case _:
-						raise ValueError("Unknown value for IRFMT in .DSC file.")
+			#for char in self.Param["IRFMT"][0].split(','): # this was just assigning
+			# based on the last one, might as well cut out the loop.
+			match self.Param["IRFMT"][0][0].upper():
+				# assign datatype of component data. Numpy naming uses byte len not bit.
+				case "C": 
+					numberFormat = 'i1' # int8
+				case "S":
+					numberFormat = 'i2' # 'int16'
+				case "I":
+					numberFormat = 'i4' # 'int32'
+				case "F":
+					numberFormat =	'f4' # 'float32'
+				case "D":
+					numberFormat = 'f8' # 'float64'
+				case "A":
+					raise NotImplementedError("Cannot read BES3T data in ASCII format.")
+				case "0"|"N":
+					numberFormat = ''
+					raise ValueError("No BES3T data found.")
+				case _:
+					numberFormat = ''
+					raise ValueError("Unknown value for IRFMT in .DSC file.")
 		else:
-			raise ValueError("Keyword IRFMT not found in .DSC file.")
+			numberFormat = ''
+			raise ValueError("Keyword IRFMT not found in .DSC file, cannot determine number format.")
+
+		self.numFormat = numberFormat
 		# We enforce IRFMT and IIFMT to be identical.
-		if "IIFMT" in self.Param:
+		if "IIFMT" in self.Param:# IIFMT: Item Imaginary Format
 			if self.Param["IIFMT"] != self.Param["IRFMT"]:
 				raise ValueError("IRFMT and IIFMT in .DSC file are not equal.")
 
@@ -323,7 +320,7 @@ class eprload:
 				self.vprint(f'Reading {axName} asbscissa of type {axisType}',1)
 				if axisType=="IGD":
 					#nonlinear axis, try to load companion file (.xgf, .ygf, .zgf)
-					tmp_nla = self.readNonlinearAbscissa(a, axisType) 
+					tmp_nla = self._readIGD(a, axisType) 
 					if type(tmp_nla) is np.ndarray:
 						self.Absc[a,:] = tmp_nla
 					elif type(tmp_nla) is str: 
@@ -355,12 +352,43 @@ class eprload:
 	#def BES3TSpecLoad(self):
 		# get data from .dta file
 		dtaExt = ['.DTA' if self.extCase else '.dta'][0]
-		self.vprint(f'Reading data from {dtaExt} file in {self.byteOrder}{self.numberFormat} format to self.Spec')
-		self.Spec = self.readBinaryDataMatrix(dtaExt,self.byteOrder,self.numberFormat,self.isComplex)
+		self.vprint(f'Reading data from {dtaExt} file in {self.numFormat} format to self.Spec')
+		self.Spec = self._readDTA(dtaExt,self.byteOrder,self.numFormat,self.isComplex)
 		if self.scaling[0] != '1':
 			self.Spec = self.scaleData()
 
-	def readNonlinearAbscissa(self, a, axisNames) -> None:
+	def _readDSC(self) -> dict:
+		"""
+		Loads the contents of a Bruker DSC file into self.Param
+
+		"""
+		param = {}
+		dscExt = ['.DSC' if self.extCase else '.dsc'][0]
+		self.vprint(f"Reading parameters from {dscExt} file to self.Param")
+		with open(self.filePath.with_suffix(dscExt)) as tmpf:
+			lines = tmpf.readlines()
+			for line in lines:
+				# ignore commented lines
+				if (not match(r"[*,#]",line)) and (len(line) > 0):
+					# trim multiple spaces and split into list
+					tmpln = sub(r"\s+",' ',line).split()
+					self.vprint(type(tmpln))
+					for attr in range(len(tmpln)):
+						#cast to ints and floats where possible
+						try:
+							tmpln[attr]  = int(tmpln[attr])
+						except ValueError:
+							try:
+								tmpln[attr] = float(tmpln[attr])
+							except ValueError:
+								None
+					# this returns all keys as lists of length 1 or longer.
+					if len(tmpln[1:]) > 0:
+						param[tmpln[0]] = tmpln[1:]
+		return param
+
+
+	def _readIGD(self, a, axisNames) -> np.ndarray| str:
 		'''
 		This function parses the format of the accessory .XGF, .YGF, and .ZGF files
 		for axisType IGD.
@@ -371,7 +399,14 @@ class eprload:
 			Index of the axis passed.
 		axisNames: list
 			List of axis names for the spectrum
+		self.filePath
+		self.byteOrder
+		self.numFormat
 
+		Returns
+		-------
+		absc | np.ndarray (str if fails)
+			The nonlinear abscissa of the spectrum.
 		'''
 		#Nonlinear axis -> Try to read companion file (.XGF, .YGF, .ZGF)
 		companionFile = self.filePath.with_suffix(f'.{axisNames[a]}GF')
@@ -391,17 +426,15 @@ class eprload:
 		# Open and read companion file
 		try:
 			tmpAbsc = np.fromfile(companionFile,dtype=self.byteOrder+sourceFormat)
-			# with open(companionFile,'rb') as ocf:
-			# 	self.Abscissa[a] = ocf.read(Dimensions[a], SourceFormat, byteOrder)
 			return tmpAbsc
 		except:
 			warn(f'Could not read companion file {companionFile} for nonlinear axis. Assuming linear axis.')
 			axisType = 'IDX'
 			return axisType
 
-	def readBinaryDataMatrix(self,fileExt,byteOrder,numberFormat,isComplex) -> np.ndarray:
+	def _readDTA(self,fileExt,byteOrder,numberFormat,isComplex) -> np.ndarray:
 		'''
-		Method called by loadBES3T to actually read in the information from a .DTA file.
+		Private method for loadBES3T. Reads in the information from a .DTA file.
 			
 		Parameters
 		----------
@@ -458,6 +491,224 @@ class eprload:
 		self.vprint(f'Shape after complex condensation: {data.shape}',1)
 		return data
 
+		
+	def loadSpecMan(self) -> None:
+		"""
+		Load data files generated by SpecMan (.d01/.exp).
+		Parameters
+		----------
+		self.fileName
+			A filename to read
+		self.fileExt
+			The file extension of self.fileName
+		Returns
+		-------
+			data: np.ndarray
+				The experimental signal
+			param: dict
+				experiment information
+
+		References
+		----------
+		Based on original code by Boris Epfel and Alexey Silakov,
+		via Stefan Stoll's Easyspin.
+
+		"""
+		self.Param = self._readEXP()
+		self.Spec = self._readD01()
+
+		# post-processing of parameters
+	
+	def _readEXP(self)->dict:
+		"""
+		Reads experimental parameters from a SpecMan EXP file.
+		
+		Parameters
+		----------
+		self.filePath
+			path to .d01 or .exp file
+
+		Returns
+		-------
+		param:
+			A {} of parameters read from the .exp file
+
+		Notes
+		-----
+		SpecMan uses a format very similar to TOML for saving experimental
+		parameters, with the exception that it does not quote strings.
+		Adapting code from tomllib to deal with this [1]_ .
+
+		Read file as text block. Parse through and:
+		#. look for `[program]`; read until next [ as literal string.
+		   Ignore other sections.
+		#. Split all other lines at =, make first item the key
+		#. Split remaining part at ;, and first half at ' '; this becomes the value.
+
+		References
+		----------
+		.. [1] https://github.com/python/cpython/blob/3.13/Lib/tomllib/_parser.py
+
+		"""
+		self.vprint('Reading .exp file')
+		expExt = ['.EXP' if self.extCase else '.exp'][0]
+		param = {}
+		with open(self.filePath.with_suffix(expExt), 'r') as f:
+			raw = f.read() 
+			pmatch = r'\[program\]((.|\n+)*?)(?=\[)'
+			param['program'] = re.search(pmatch,raw).group(0)
+			raw = re.sub(pmatch,'',raw)
+			raw = re.sub(r'\[(.*?)\]','',raw)
+			raw = raw.split('\n')
+			raw = [x.strip() for x in raw if x.strip()]
+			#print(raw)
+			for line in raw:
+				tmpln=line.replace(' = ','=')
+				tmpln = tmpln.split('=')
+				tmpval = re.split(' ',tmpln[1],maxsplit=1) if len(tmpln) >=2 else '' 
+				if tmpval[0].isdigit():
+					tmpval[0] = int(tmpval[0])
+				elif re.match(r'[0-9]+[.]?[0-9]+',tmpval[0]):
+					tmpval[0] = float(tmpval[0])
+				#try:
+				#	prog[tmpln[0]] = list(int(tmpkey[0])).append(tmpkey)
+				param[tmpln[0]] = tmpval
+			
+			#prog = match(tmpar,'^program')
+
+			#self.vprint(raw)
+			self.vprint(param)
+		print('Finsished loading .exp file.')
+		param={}
+		return param
+
+	def _readD01(self) -> np.ndarray:
+		"""
+		Private function for use by :method:`eprload.loadSpecMan`
+
+		Parameters
+		----------
+		self.filePath
+			Path to .d01 or .exp file
+
+		Returns
+		-------
+		data: np.ndarray
+			Array of data read from .d01 file.
+
+		Notes
+		-----
+		File :code:`fid` is little endian. Structure: :code:`nsig, dformat,
+		{nstrm, strmdim,strmtot} nsig times, tmpdat`
+
+		nSig: <u4
+			Number of signals in the file (i.e. real, imaginary)
+		dFormat: uint32
+			Data format. 1=float32, other=float64
+		nStrm: <i4
+			Number of data streams per signal.
+		strmDim: list of 4 <i4
+			Number of points per stream, to a max of 4 streams. 
+		strmTot: <i4
+			Total number of data streams from this signal 
+		tmpDat: np.ndarray
+			Remainder of file. sum(strmTot) points in format dformat. Each signal
+			is an array of shape strmDim
+		
+		Method:
+		* Read nSig and dFormat
+		* read next 6*nSig bytes as nsig sets of {nstrm, strmdim[1:4],strmtot}
+		  as ndarray.
+		* Read remainder of file into (1,) ndarray
+		* split data into wither a 1d or complex spectrum based on nSig
+		* If Nsig != [1|2], then try to figure out if there's a blank dimension
+		  at the beginning of the file and try again
+		* If all else fails, just read it in as a 1d file.
+
+		"""
+		self.vprint('Reading .d01 file')
+		dExt = ['.D01' if self.extCase else '.d01'][0]
+		dfile = self.filePath.with_suffix(dExt)
+		if not hasattr(self,'Param'): # check that parameters have been loaded
+			raise RuntimeError("Parameters have not been loaded.")
+		dOffset = 0 # Number of bytes read so far
+		sigMeta= np.fromfile(dfile,count=2,dtype='<u4')
+		dOffset += 2*4 
+		nSig  = int(sigMeta[0])
+		dformat = '<f4' if (int(sigMeta[1]==1)) else '<f8'
+
+		self.vprint(f'Signal metadata: {sigMeta}')
+		self.vprint(f'nSig: {nSig}, dformat: {dformat}',1)
+		# After 8-byte header, read ndim1 rows of 6 items as int32 (ndim1*24 bytes)
+		strmMeta= np.fromfile(dfile,offset=dOffset,count=nSig*6,
+				dtype='<i4').reshape(nSig,6)
+		dOffset += nSig*6*4
+		#self.vprint(f'Stream metadata: {strmMeta}')
+		strms = []
+		ntotal = 0
+		# the columns of strmMeta are: [nstrm, strmDim1, strmDim2, strmDim3,
+		# strmDim4, strmTot] where p denotes points.
+		# Now add a column for first, the index of the first data point in the stream.
+		colExt	= np.empty(nSig, dtype=int)
+		strmMeta = np.c_[strmMeta, colExt]
+		for spec in range(nSig):
+			# if read correctly, product of nonzero dimensions == total
+			nstrm = np.count_nonzero(strmMeta[spec,1:5])
+			calcTotal= np.prod(strmMeta[spec,1:1+nstrm])
+			if calcTotal != strmMeta[spec,5]:
+				raise RuntimeError("Data not loaded correctly, calculated  and\
+				specified number of data points differ.")
+			strmMeta[spec,6] = ntotal
+			ntotal += calcTotal
+		# now strmMeta is:
+		strMetaLabel = np.array([['nStrm', 'strmD1', 'strmD2', 'strmD3','strmD4',
+				  'strmTot', 'startIdx']])
+		self.vprint(f'Stream metadata:\n{np.r_[strMetaLabel,strmMeta]}')
+		# read spectra into one long ndarray 
+		rawData = np.fromfile(dfile, offset = dOffset, dtype=dformat).flatten()
+		self.vprint('data shape:')
+		self.vprint(f'raw: {rawData.shape}',1)
+		#specs = []
+		#for i in sigMeta:
+		#	specs.append(rawData[i[6]:i[6]+i[5]])
+		#self.vprint([j.shape for j in specs],1)
+
+		pdim0 = np.trim_zeros(strmMeta[0,1:4])
+		match nSig:
+			case 0:
+				raise RuntimeError("No data present.")
+			case 1:
+				data = np.reshape(rawData,pdim0)
+			case 2:
+				# rawData slice from 0th signal first to first+total,
+				# then take second stream (same slice) as imaginary
+				end0 = strmMeta[0,6]+strmMeta[0,5]
+				data = rawData[strmMeta[0,6],end0] + 1j*rawData[end0:end0+strmMeta[1,5]]
+				# reshape into transpose of first data stream dimension
+				data = np.reshape(data,pdim0)
+			case _:
+				# if all the dimensions are the same size in all signals, and the
+				# number of dimensions in signal 0 is 0, then look at the number of
+				# following dimensions. If there were 3 total, read signals 1 and 2
+				# as 2d. Else, read all data in as 1d, assuming an error.
+				pdim1 = np.trim_zeros(strmMeta[1,1:4])
+				dimsSame = strmMeta[:,1:4] == strmMeta[0,1:4]
+				if dimsSame and (strmMeta.size[0] == 2):
+						# assume nSig is actually 2 and nSig got corrupted
+						data = np.reshape(rawData,pdim1)
+				elif dimsSame and (strmMeta.size[0] == 3):
+						# assume nSig is actually 3 and nSig got corrupted
+						end1 = strmMeta[1,6]+strmMeta[1,5]
+						data = rawData[strmMeta[1,6],end1] + 1j*rawData[end1:end1+strmMeta[2,5]]
+
+				else:
+					warn('Data format cannot be recognized, defaulting to 1d spectrum')
+					data = rawData
+					
+		self.vprint(f'final: {data.shape}',1)
+		self.vprint("Finished loading .d01 file.")
+		return data
+
 	def scaleData(self) -> np.ndarray|None:
 		'''
 			A class method of eprload(), called when a scaling factor is passed
@@ -467,13 +718,13 @@ class eprload:
 			-----
 
 			===== =============== =====  =============================
-			Value Scale By        Units  Limitations
+			Value Scale By		  Units  Limitations
 			===== =============== =====  =============================
-			n     number of scans --     non-Bruker only
-			g     reciever gain   dB     CW Bruker ESP only 
-			c     conversion time ms     CW Bruker ESP only
-			p     microwave power mW     CW Bruker only
-			t     temperature     K      CW Internal temp control only
+			n	  number of scans --	 non-Bruker only
+			g	  reciever gain   dB	 CW Bruker ESP only 
+			c	  conversion time ms	 CW Bruker ESP only
+			p	  microwave power mW	 CW Bruker only
+			t	  temperature	  K		 CW Internal temp control only
 			===== =============== =====  =============================
 
 		'''
