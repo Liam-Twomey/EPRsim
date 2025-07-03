@@ -5,7 +5,7 @@ dynamic = ["version"]
 description = "A Python library for loading and simulating EPR spectra."
 authors = [
 	{name = "Stefan Rein", email = "stephan.rein@physchem.uni-freiburg.de"},
-	{name Unfortunately clear= "Darien Morrow"},
+	{name= "Darien Morrow"},
 	{name = "Liam Twomey"},
 ]
 maintainers = [
