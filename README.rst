@@ -38,7 +38,7 @@ Documentation
 
 Documentation for the package is hosted on `readthedocs`_ .
 
-.. readthedocs:: https://eprsim.readthedocs.io/en/latest/
+.. _readthedocs:: https://eprsim.readthedocs.io/en/latest/
 
 Installation
 ------------
