@@ -40,8 +40,8 @@ devel=[
 	'sphinx', # documentation system
 	'pydata_sphinx_theme', # documentation theme
 	'mock', # documentation workaround
-	'sphinx-copybutton',# enables auto copying of snippets
-	'sphinx-design' # allows use of grid, button elements in docs
+	'sphinx_copybutton',# enables auto copying of snippets
+	'sphinx_design' # allows use of grid, button elements in docs
 	]
 
 [project.urls]
