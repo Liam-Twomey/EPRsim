@@ -6,7 +6,6 @@ import re
 import numpy as np
 from warnings import warn
 from pprint import pprint, pformat
-import tomllib
 
 # all logic adapted from Stefan Stoll's EasySpin.
 class eprload:
@@ -25,16 +24,14 @@ class eprload:
 			Request printout of debug information for this object. Debug info is implemented
 			via :py:meth:`vprint`.
 
-		Returns
-		-------
-		`eprload` object with the attributes:
-		
-		#.. attr:: Absc
-		#	Magnetic field abscissa(s) loaded from file, often labelled "B".
-		#.. attr:: Spec
-		#	Signal component of the data, often labelled "S". 
-		#.. attr:: Par
-		#	Experimental parameters read from parameter file, often called "P".
+		Attributes
+		----------
+		Absc: :class:`np.ndarray`
+			Magnetic field abscissa(s) loaded from file, often labelled "B".
+		Spec: :class:`np.ndarray`
+			Signal component of the data, often labelled "S". 
+		Par: :class:`dict`
+			Experimental parameters read from parameter file, often called "P".
 	
 	'''
 	def __init__(self, fileName:(str | Path), scaling:str='1',verbose:bool=False): 
@@ -503,10 +500,12 @@ class eprload:
 			The file extension of self.fileName
 		Returns
 		-------
-			data: np.ndarray
-				The experimental signal
-			param: dict
-				experiment information
+		None. sets self.Param, self.Spec.
+
+		Notes
+		-----
+		* calls _readEXP and _readD01 to get file data, then data processing
+		* save transient as fullfield
 
 		References
 		----------
@@ -516,8 +515,8 @@ class eprload:
 		"""
 		self.Param = self._readEXP()
 		self.Spec = self._readD01()
-
 		# post-processing of parameters
+
 	
 	def _readEXP(self)->dict:
 		"""
@@ -567,19 +566,13 @@ class eprload:
 				tmpln = tmpln.split('=')
 				tmpval = re.split(' ',tmpln[1],maxsplit=1) if len(tmpln) >=2 else '' 
 				if tmpval[0].isdigit():
+					# convert viable str to int
 					tmpval[0] = int(tmpval[0])
 				elif re.match(r'[0-9]+[.]?[0-9]+',tmpval[0]):
+					# convert viable str to float
 					tmpval[0] = float(tmpval[0])
-				#try:
-				#	prog[tmpln[0]] = list(int(tmpkey[0])).append(tmpkey)
 				param[tmpln[0]] = tmpval
-			
-			#prog = match(tmpar,'^program')
-
-			#self.vprint(raw)
-			self.vprint(param)
 		print('Finsished loading .exp file.')
-		param={}
 		return param
 
 	def _readD01(self) -> np.ndarray:
@@ -718,13 +711,13 @@ class eprload:
 			-----
 
 			===== =============== =====  =============================
-			Value Scale By		  Units  Limitations
+			Value Scale By        Units  Limitations
 			===== =============== =====  =============================
-			n	  number of scans --	 non-Bruker only
-			g	  reciever gain   dB	 CW Bruker ESP only 
-			c	  conversion time ms	 CW Bruker ESP only
-			p	  microwave power mW	 CW Bruker only
-			t	  temperature	  K		 CW Internal temp control only
+			n     number of scans --     non-Bruker only
+			g     reciever gain   dB     CW Bruker ESP only 
+			c     conversion time ms     CW Bruker ESP only
+			p     microwave power mW     CW Bruker only
+			t     temperature     K      CW Internal temp control only
 			===== =============== =====  =============================
 
 		'''

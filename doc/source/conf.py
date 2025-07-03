@@ -9,6 +9,31 @@ from pathlib import Path
 from importlib.metadata import version as vn
 #import mock
 
+# -- Options for HTML output -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+
+html_theme = 'pydata_sphinx_theme'
+html_static_path = ['_static']
+html_css_files = ["eprsim.css"]
+html_show_sourcelink = False 
+html_favicon = "_static/eprsim_favicon.png"
+html_logo = "_static/eprsim_logo.png"
+#html_theme_options = {
+#	"logo": {
+#		"image_light": "_static/eprsim_logo_light.svg",
+#		"image_dark": "_static/eprsim_logo_dark.svg",
+#	}
+#}
+
+html_context = {
+	"github_user": "Liam-Twomey",
+	"github_repo" : "EPRsim",
+	"github_version" : "main",
+	"doc_path":"doc",
+}
+
+# -- Set path for autofunctions and autoset version info
+#
 pkg_path  = str(Path('../..').resolve())
 print('package location:', pkg_path)
 sys.path.insert(0,pkg_path) 
@@ -25,18 +50,18 @@ release = '.'.join(ver.split('.'))
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.napoleon']
+extensions = [
+	'sphinx.ext.napoleon', # for numpy in autodoc
+	'sphinx.ext.autodoc',  # for automatic documentation of docstrings
+	'sphinx.ext.mathjax',  # for latex support in html 
+	'sphinx_copybutton',   # allow code copy button in examples
+	'sphinx_design'		   # enable design elements like grids
+]
+language = "en"
 
 templates_path = ['_templates']
-exclude_patterns = []
-numpydoc_show_class_members= False
 
 #toMock = ['Validate_input_parameter','Tools']
 #for modName in toMock:
 #	sys.modules[modName] = mock.Mock()
 
-# -- Options for HTML output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
-
-html_theme = 'furo'
-html_static_path = ['_static']

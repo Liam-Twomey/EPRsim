@@ -5,7 +5,7 @@ dynamic = ["version"]
 description = "A Python library for loading and simulating EPR spectra."
 authors = [
 	{name = "Stefan Rein", email = "stephan.rein@physchem.uni-freiburg.de"},
-	{name = "Darien Morrow"},
+	{name Unfortunately clear= "Darien Morrow"},
 	{name = "Liam Twomey"},
 ]
 maintainers = [
@@ -34,7 +34,15 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-devel=['pytest','setuptools','sphinx','numpydoc','furo','mock']
+devel=[
+	'pytest', # testing framework
+	'setuptools', # build system
+	'sphinx', # documentation system
+	'pydata_sphinx_theme', # documentation theme
+	'mock', # documentation workaround
+	'sphinx-copybutton',# enables auto copying of snippets
+	'sphinx-design' # allows use of grid, button elements in docs
+	]
 
 [project.urls]
 Repository = "https://github.com/LiamTwomey/EPRsim"

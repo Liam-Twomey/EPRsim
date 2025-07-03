@@ -29,55 +29,56 @@ def mul_and_add_tensors(mul, add, tensor):
 def Symmetry_Group(Par):
 	"""
 	Determine the symmetry group of a (pre-processed) Hamiltonian
+	
+	Parameters
+	----------
+	Par : `object`
+	   Object with all user-defined parameters.
 
-	 Parameters
-	 ----------
-	 Par : `object`
-		Object with all user-defined parameters.
+	See Also
+	--------
+	Parameters: :class:`EPRsim.Parameters`
+		Class of Parameters (with a full list of parameters)
 
-	 See Also
-	 --------
-	 Parameters : Class of Parameters (with a full list of parameters)
+	Notes
+	-----
+	Works fully on call on reference on the Par object. The function
+	categrorized the Hamiltonian in different point groups. The symmetry
+	group determines how many octants of a hemisphere are calculated
+	and how many points, at maxmimum, of theta and phi are caluclated.
 
-	 Notes
-	 -----
-	 Works fully on call on reference on the Par object. The function
-	 categrorized the Hamiltonian in different point groups. The symmetry
-	 group determines how many octants of a hemisphere are calculated
-	 and how many points, at maxmimum, of theta and phi are caluclated.
+	=========  ============  ======== ====================
+	Sym group  Point group   Octants  max nphi/ntheta
+	=========  ============  ======== ====================
+	 -1        O3            1        4/4
+	  0        Dhinfty       1        400/4  or  4/400
+	  1        D2h           1        400/400
+	  2        C2h           2        800/400
+	  4        Ci            4        1600/400
+	=========  ============  ======== ====================
 
-	 =========  ============  ======== ====================
-	 Sym group  Point group   Octants  max nphi/ntheta
-	 =========  ============  ======== ====================
-	  -1        O3            1        4/4
-	   0        Dhinfty       1        400/4  or  4/400
-	   1        D2h           1        400/400
-	   2        C2h           2        800/400
-	   4        Ci            4        1600/400
-	 =========  ============  ======== ====================
+	Examples
+	--------
 
-	 Examples
-	 --------
+	Example for getting back the hyperfine tensors, out of the input
+	information as well as the point group of the Hamiltonian
 
-	 Example for getting back the hyperfine tensors, out of the input
-	 information as well as the point group of the Hamiltonian
-
-	 >>> import numpy as np
-	 >>> import EPRsim.Presettings as pre
-	 >>> import EPRsim.Hamiltonian_Point_Group as gr
-	 >>> P = sim.Parameters()
-	 >>> P.Range = [335 ,350]
-	 >>> P.mwFreq = 9.6
-	 >>> P.g = 2.002
-	 >>> P.A = [12, 20, 120]
-	 >>> P.Nucs = '14N'
-	 >>> Val = sim.Validate_Parameters(P)
-	 >>> P.A_tensor = [np.diag(np.array([12, 20, 120]))]
-	 >>> P.g_tensor = [np.diag(np.array([2.002, 2.002, 2.002]))]
-	 >>> P.number_of_nuclei = 1
-	 >>> P.coupled_e_dim = 1
-	 >>> gr.Symmetry_Group(P)
-	 D2h
+	>>> import numpy as np
+	>>> import EPRsim.Presettings as pre
+	>>> import EPRsim.Hamiltonian_Point_Group as gr
+	>>> P = sim.Parameters()
+	>>> P.Range = [335 ,350]
+	>>> P.mwFreq = 9.6
+	>>> P.g = 2.002
+	>>> P.A = [12, 20, 120]
+	>>> P.Nucs = '14N'
+	>>> Val = sim.Validate_Parameters(P)
+	>>> P.A_tensor = [np.diag(np.array([12, 20, 120]))]
+	>>> P.g_tensor = [np.diag(np.array([2.002, 2.002, 2.002]))]
+	>>> P.number_of_nuclei = 1
+	>>> P.coupled_e_dim = 1
+	>>> gr.Symmetry_Group(P)
+	D2h
 	"""
 
 	# Important Symmetry Point Groups

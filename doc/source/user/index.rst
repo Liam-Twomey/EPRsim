@@ -1,9 +1,8 @@
-****************
-Project overview
-****************
+EPRsim documentation
+====================
 
 What is EPRsim ?
-================
+----------------
 
 EPRsim is a Python 3 package for the interpretation of EPR spectra. It consists of
 three major components:
@@ -31,13 +30,11 @@ This package is developed at the `git repository`_, and is not yet available on 
  
 .. _git repository: https://github.com/Liam-Twomey/EPRsim
 
-License and Permissions
-=======================
+.. toctree::
+    :maxdepth: 2
+    :caption: Contents:
 
-This project is licensed under GPLv3, meaning that it is free to use,
-modify, make derivative versions, and distribute. If any modified or derivative
-verison of this software is made, its source code must also be made freely
-available under the GPL license.
-
-The testing EPR data (in :code:`test/eprfiles/`) was forked from the EasySpin
-project, and is licensed under the MIT license, which is GPL-compatible.
+    eprsim
+    eprload
+    tools
+    og-coverpage
