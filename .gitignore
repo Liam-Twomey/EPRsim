@@ -14,12 +14,6 @@ flycheck_*.el
 .projectile
 
 # Images
-*.jpg
-*.gif
-*.png
-!logo/logo.png
-*.svg
-*.ico
 
 # Distribution / packaging
 .Python
@@ -70,7 +64,7 @@ coverage.xml
 *.log
 
 # Sphinx documentation
-doc/_build/
+doc/build/
 
 # PyBuilder
 target/

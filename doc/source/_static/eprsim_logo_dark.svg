@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="12.15681mm"
+   height="12.156817mm"
+   viewBox="0 0 12.15681 12.156817"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <marker
+       style="overflow:visible"
+       id="RoundedArrow"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.7)"
+         d="m -0.21114562,-4.1055728 6.42229122,3.21114561 a 1,1 90 0 1 0,1.78885438 L -0.21114562,4.1055728 A 1.236068,1.236068 31.717474 0 1 -2,3 v -6 a 1.236068,1.236068 148.28253 0 1 1.78885438,-1.1055728 z"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         id="path8" />
+    </marker>
+    <filter
+       id="mask-powermask-path-effect3_inverse"
+       style="color-interpolation-filters:sRGB"
+       height="100"
+       width="100"
+       x="-50"
+       y="-50">
+      <feColorMatrix
+         id="mask-powermask-path-effect3_primitive1"
+         values="1"
+         type="saturate"
+         result="fbSourceGraphic" />
+      <feColorMatrix
+         id="mask-powermask-path-effect3_primitive2"
+         values="-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0 "
+         in="fbSourceGraphic" />
+    </filter>
+    <mask
+       maskUnits="userSpaceOnUse"
+       id="mask1">
+      <g
+         id="g5"
+         style="stroke-width:0.169056"
+         transform="matrix(5.9151966,0,0,5.9151963,-448.89193,-378.4433)">
+        <path
+           id="path4"
+           style="fill:#ffffff;fill-opacity:1;stroke-width:0.169056"
+           d="M 90.862717,76.588701 H 103.35764 V 89.083628 H 90.862717 Z" />
+        <path
+           style="fill:#341a61;fill-opacity:1;stroke:#341a61;stroke-width:0.596393;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+           d="m 93.952773,85.993572 5.067769,-5.067775"
+           id="path5" />
+      </g>
+    </mask>
+    <mask
+       maskUnits="userSpaceOnUse"
+       id="mask5">
+      <g
+         id="g7"
+         style="stroke-width:0.169056"
+         transform="matrix(5.9151966,0,0,5.9151963,-448.89193,-378.4433)">
+        <path
+           id="path6"
+           style="fill:#ffffff;fill-opacity:1;stroke-width:0.169056"
+           d="M 90.862717,76.588701 H 103.35764 V 89.083628 H 90.862717 Z" />
+        <path
+           style="fill:#341a61;fill-opacity:1;stroke:#341a61;stroke-width:0.596393;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+           d="m 93.952773,85.993572 5.067769,-5.067775"
+           id="path7" />
+      </g>
+    </mask>
+  </defs>
+  <g
+     id="layer1"
+     transform="translate(-91.031773,-76.757755)">
+    <path
+       style="fill:#000000;stroke:#9c5ffd;stroke-width:3.13012;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#RoundedArrow)"
+       d="M 91.143954,145.93878 150.36748,86.71522"
+       id="path2"
+       transform="matrix(0.16905609,0,0,0.1690561,75.887916,63.978148)"
+       mask="url(#mask5)" />
+    <path
+       id="path1"
+       d="M 149.26586,115.23711 A 27.420244,27.420244 0 0 1 121.84561,142.65735 27.420244,27.420244 0 0 1 94.425367,115.23711 27.420244,27.420244 0 0 1 121.84561,87.816862 27.420244,27.420244 0 0 1 149.26586,115.23711 Z"
+       style="fill:#9c5ffd;fill-opacity:1;stroke:none;stroke-width:4.1735"
+       transform="matrix(0.16905609,0,0,0.1690561,75.887916,63.978148)"
+       mask="url(#mask1)" />
+  </g>
+</svg>
