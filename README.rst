@@ -36,9 +36,7 @@ Current capabilities
 Documentation
 -------------
 
-Documentation for the package is hosted on `readthedocs`_ .
-
-.. _readthedocs:: https://eprsim.readthedocs.io/en/latest/
+Documentation for the package is hosted on `readthedocs <https://eprsim.readthedocs.io/en/latest/>`
 
 Installation
 ------------
