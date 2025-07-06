@@ -366,9 +366,9 @@ class eprload:
 			lines = tmpf.readlines()
 			for line in lines:
 				# ignore commented lines
-				if (not match(r"[*,#]",line)) and (len(line) > 0):
+				if (not re.match(r"[*,#]",line)) and (len(line) > 0):
 					# trim multiple spaces and split into list
-					tmpln = sub(r"\s+",' ',line).split()
+					tmpln = re.sub(r"\s+",' ',line).split()
 					self.vprint(type(tmpln))
 					for attr in range(len(tmpln)):
 						#cast to ints and floats where possible
