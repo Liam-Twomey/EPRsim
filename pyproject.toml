@@ -28,13 +28,22 @@ classifiers = [
 dependencies = [
 	'numpy',
 	'scipy',
-	'numba',
 	'matplotlib',
 	'pathlib',
 	'seaborn',
 ]
 
 [project.optional-dependencies]
+all=[
+	'numba',
+	'psutil',
+	'pytest', # testing framework
+	'setuptools', # build system
+	'sphinx', # documentation system
+	'pydata_sphinx_theme', # documentation theme
+	'sphinx_copybutton',# enables auto copying of snippets
+	'sphinx_design' # allows use of grid, button elements in docs
+]
 fast=[
 	'numba',
 	'psutil',
