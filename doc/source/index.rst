@@ -19,13 +19,13 @@ What is EPRsim ?
 EPRsim is a Python3 package for the interpretation of EPR spectra.
 
 EPRsim was originally developed by Stephan Rein in the lab of Prof. Dr. Stefan Weber,
-following the conventions of Stefan Stoll's `Easyspin`_ .
+following the conventions of Stefan Stoll's `EasySpin`_ .
 
-Although it was slightly intimidating to be the first non-``Ste(f|ph)an`` to work on
+Although it was slightly intimidating to be the first non-Ste(f|ph)an to work on
 these projects, EPRload was adapted from the EasySpin implementation by Liam Twomey,
 and the package is currently maintained by Liam Twomey.
 
-.. _Easyspin: https://github.com/StollLab/EasySpin
+.. _EasySpin: https://github.com/StollLab/EasySpin
 
 This package is developed at the `git repository`_, and is not yet available on PyPI.
  
