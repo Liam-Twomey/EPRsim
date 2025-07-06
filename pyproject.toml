@@ -31,9 +31,14 @@ dependencies = [
 	'numba',
 	'matplotlib',
 	'pathlib',
+	'seaborn',
 ]
 
 [project.optional-dependencies]
+fast=[
+	'numba',
+	'psutil',
+]
 dev = [
 	'pytest', # testing framework
 	'setuptools', # build system
