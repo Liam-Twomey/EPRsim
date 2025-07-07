@@ -23,8 +23,10 @@ bFiles = getFiles(bExt, srchPath)
 smFiles = getFiles(smExt,srchPath)
 
 #### Testing Bruker file loading
-def test_bruker_object_gen():
-	return
+def test_loadall_bruker():
+	objs = []
+	for i in bFiles:
+		objs.append(eprload(i))
 
 ### Testing general file load properties
 
