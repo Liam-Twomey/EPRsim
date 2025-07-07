@@ -34,12 +34,13 @@ class eprload:
 			Experimental parameters read from parameter file, often called "P".
 	
 	'''
-	def __init__(self, fileName:(str | Path), scaling:str='1',verbose:bool=False): 
+	def __init__(self, fileName:(str | Path), scaling:str='1',debug:bool=False,
+			   keepTmp:bool = False): 
 		self.filePath = Path(fileName) #if already a Path this won't effect anything
 		self.fileExt = self.filePath.suffix
 		self.scaling = scaling.upper()
 		# self.Param = {}
-		self.verbose = verbose
+		self.verbose = debug
 		self.vprint(f'`eprload` initalized on \"{self.filePath}\"')
 		if self.fileExt.isupper():
 			self.extCase = 1
@@ -47,18 +48,25 @@ class eprload:
 			self.extCase = 0
 		else:
 			raise IOError("Please don't use mixed-case extensions!")
-		self.checkFileType()
+
+		self._checkFileType()
+
+		# Delete temporary class items for memory savings; disable with keepTmp = True.
+		if keepTmp is False:
+			del self.extCase, self.numFormat, self.byteOrder, self.dimensions, self.isComplex
 
 	def __repr__(self):
 		'''
 		Allows for printing of the class object.
 
 		'''
-		return	"Abscissa:\n"+pformat(self.Absc,width=40)+"\nSignal:\n"+pformat(self.Spec,indent=4,width=40)+\
-			"\nParameters:\n"+pformat(self.Param,indent=4,width=80)+"\nInternal values:"+"\n\tFilePath: "+str(self.filePath)+\
-			"\n\tFile Extension: "+str(self.fileExt)+"\n\tFile Extension Case: "+str(self.extCase).replace('0','Lower').replace('1','Upper')+\
-			"\n\tVerbose: "+str(self.verbose)+"\n\tScaling: "+str(self.scaling[0]).replace('1','None')+'\n\tAxis complexity is: '+\
-			str(self.isComplex).replace('1','CPLX').replace('0','REAL')
+		return	"Abscissa:\n"+pformat(self.Absc,width=40)+"\nSignal:\n"+pformat(self.Spec,\
+			indent=4,width=40)+"\nParameters:\n"+pformat(self.Param,indent=4,width=80)+\
+			"\nInternal values:"+"\n\tFilePath: "+str(self.filePath)+"\n\tFile Extension: "\
+			+str(self.fileExt)+"\n\tFile Extension Case: "+str(self.extCase).replace('0','Lower')\
+			.replace('1','Upper')+"\n\tVerbose: "+str(self.verbose)+"\n\tScaling: "+str(\
+			self.scaling[0]).replace('1','None')+'\n\tAxis complexity is: '+ str(self.isComplex)\
+			.replace('1','CPLX').replace('0','REAL')
 
 	def __str__(self):
 		'''
@@ -68,37 +76,26 @@ class eprload:
 		pfa = pformat(self.Absc)
 		pfs = pformat(self.Spec)
 		pfp = pformat(self.Param)
-		fst = f"eprload object with:\nAbscissa (B):\n {pfa} \nSpectrum (S):\n{pfp}\nParameters (P):\n{pfs}"
+		fst = f"eprload object with:\nAbscissa (B):\n {pfa} \nSpectrum (S):\n{pfp}\n\
+		Parameters (P):\n{pfs}"
 		return fst
 
-	def getAbsc(self):
-		'''
-		Returns the Absc attribute of the object.
-
-		'''
+	def __getattr__(self,attr):
+		"""
+		Define fallbacks for noncanonical aliases to self.Absc, Spec, Param under
+		EasySpin format (B,S,P)
+		"""
+		match attr.upper():
+			case 'B':
+				return self.Absc
+			case 'S':
+				return self.Spec
+			case 'P':
+				return self.Param
+			case _:
+				raise AttributeError(f"{attr} is not an attibute of this EPRload object.")
 		return self.Absc
 
-	def getSpec(self):
-		'''
-		Returns the Spec attribute of the object.
-
-		'''
-		return self.Spec
-
-	def getParam(self):
-		'''
-		Returns the Param attribute of the object.
-
-		'''
-		return self.Param
-
-	def esfmt(self):
-		'''
-		(WIP) Returns spectrum in EasySpin format: (B, Spc, P) or (Absc,Spec,Param)
-
-		'''
-		return (self.Absc, self.Spec, self.Param)
-		
 	def vprint(self,output:str,indentLevel:int=0):
 		'''
 		A debug printer for easy output of debug/verbose info only when self.verbose=True
@@ -120,10 +117,20 @@ class eprload:
 			pprint(output)
 			return
 
-	def checkFileType(self):
+	def _checkFileType(self):
 		'''
 		Checks through the list of known EPR filetypes. Calls the appropriate file read method
 		if implemented; throws an error if it is not implemented or not a known EPR file.
+		
+		Parameters
+		----------
+		self.fileExt: Path
+			Extension of the file path passed to eprload
+
+		Returns
+		-------
+		ftype: str
+			nickname of the filetype to be passed back up.
 
 		Notes
 		-----
@@ -529,8 +536,8 @@ class eprload:
 
 		Returns
 		-------
-		param:
-			A {} of parameters read from the .exp file
+		param: dict
+			Experimental parameters read from the .exp file
 
 		Notes
 		-----
@@ -538,11 +545,12 @@ class eprload:
 		parameters, with the exception that it does not quote strings.
 		Adapting code from tomllib to deal with this [1]_ .
 
-		Read file as text block. Parse through and:
+		Read file as text block.
+
 		#. look for `[program]`; read until next [ as literal string.
 		   Ignore other sections.
-		#. Split all other lines at =, make first item the key
-		#. Split remaining part at ;, and first half at ' '; this becomes the value.
+		#. Split all other lines at ``=``, make first item the key
+		#. Split remaining part at ``;``, and first half at ``' '``; this becomes the value.
 
 		References
 		----------
@@ -577,7 +585,7 @@ class eprload:
 
 	def _readD01(self) -> np.ndarray:
 		"""
-		Private function for use by :method:`eprload.loadSpecMan`
+		Private function for use by `eprload.loadSpecMan`
 
 		Parameters
 		----------
@@ -591,8 +599,8 @@ class eprload:
 
 		Notes
 		-----
-		File :code:`fid` is little endian. Structure: :code:`nsig, dformat,
-		{nstrm, strmdim,strmtot} nsig times, tmpdat`
+		File ``fid`` is little endian. Structure: ``nsig, dformat,
+		{nstrm, strmdim,strmtot}`` nsig times, ``tmpdat``
 
 		nSig: <u4
 			Number of signals in the file (i.e. real, imaginary)
@@ -607,11 +615,11 @@ class eprload:
 		tmpDat: np.ndarray
 			Remainder of file. sum(strmTot) points in format dformat. Each signal
 			is an array of shape strmDim
-		
-		Method:
+	
+		**Method**
+
 		* Read nSig and dFormat
-		* read next 6*nSig bytes as nsig sets of {nstrm, strmdim[1:4],strmtot}
-		  as ndarray.
+		* read next 6*nSig bytes as nsig sets of {nstrm, strmdim[1:4],strmtot} as ndarray.
 		* Read remainder of file into (1,) ndarray
 		* split data into wither a 1d or complex spectrum based on nSig
 		* If Nsig != [1|2], then try to figure out if there's a blank dimension

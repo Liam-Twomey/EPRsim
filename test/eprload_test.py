@@ -36,13 +36,13 @@ def test_bruker_object_gen():
 #		with pt.raises(IOError):
 #			eprload(i)
 
-def test_esfmt():
-	x = eprload(bFiles[0]).esfmt()
-	assert(type(x) is tuple)
-	assert(len(x) == 3)
-	assert(type(x[0]) is np.ndarray)
-	assert(type(x[1]) is np.ndarray)
-	assert(type(x[2]) is dict)
+def test_alias():
+	x = eprload(bFiles[0])
+	assert(type(x.B) is np.ndarray)
+	assert(type(x.S) is np.ndarray)
+	assert(type(x.P) is dict)
+	with pt.raises(AttributeError):
+		assert(type(x.W) is np.ndarray)
 
 def test_parse_dsc():
 	simpleFiles = [baseDir + "/bes3t/strong1.dta", baseDir + "/esp/strong1esp.spc"]
@@ -52,9 +52,9 @@ def test_parse_dsc():
 	assert np.isreal(sf1.Param["XWID"])
 	with pt.raises(NotImplementedError):
 		sf2 = eprload(simpleFiles[1]) # have not yet implemented spc files
-		assert np.isreal(sf2.Param["MF"])
-		assert np.isreal(sf2.Param["GST"])
-		assert np.isreal(sf2.Param["MP"])
+		assert(np.isreal(sf2.Param["MF"]))
+		assert(np.isreal(sf2.Param["GST"]))
+		assert(np.isreal(sf2.Param["MP"]))
 
 #def test_fileload():
 #	ext = ['*.dsc','*.dta','*.DSC','*.DTA', '*.spc','*.par',
