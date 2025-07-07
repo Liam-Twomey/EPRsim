@@ -95,14 +95,19 @@ To install for development, instead use:
    git clone https:/github.com/LiamTwomey/EPRsim
    cd EPRsim
    python -m build
-   pip install --editable '.[dev,doc]'.
+   pip install -e '.[all]'.
 
-This does two things:
+This does three things:
 
-1. Install the development dependencies ``pytest`` and ``sphinx`` for
+#. Install the development dependencies ``pytest`` and ``sphinx`` for
    testing and documentation, respectively, as well as their dependencies.
-2. Installs the package in editable format, so changes to the ``src``
+#. Installs the package in editable format, so changes to the ``src``
    directory are reflected on next import, without needing to rebuild.
+#. Installs the optional dependency Numba to accelerate the code using
+   just-in-time compilation.
+
+The ``all`` optional dependency group installs the ``dev``, ``doc``, and ``fast``
+packages, which install dependencies for the 
 
 Testing
 ~~~~~~~
