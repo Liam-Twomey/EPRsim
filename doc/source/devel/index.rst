@@ -3,26 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-EPRsim documentation
+EPRsim Dev Docs 
 ====================
 
 .. toctree::
-    :maxdepth: 2
-    :caption: Contents:
+    :maxdepth: 3
 
     Documenting <docdoc>
     Packaging <packaging>
     Testing <testing>
-    presettings
-    fastmotion
-    solidstate
-    nucdic
-    validate_input
-    convolutions
-    pauli_gen
-    resfield
-    conv2field
-    hamil_eig
-    hamil_pointgroup
-    interpolation
-    spectral_proc
+    Programming <programming>
+    EPRsim backend <eprsim-backend>
+    EPRload backend <eprload.rst>

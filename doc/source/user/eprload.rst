@@ -8,7 +8,17 @@ Basic use
 To use the eprload class:
 
 >>> from eprsim.EPRload import *
->>> spectrum = eprload("./")
+>>> spectrum = eprload("./testfile.dsc")
+
+This will return an ``eprload`` object called spectrum. Following similar syntax
+to EasySpin, the magnetic field abscissa can be accessed as ``spectrum.B`` or
+``spectrum.Absc``, the signal as ``self.S`` or ``self.Spec``, and the experimental
+parameters as ``spectrum.P`` or ``spectrum.Param``.
+
+* If ``debug=True`` is passed when instantiating the class, it will print out debug
+  info as the files are read. 
+* If ``keepTmp=True`` is passed when instantiating, it will save class attributes like 
+  axis information and file format, at the cost of more memory usage.
 
 User Documentation
 ==================
@@ -16,31 +26,3 @@ User Documentation
 .. module:: src.EPRload
 .. autoclass:: eprload
     :members:
-
-Internal Documentation
-======================
-
-The logic flow of this program (in pseudocode) is:
-
-.. code:: 
-
-    call :class:`eprload`
-        if file is .dsc or .dta :method:`loadBES3T` to intiate bes3t loading
-            load parameters from .dsc file
-            parse parameters to determine how to load data 
-            for each axis:
-                if axis type is IGD, abscissa = :method:`_readNonLinearAbscissa`
-                if axis type is IDX, assign abscissa as linspace defined by params
-                if axis type is NTUP, error, because this is not implemented.
-            assign :attr:`self.Spec` = :method:`_readBinaryDataMatrix`.
-        if file is .d01 or .exp :method:`loadSpecMan`
-            call :method:`_loadEXP`
-                read parameters from .exp file using pyyaml
-                parse parameters to correct type
-                assign parameters to :attr:`self.Param`
-            call :method:`_loadD01`
-                test that :attr:`self.Param` is assigned.
-                read initial bytes of file (# spec, # axes, # data points)
-                read data into appropriately sized array
-
-
