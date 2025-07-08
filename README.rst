@@ -10,28 +10,17 @@ From the original PyPI:
     The program uses several concepts described in [#f1]_. EPRsim is open-source
     and available free of charge.
 
-A bit of history
-----------------
-
-The `PyPI page`_ appears to be abandoned, and the website listed for
-`documentation`_ contains no reference to it. I have also been unable to get in
-contact with Prof. Dr. Stefan Weber, in whose lab this software was developed,
-to get access to this documentation.
-
-.. _PyPI page: https://pypi.org/project/EPRsim/
-.. _documentation: https://www.radicals.uni-freiburg.de/de/software
-
-Fortunately, Darien Morrow forked the PyPI package into a repository,
-and added a couple of demos. I have decided to (slowly, but surely)
-reimplement as much of the Matlab package `Easyspin <Easyspin.org>`__ as
-possible.
+The goal of this fork is to (slowly, but surely) extend the original EPRsim package with
+additional features, largely by reimplementing components of Stefan Stoll's
+`Easyspin <Easyspin.org>`__ package for MATLAB.
 
 Current capabilities
 --------------------
 
 -  Simulation of EPR spectra in fast motion, slow, motion, and solid-state
    regimes (by Stephan Rein).
--  Loading of Bruker BES3T (.DSC/.DTA) files and beta support for loading Specman (.exp/d01) files (by Liam Twomey).
+-  Loading of Bruker BES3T (.DSC/.DTA) files and beta support for loading Specman (.exp/d01) files
+   (adapted from the EasySpin implementation by Liam Twomey).
 
 Documentation
 -------------
