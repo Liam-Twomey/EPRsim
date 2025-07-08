@@ -26,6 +26,7 @@ smFiles = getFiles(smExt,srchPath)
 def test_loadall_bruker():
 	objs = []
 	for i in bFiles:
+		print(i)
 		objs.append(eprload(i))
 
 ### Testing general file load properties

@@ -9,3 +9,7 @@ eprFilePath = Path("eprfiles/bes3t")
 #print(type(brukertest.Absc),type(brukertest.Spec),type(brukertest.Param))
 # brukertest.show_params()
 bt2 = eprload(eprFilePath/'00012107.dsc', debug=True)
+bt3 = eprload(eprFilePath/'calib_10dB_RT_9370-9440mT_lin_1G.DSC', debug=True)
+bt4 = eprload(eprFilePath/'hy3205t132b.DSC', debug=True)
+
+

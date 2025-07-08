@@ -291,7 +291,7 @@ class eprload:
 				case "I":
 					numberFormat = 'i4' # 'int32'
 				case "F":
-					numberFormat =	'f4' # 'float32'
+					numberFormat = 'f4' # 'float32'
 				case "D":
 					numberFormat = 'f8' # 'float64'
 				case "A":
@@ -314,13 +314,21 @@ class eprload:
 
 #	def BES3TAbscLoad(self):
 		self.vprint('Reading abscissas into self.Absc')
+		# setup a 
+		#axisNames = []
+		#for ax in ['X','Y','Z']:
+		#	axisNames.append(ax) if self.Param[f'{ax}TYP'][0] != "NODATA" else None
+		#print(f"Axes in use: {axisNames}")
 		axisNames = ['X','Y','Z']
 		# I think I can rewrite this for loop in a way that makes more sense in python @TODO
-		self.Absc = np.full([len(axisNames), max(self.dimensions)], np.nan) 
+		self.Absc = np.full((len(axisNames), max(self.dimensions)), np.nan)
+		self.vprint(f'Abscissa size:{self.Absc.shape}',1)
 		for a in range(len(axisNames)):
 			axName = axisNames[a]
-			if self.dimensions[a] >=1:
-				axisType = self.Param[f"{axisNames[a]}TYP"][0]
+			axisType = self.Param[f"{axName}TYP"][0]
+			if axisType == "NODATA":
+				continue
+			else:
 				self.vprint(f'Reading {axName} asbscissa of type {axisType}',1)
 				if axisType=="IGD":
 					#nonlinear axis, try to load companion file (.xgf, .ygf, .zgf)
@@ -333,31 +341,29 @@ class eprload:
 						raise RuntimeError("Undefined return from readNonLinearAbscissa")
 					del tmp_nla
 				if axisType=="IDX": # not elif to allow for nonlinearabscissa error handling 2l above
-					absc_min = np.zeros(len(axisNames))
-					absc_width = np.zeros(len(axisNames))
-					absc_min[a] = self.Param[f"{axisNames[a]}MIN"][0]
-					absc_width[a] = self.Param[f"{axisNames[a]}WID"][0]
-					if absc_width[a] == 0:
-						warn(f"{axisNames[a]} has a width of 0.")
-						absc_min[a] = 1
-						absc_width[a] = self.dimensions[a]-1
-					self.Absc[a,:] = np.linspace(absc_min[a],absc_min[a]+absc_width[a],num=self.dimensions[a])
+					absc_min = self.Param[f"{axName}MIN"][0]
+					absc_width = self.Param[f"{axName}WID"][0]
+					if absc_width == 0:
+						warn(f"{axName} has a width of 0.")
+						absc_min = 1
+						absc_width = self.dimensions[a]-1
+					self.Absc[a,:] = np.linspace(start=absc_min,
+								  				 stop=absc_min+absc_width,
+								  				 num=self.dimensions[a])
 					self.vprint(f'{axName} abscissa size: {self.Absc[a].shape}',1)
 				elif axisType=="NTUP":
 					raise NotImplementedError('Cannot read data with NTUP axes.')
 				else:
-					raise FileNotFoundError('AxisType is not defined for axis {axisNames[a]}')
-			else:
-				self.vprint(f'No abscissa for axis {axName}',1)
-			# flatten array to minimal dimensionality, and drop all nan values
-			tmpabsc = self.Absc.flatten()
-			self.Absc = tmpabsc[~np.isnan(tmpabsc)]
-			del tmpabsc
+					raise FileNotFoundError(f'AxisType is not defined for axis {axisNames[a]}')
+		# flatten array to minimal dimensionality, and drop all nan values
+		tmpabsc = np.squeeze(self.Absc)
+		self.Absc = tmpabsc[~np.isnan(tmpabsc)]
+		del tmpabsc
 	#def BES3TSpecLoad(self):
 		# get data from .dta file
 		dtaExt = ['.DTA' if self.extCase else '.dta'][0]
 		self.vprint(f'Reading data from {dtaExt} file in {self.numFormat} format to self.Spec')
-		self.Spec = self._readDTA(dtaExt,self.byteOrder,self.numFormat,self.isComplex)
+		self.Spec, self.auxSpec = self._readDTA(dtaExt,self.byteOrder,self.numFormat,self.isComplex)
 		if self.scaling[0] != '1':
 			self.Spec = self.scaleData()
 
@@ -375,8 +381,9 @@ class eprload:
 				# ignore commented lines
 				if (not re.match(r"[*,#]",line)) and (len(line) > 0):
 					# trim multiple spaces and split into list
-					tmpln = re.sub(r"\s+",' ',line).split()
-					self.vprint(type(tmpln))
+					tmpln = re.sub(r"\s+",' ',line)
+					tmpln = re.sub(r",",' ',line)
+					tmpln = tmpln.split()
 					for attr in range(len(tmpln)):
 						#cast to ints and floats where possible
 						try:
@@ -389,6 +396,7 @@ class eprload:
 					# this returns all keys as lists of length 1 or longer.
 					if len(tmpln[1:]) > 0:
 						param[tmpln[0]] = tmpln[1:]
+			#param['IKKF'] = param['IKKF'][0].split(',')
 		return param
 
 
@@ -436,7 +444,7 @@ class eprload:
 			axisType = 'IDX'
 			return axisType
 
-	def _readDTA(self,fileExt,byteOrder,numberFormat,isComplex) -> np.ndarray:
+	def _readDTA(self,fileExt,byteOrder,numberFormat,isComplex) -> tuple:
 		'''
 		Private method for loadBES3T. Reads in the information from a .DTA file.
 			
@@ -459,42 +467,63 @@ class eprload:
 		
 		Notes
 		-----
-		#. Open file :code:`self.fileName.fileExt` using :code:`np.readfile` with
+		#. Open file ``self.fileName.fileExt`` using ``np.readfile`` with
 		   format byteOrder+numberFormat. Real and imaginary data are interspersed,
-		   so it just reads everything into an `nx*ny*nz` matrix (i.e. total number of
-		   points in all dimensions.
-		#. This data is then np.reshape()d into a :math:`(nRealsPerPoint :times (nx*ny*nz))`
-		   array, so each row is a different real value index, and each column is a new
-		   datapoint. 
-		#. Now we cope with each datapoint having nDataValuesPerPoint values.
-			* Note: both Matlab and numpy index [row, column].
-			* We run through the isComplex array and compare it against the rows of the data,
-			  and if a row isComplex, then it and the row after it are combined into an
-			  np.complex128 complex number.
-			* If the row is not complex, then it is left alone.
-		#. The resulting matrix is then reshaped to an array of :code:`[[Absc X],[Absc Y],[Absc Z]]`.
+		   so it just reads everything into an ``(nx*ny*nz,)`` matrix (i.e. total
+		   number of points in all dimensions into a list).
+		#. We determine if the data is saved as result sets (i.e. if it has multiple
+		   values for IKKF, and so has auxilliary data.
+		#. We reshape the data to ``( nx*ny*nz , sum(isComplex+1) )`` to push each data
+		   point into a row, with each column being a different attribute (one column
+		   for reals, two for complexes).
+		#. If the data doesn't have any aux data recorded with it (len isComplex is 1)
+		   we just combine complex numbers into one signal, reshape it to ``(nx, ny, nz)``
+		   for as many dimensions are defined, and return (data,None).
+		#. If data has auxilliary attributes, we iterate through the columns, and select
+		   columns (combining with the following column where necessary to generate
+		   complex numbers, and add them to a temporary list. We reshape each member 
+		   of the list to (nx,ny,nz), the first member of the list becomes the data,
+		   and the rest becomes auxData. We return (data, auxdata)
+
 		
+		Data binary is composed of nPoints n tuples of data, each of which is composed
+		of one data point for each axis.
 		'''
-
-		self.vprint('Axis complexity is: '+str(isComplex).replace('1','CPLX').replace('0','REAL'),1)
+		self.vprint(f"Signal complexity is: {str(isComplex).replace('1','CPLX').replace('0','REAL')}",1)
+		self.vprint (f"Axis format is: {"Simple" if len(isComplex)==1 else "Result Set"}",1)
 		data = np.fromfile(self.filePath.with_suffix(fileExt),dtype=byteOrder+numberFormat)
-		# self.vprint('Raw data length: '+str(len(data)),1)
-		nDataValuesPerPoint = len(isComplex)
-		nRealsPerPoint = sum(isComplex+1)
-		#remove non-existent axes since python doesn't start indices at 1 and get prod for total n points
-		nPoints =np.prod([dim for dim in self.dimensions if dim >0])
-		# find total number of values
-		N = nRealsPerPoint*nPoints
-		# reshape data into an array of with n rows 
-		data = np.reshape(data,(nRealsPerPoint,nPoints)).flatten()
-		self.vprint('Loaded {0} values with shape {1}'.format(N,data.shape),1)
-		for k in range(nDataValuesPerPoint):
-			if isComplex[k]:
-				data[k,:] = np.complex64(data[k,:],data[k+1,:]) #@TODO test with actual complex data
-				np.delete(data,k+1,axis=1)
-		self.vprint(f'Shape after complex condensation: {data.shape}',1)
-		return data
-
+		self.vprint(f'Initial data shape: {data.shape}',1)
+		dim = np.trim_zeros(self.dimensions)
+		totPts = np.prod(dim)
+		nCol = isComplex+1
+		nValsPerPt = sum(nCol)
+		data = np.reshape(data,(totPts,nValsPerPt))
+		if len(isComplex) == 1:
+			# for normal data not saved as a result set
+			data = np.reshape(data,(totPts,isComplex[0]+1))
+			if isComplex[0] == 1: # check for complex data
+				data = data[:,0] + 1j*data[:,1]
+			data = np.reshape(data,dim)
+			self.vprint(f'final shape of Spec (simple) {data.shape}',1)
+			return (data, None)
+		else:
+			# deal with data saved as Result Sets
+			assert(data.shape[1] == nValsPerPt)
+			# split reshaped data into columns
+			dholder = []
+			for i in range(len(nCol)):
+				idx = sum(nCol[:i])
+				if nCol[i] ==1:
+					dtmp = data[:,idx]
+				else:
+					dtmp = data[:,idx]+1j*data[:,idx+1]
+				dtmp = np.reshape(dtmp,(dim))
+				dholder.append(dtmp)
+			data = dholder[0]
+			auxData = dholder[1:]
+			self.vprint(f'Final shape of Spec (Result Set): {data.shape}',1)
+			self.vprint(f'Aux data: {len(auxData)} signals, shaped: {auxData[0].shape}',1)
+			return (data, auxData)
 		
 	def loadSpecMan(self) -> None:
 		"""
@@ -666,7 +695,7 @@ class eprload:
 				  'strmTot', 'startIdx']])
 		self.vprint(f'Stream metadata:\n{np.r_[strMetaLabel,strmMeta]}')
 		# read spectra into one long ndarray 
-		rawData = np.fromfile(dfile, offset = dOffset, dtype=dformat).flatten()
+		rawData = np.fromfile(dfile, offset = dOffset, dtype=dformat)
 		self.vprint('data shape:')
 		self.vprint(f'raw: {rawData.shape}',1)
 		#specs = []
