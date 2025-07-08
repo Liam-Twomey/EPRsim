@@ -52,8 +52,8 @@ class eprload:
 		self._checkFileType()
 
 		# Delete temporary class items for memory savings; disable with keepTmp = True.
-		if keepTmp is False:
-			del self.extCase, self.numFormat, self.byteOrder, self.dimensions, self.isComplex
+		#if keepTmp is False:
+		#	del self.extCase, self.numFormat, self.byteOrder, self.dimensions, self.isComplex
 
 	def __repr__(self):
 		'''
@@ -357,7 +357,7 @@ class eprload:
 					raise FileNotFoundError(f'AxisType is not defined for axis {axisNames[a]}')
 		# flatten array to minimal dimensionality, and drop all nan values
 		tmpabsc = np.squeeze(self.Absc)
-		self.Absc = tmpabsc[~np.isnan(tmpabsc)]
+		self.Absc = tmpabsc[~np.isnan(tmpabsc)]/10
 		del tmpabsc
 	#def BES3TSpecLoad(self):
 		# get data from .dta file
@@ -551,7 +551,11 @@ class eprload:
 		"""
 		self.Param = self._readEXP()
 		self.Spec = self._readD01()
+		finpar = {}
 		# post-processing of parameters
+		units = {'n':1E-9,'u':1E-6,'m':1E-3,'k':1E3,'M':1E6,'G':1E9}
+		finpar['title'] = param['general_name']
+		#while isfield() :
 
 	
 	def _readEXP(self)->dict:
@@ -593,23 +597,28 @@ class eprload:
 			raw = f.read() 
 			pmatch = r'\[program\]((.|\n+)*?)(?=\[)'
 			param['program'] = re.search(pmatch,raw).group(0)
-			raw = re.sub(pmatch,'',raw)
-			raw = re.sub(r'\[(.*?)\]','',raw)
-			raw = raw.split('\n')
-			raw = [x.strip() for x in raw if x.strip()]
-			#print(raw)
-			for line in raw:
-				tmpln=line.replace(' = ','=')
-				tmpln = tmpln.split('=')
-				tmpval = re.split(' ',tmpln[1],maxsplit=1) if len(tmpln) >=2 else '' 
-				if tmpval[0].isdigit():
-					# convert viable str to int
-					tmpval[0] = int(tmpval[0])
-				elif re.match(r'[0-9]+[.]?[0-9]+',tmpval[0]):
-					# convert viable str to float
-					tmpval[0] = float(tmpval[0])
-				param[tmpln[0]] = tmpval
-		print('Finsished loading .exp file.')
+			proc = re.sub(pmatch,'',raw)
+			#raw = re.sub(r'\[(.*?)\]','',raw)
+			proc = proc.split('\n')
+			proc = [x.strip() for x in proc if x.strip()]
+			param, prefix = {},None
+			for line in proc:
+				if line[0].startswith(r'['):
+					prefix = re.sub(r'\[|\]','',line)
+					print('PRE',prefix)
+				else:
+					tmpln=line.replace(' = ','=')
+					tmpln = tmpln.split('=')
+					tmpval = re.split(' ',tmpln[1],maxsplit=1) if len(tmpln) >=2 else '' 
+					if tmpval[0].isdigit():
+						# convert viable str to int
+						tmpval[0] = int(tmpval[0])
+					elif re.match(r'[0-9]+[.]?[0-9]+',tmpval[0]):
+						# convert viable str to float
+						tmpval[0] = float(tmpval[0])
+					param[prefix+'_'+tmpln[0]] = tmpval
+		print(param) 
+		self.vprint('Finsished loading .exp file.')
 		return param
 
 	def _readD01(self) -> np.ndarray:
