@@ -6,8 +6,12 @@ import re
 import numpy as np
 from warnings import warn
 from pprint import pprint, pformat
+from types import FunctionType
+'''
+All logic was adapted from Stefan Stoll's EasySpin package for MATLAB, some was reimplemented
+from scratch based on the Bruker BES3T specification.
 
-# all logic adapted from Stefan Stoll's EasySpin.
+'''
 class eprload:
 	'''
 		The parent eprload class acts as a wrapper for instrument-specific `eprload`
@@ -35,7 +39,7 @@ class eprload:
 	
 	'''
 	def __init__(self, fileName:(str | Path), scaling:str='1',debug:bool=False,
-			   keepTmp:bool = False): 
+			  keepTmp:bool = False, corrFn:FunctionType = None): 
 		self.filePath = Path(fileName) #if already a Path this won't effect anything
 		self.fileExt = self.filePath.suffix
 		self.scaling = scaling.upper()
@@ -49,7 +53,11 @@ class eprload:
 		else:
 			raise IOError("Please don't use mixed-case extensions!")
 
-		self._checkFileType()
+		self.fileType = self._checkFileType()
+		if isinstance(corrFn,FunctionType) and self.fileType=='bes3t':
+			self.AbscCorr = corrFn(self.Absc,self.Param['XWID'][0],self.Param['SweepTime'][0])
+			if self.AbscCorr is None:
+				raise RuntimeError("No data returned from field correction function.")
 
 		# Delete temporary class items for memory savings; disable with keepTmp = True.
 		#if keepTmp is False:
@@ -57,7 +65,7 @@ class eprload:
 
 	def __repr__(self):
 		'''
-		Allows for printing of the class object.
+		Allows for printing of the eprload class-object.
 
 		'''
 		return	"Abscissa:\n"+pformat(self.Absc,width=40)+"\nSignal:\n"+pformat(self.Spec,\
@@ -92,6 +100,8 @@ class eprload:
 				return self.Spec
 			case 'P':
 				return self.Param
+			case 'BCORR':
+				return self.AbscCorr
 			case _:
 				raise AttributeError(f"{attr} is not an attibute of this EPRload object.")
 		return self.Absc
@@ -166,14 +176,16 @@ class eprload:
 		'''
 		match self.fileExt.upper():
 			case '.DSC'|'.DTA':	
-				self.vprint('File type is Bruker BES3T')
+				ftyp = 'bes3t'
+				self.vprint(f'File type is Bruker {ftyp}')
 				# 1 is the default internal value
 				if self.scaling.upper() in "NGPTC1":
 					self.loadBES3T()
 				else:
 					raise RuntimeError("Invalid scaling option supplied. Valid options are: N,P,G,T,C.")
 			case '.D01':
-				self.vprint('File type is SpecMan')
+				ftyp = 'specman'
+				self.vprint(f'File type is {ftyp}')
 				if self.scaling[0]!='1':
 					warn("Scaling not supported for this filetype.")
 				self.loadSpecMan()
@@ -197,10 +209,9 @@ class eprload:
 
 				else:
 					raise NotImplementedError(f"Unsupported file extension {self.fileExt}")
+		return ftyp
 
 #### LOAD BRUKER BE3T ####
-
-
 	def loadBES3T(self) -> None:
 		'''
 		File loading for BES3T (Bruker EPR Standard for Spectrum Storage and Transfer)
@@ -820,3 +831,6 @@ class eprload:
 				return data
 			else:
 				raise RuntimeError(f'The method \"{self.scaling}\" only applies to CW data.')
+	def baseCorr(self, dim, order):
+		return
+
