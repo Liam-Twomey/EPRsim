@@ -39,7 +39,7 @@ class eprload:
 	
 	'''
 	def __init__(self, fileName:(str | Path), scaling:str='1',debug:bool=False,
-			  keepTmp:bool = False, corrFn:FunctionType = None): 
+			  keepTmp:bool = False, corrFn:FunctionType = None, baseCorr:list=None): 
 		self.filePath = Path(fileName) #if already a Path this won't effect anything
 		self.fileExt = self.filePath.suffix
 		self.scaling = scaling.upper()
@@ -58,7 +58,8 @@ class eprload:
 			self.AbscCorr = corrFn(self.Absc,self.Param['XWID'][0],self.Param['SweepTime'][0])
 			if self.AbscCorr is None:
 				raise RuntimeError("No data returned from field correction function.")
-
+		if isinstance(baseCorr, list):
+			self.SpecCorr = self.baseCorr(baseCorr[0],baseCorr[1])
 		# Delete temporary class items for memory savings; disable with keepTmp = True.
 		#if keepTmp is False:
 		#	del self.extCase, self.numFormat, self.byteOrder, self.dimensions, self.isComplex
@@ -100,8 +101,10 @@ class eprload:
 				return self.Spec
 			case 'P':
 				return self.Param
-			case 'BCORR':
+			case 'BCORR'|'BC':
 				return self.AbscCorr
+			case 'SCORR'|'SC':
+				return self.SpecCorr
 			case _:
 				raise AttributeError(f"{attr} is not an attibute of this EPRload object.")
 		return self.Absc
@@ -831,6 +834,18 @@ class eprload:
 				return data
 			else:
 				raise RuntimeError(f'The method \"{self.scaling}\" only applies to CW data.')
-	def baseCorr(self, dim, order):
+
+	def baseCorr(self, dim:int=0, order:int=1):
+		#try:
+		#	fit = np.polyfit(self.Absc, self.S[dim,:], deg=order)
+		#	bcorr = self.S[dim,:]-fit
+		#except IndexError:
+		#	print(self.Absc.shape)
+		#	print(self.Spec.shape)
+		#	fit = np.polyfit(self.Absc, self.S,deg=order)
+		#	fitpoly = np.poly1d(fit)
+		#	print(fit.shape)
+		#	bcorr = self.S-fitpoly
+		#return bcorr
 		return
 
