@@ -371,7 +371,7 @@ class eprload:
 					raise FileNotFoundError(f'AxisType is not defined for axis {axisNames[a]}')
 		# flatten array to minimal dimensionality, and drop all nan values
 		tmpabsc = np.squeeze(self.Absc)
-		self.Absc = tmpabsc[~np.isnan(tmpabsc)]/10
+		self.Absc = tmpabsc[~np.isnan(tmpabsc)]# /10
 		del tmpabsc
 	#def BES3TSpecLoad(self):
 		# get data from .dta file
