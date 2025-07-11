@@ -23,5 +23,4 @@ python:
   install:
     - path: .
       extra_requirements:
-        - dev
-        - doc
+        - all 
