@@ -12,6 +12,8 @@ Basic Usage
 User Documentation
 ==================
 
-.. module:: src.esfit
-.. autoclass:: esfit
+.. module:: src.ESfit
+.. autoclass:: fitOpt
+    :members:
+.. autoclass:: fitter
     :members:
