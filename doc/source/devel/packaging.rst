@@ -132,7 +132,7 @@ However, as it turns out that forces the automatic discovery system to use the
    eprsim="src"
 
 Info Sources
-~~~~~~~~~~~~
+------------
 
 * Setuptools `package discovery documentation`_.
 * A `wierd corner`_ of the setuptools documentation which I only saw on the source GitHub.
