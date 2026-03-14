@@ -36,5 +36,6 @@ This package is developed at the `git repository`_, and is not yet available on 
 
     eprsim
     eprload
+    esfit
     tools
     og-coverpage
