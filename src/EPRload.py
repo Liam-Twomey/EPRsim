@@ -32,6 +32,9 @@ class eprload:
 		----------
 		Absc: :class:`np.ndarray`
 			Magnetic field abscissa(s) loaded from file, often labelled "B".
+		g: :class:`np.ndarray`
+			*g*-value of each point, derived from Absc and self.Par.MWFQ. Only calculated
+			for BES3T files.
 		Spec: :class:`np.ndarray`
 			Signal component of the data, often labelled "S". 
 		Param: :class:`dict`
@@ -372,7 +375,8 @@ class eprload:
 					raise FileNotFoundError(f'AxisType is not defined for axis {axisNames[a]}')
 		# flatten array to minimal dimensionality, and drop all nan values
 		tmpabsc = np.squeeze(self.Absc)
-		self.Absc = tmpabsc[~np.isnan(tmpabsc)]# /10
+		self.Absc = tmpabsc[~np.isnan(tmpabsc)]/10
+		self.g = 71.4484*self.Param['MWFQ'][0]/1E9/self.Absc
 		del tmpabsc
 	#def BES3TSpecLoad(self):
 		# get data from .dta file
