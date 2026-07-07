@@ -34,7 +34,7 @@ class eprload:
 			Magnetic field abscissa(s) loaded from file, often labelled "B".
 		Spec: :class:`np.ndarray`
 			Signal component of the data, often labelled "S". 
-		Par: :class:`dict`
+		Param: :class:`dict`
 			Experimental parameters read from parameter file, often called "P".
 	
 	'''
@@ -69,11 +69,12 @@ class eprload:
 		Allows for printing of the eprload class-object.
 
 		'''
-		return	"Abscissa:\n"+pformat(self.Absc,width=40)+"\nSignal:\n"+pformat(self.Spec,\
-			indent=4,width=40)+"\nParameters:\n"+pformat(self.Param,indent=4,width=80)+\
-			"\nInternal values:"+"\n\tFilePath: "+str(self.filePath)+"\n\tFile Extension: "\
-			+str(self.fileExt)+"\n\tFile Extension Case: "+str(self.extCase).replace('0','Lower')\
-			.replace('1','Upper')+"\n\tVerbose: "+str(self.verbose)+"\n\tScaling: "+str(\
+		return	f"> Absc:\nHead:{self.Absc[:10]}\n\t...\nTail:{self.Absc[-10:]}\nShape:{self.Absc.shape}\n"+\
+			f"\n> Spec:\n{self.Spec[:10]}\n\t...\nTail:{self.Spec[-10:]}\nShape:{self.Spec.shape}\n"+\
+			"\n> Param:\n"+pformat(self.Param,indent=4,width=80)+\
+			"\nInternal values:"+"\n\tfilePath: "+str(self.filePath)+"\n\tfileExt: "\
+			+str(self.fileExt)+"\n\textCase: "+str(self.extCase).replace('0','Lower')\
+			.replace('1','Upper')+"\n\tverbose: "+str(self.verbose)+"\n\tscaling: "+str(\
 			self.scaling[0]).replace('1','None')+'\n\tAxis complexity is: '+ str(self.isComplex)\
 			.replace('1','CPLX').replace('0','REAL')
 
