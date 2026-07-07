@@ -370,6 +370,34 @@ def mT2GHz(field, giso=None):
 	mwFreq = (giso * field * 1e-12 * cons.beta) / cons.h
 	return mwFreq
 
+def mT2g(field,freq,Hz:bool=False):
+	"""
+	Convert magnetic field (in mT) to g value.
+
+	Parameters
+	----------
+	field: np.ndarray
+		The field abscissa of the spectrum, to be converted.
+	freq: np.ndarray
+		The frequency at which the spectrum was collected. By default, should be in
+		GHz. This can be modified by Hz=True.
+	Hz: bool
+		If True, treats passed ``freq`` in Hz and converts it to GHz for the
+		calculation. This would be used e.g. for frequencies derived from the
+		``MWFQ`` parameter of a BS3T spectrum.
+
+	Returns
+	-------
+	g: np.ndarray
+		The g-values of each point.
+	
+	Notes
+	-----
+	The internal calculation is done using GHz as the freq. unit.
+	"""
+	if Hz:
+		freq = freq/1E9
+	return (71.4484*freq)/field
 
 def modulation_amplitude(modamp, field, spectrum):
 	"""
